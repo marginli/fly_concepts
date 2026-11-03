@@ -36,7 +36,7 @@ header h1 { font-size: 1.6rem; margin: 0 0 4px; }
 #panel ul { list-style: none; padding-left: 14px; margin: 4px 0 10px; }
 #panel summary { cursor: pointer; font-weight: 600; }
 #panel .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-left: 4px; }
-.views { display: flex; gap: 6px; margin-bottom: 10px; }
+.views { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .views button { flex: 1; padding: 6px; border: 1px solid var(--line); background: var(--card); color: var(--fg);
   border-radius: 6px; cursor: pointer; font: inherit; }
 .hint { color: var(--muted); font-size: .85rem; margin-top: -10px; }

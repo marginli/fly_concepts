@@ -8,6 +8,7 @@ entries/<id>/meta.json：
    "figs": [{"src": "a.png", "caption": "..."}]（有平面圖才寫）}
 entries/<id>/desc.html：說明文字（HTML 片段）。
 """
+import hashlib
 import html
 import json
 import os
@@ -38,7 +39,8 @@ def entry_page(eid, m):
     out.append(f'<p class="meta">條目編號 {eid}。產生這一頁的程式：<a href="make.py">make.py</a>。</p></div>')
     if m.get("scene"):
         out.append(IMPORTMAP)
-        out.append(f'<script type="module">import {{mount}} from "../../lib/viewer.js"; mount("{m["scene"]}");</script>')
+        ver = hashlib.md5(open(os.path.join(HERE, "lib", "viewer.js"), "rb").read()).hexdigest()[:8]   # 改了 viewer 就換網址，避免瀏覽器用舊版
+        out.append(f'<script type="module">import {{mount}} from "../../lib/viewer.js?v={ver}"; mount("{m["scene"]}?v={ver}");</script>')
     out.append("</body></html>")
     with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out))
