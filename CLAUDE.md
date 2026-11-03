@@ -22,3 +22,4 @@
 - MaleCNS 標籤體積的 z 原點是 −191（不是管線框的 −175），flylib 的 LABEL_ORIGIN 已處理；判斷骨架點在哪區用 mcns_region_at()。說明裡寫的「經過哪區」要先用它核對。
 - 參考物（全腦輪廓）用 `ref=True`，鏡頭取景不算它。
 - three.js 由 jsdelivr 載入 three@0.160.0（importmap 在 build.py）。
+- 點雲可逐點上色：`points_item(..., colors=N×3 RGB)`（viewer 用 vertexColors），例如突觸密度；範例 entries/20261103-pb-lpu-200/make.py。
