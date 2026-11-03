@@ -27,8 +27,10 @@ def mesh(L, names, sel, faces=1500, sigma=1.0):
     return mask_mesh(m, list(lo), np.array(ORIG), 1.0, faces, sigma=sigma)
 
 REG = [("E052_PB", "#1f5fa8"), ("E077_PB", "#6fa8dc"), ("E060_IB", "#e69138"), ("E065_IB", "#f6b26b"), ("E012_SPS_L", "#38a169")]
-pb = [mesh_item("官方 Ito 分區的前腦橋 PB", *mesh(L80, N80, ["PB"], 2000), color="#222222", opacity=0.55)]
+pb = [mesh_item("官方 Ito 分區的前腦橋 PB", *mesh(L80, N80, ["PB"], 2000), color="#222222", opacity=0.22)]
 regs = [mesh_item(f"{n}", *mesh(L200, N200, [n], 1500), color=c, opacity=0.28) for n, c in REG]
+for it in regs:
+    it["visible"] = False
 u20 = [mesh_item("r20 的 LPU：E052＋E077＋E060＋E065", *mesh(L200, N200, [n for n, _ in REG[:4]], 2500), color="#2f9e5b", opacity=0.3)]
 u30 = [mesh_item("r30 的 LPU：上面 4 區＋E012", *mesh(L200, N200, [n for n, _ in REG], 3000), color="#2f9e5b", opacity=0.3)]
 for it in u20 + u30:
@@ -63,17 +65,22 @@ dens = []; dstat = []
 for n, c in REG:
     m = LAB == int(n[1:4])
     rgb = cmap(norm(np.clip(DEN[m], norm.vmin, norm.vmax)))[:, :3] * 0.92
-    dens.append(points_item(f"{n} 突觸密度", VXYZ[m], color=c, size=5.5, colors=rgb, visible=False))
+    dens.append(points_item(f"{n} 突觸密度", VXYZ[m], color=c, size=5.5, colors=rgb))
     dstat.append((n, int(m.sum()), int(SYN[m].sum()), DEN[m]))
 DSTAT = dstat
+_tk = [3, 5, 10, 20]
+LEG = {"title": "突觸密度（每立方微米）", "colors": [mcolors.to_hex(np.array(cmap(x)[:3]) * 0.92) for x in np.linspace(0, 1, 9)],
+       "ticks": [[float(norm(t)), str(t)] for t in _tk if norm.vmin <= t <= norm.vmax],
+       "note": "暗＝稀、亮＝密；每點是一個 5 µm 方格"}
 
 write_scene(os.path.join(HERE, "scene.json"), "前腦橋 PB 的 LPU 與 200 區",
             [{"name": "官方前腦橋", "items": pb},
-             {"name": "蓋到前腦橋的 5 個 200 區", "items": regs},
+             {"name": "各區的突觸密度（每點＝5 µm 方格）", "items": dens},
+             {"name": "蓋到前腦橋的 5 個 200 區（預設關閉）", "items": regs},
              {"name": "LPU（預設關閉）", "items": u20 + u30},
-             {"name": "各區的突觸密度（預設關閉）", "items": dens},
              {"name": f"r20 LPU 的 Δ7（抽 {len(d7)} 顆）", "items": neur},
-             {"name": "參考", "items": ref}])
+             {"name": "參考", "items": ref}],
+            legend=LEG)
 
 # ---- 平面圖：組成表 ----
 from matplotlib import font_manager

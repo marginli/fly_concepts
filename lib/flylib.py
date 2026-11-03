@@ -157,8 +157,11 @@ def points_item(name, pts, color="#333", size=2.0, colors=None, opacity=None, vi
     return it
 
 
-def write_scene(path, title, groups, up=MCNS_UP, front=MCNS_FRONT):
+def write_scene(path, title, groups, up=MCNS_UP, front=MCNS_FRONT, legend=None):
+    """legend（選用）：3D 視窗右上角的色條 {"title", "colors": [hex 由低到高], "ticks": [[0–1 位置, 標籤]], "note"}。"""
     scene = {"title": title, "up": up, "front": front, "groups": groups}
+    if legend:
+        scene["legend"] = legend
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(scene, fh, ensure_ascii=False, separators=(",", ":"))
     print(f"寫出 {path}（{os.path.getsize(path) / 1e6:.2f} MB）")

@@ -23,3 +23,4 @@
 - 參考物（全腦輪廓）用 `ref=True`，鏡頭取景不算它。
 - three.js 由 jsdelivr 載入 three@0.160.0（importmap 在 build.py）。
 - 點雲可逐點上色：`points_item(..., colors=N×3 RGB)`（viewer 用 vertexColors），例如突觸密度；範例 entries/20261103-pb-lpu-200/make.py。
+- 3D 視窗右上角可加色條：`write_scene(..., legend={"title","colors","ticks","note"})`。縮放範圍與 near/far 由 viewer 依場景大小自動設（2026-11-03 修：原本縮太遠會超過 far 而全白）。
