@@ -16,7 +16,9 @@
 5. `./publish.sh "add <編號>"`。GitHub Pages 約 1–2 分鐘後更新。
 
 ## 注意
+- 用語：antennal lobe 一律寫「嗅葉」、mushroom body 一律寫「蕈狀體」（不用觸角葉、蘑菇體）。
 - 座標：A1 管線 µm 框（同 brain_division）。MaleCNS up=−y、front=−z。其他資料庫要加 loader 時先確認與哪個框對齊，不同框的東西不要放同一個 scene。
 - 檔案大小：單一 scene.json 盡量 < 10 MB（骨架用 keep_every 抽點、mesh 限面數）；GitHub 單檔上限 100 MB。
+- MaleCNS 標籤體積的 z 原點是 −191（不是管線框的 −175），flylib 的 LABEL_ORIGIN 已處理；判斷骨架點在哪區用 mcns_region_at()。說明裡寫的「經過哪區」要先用它核對。
 - 參考物（全腦輪廓）用 `ref=True`，鏡頭取景不算它。
 - three.js 由 jsdelivr 載入 three@0.160.0（importmap 在 build.py）。

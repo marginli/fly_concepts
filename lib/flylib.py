@@ -26,7 +26,10 @@ MCNS_LABELS = "/mnt/sda1/work1/brain_division/malecns_v5/labels_fc_1um.npy"
 MCNS_NAMES = "/mnt/sda1/work1/brain_division/malecns_v5/names.json"
 MCNS_SWC = "/mnt/sda1/work1/male_cns/swc_pipe"
 MCNS_ANN = "/mnt/sda1/work1/male_cns/raw/flat-connectome/body-annotations-male-cns-v1.0-minconf-0.5.feather"
-ORIGIN = np.array([-480.0, -410.0, -175.0])
+ORIGIN = np.array([-480.0, -410.0, -175.0])          # 管線框原點（骨架 µm 座標用這個框）
+# MaleCNS 標籤體積（391×440×758）比管線框（375×440×750）在 z 前端多 16 格：
+# 標籤第 0 格的 z = −191 µm。2026-11-03 用 KC 落在對應葉的比例實測（位移 0 時 37%、z+16 時 76%）。
+LABEL_ORIGIN = np.array([-480.0, -410.0, -191.0])
 STEP = 1.0
 MCNS_UP, MCNS_FRONT = [0, -1, 0], [0, 0, -1]
 
@@ -38,6 +41,15 @@ def mcns_labels():
     if _lab is None:
         _lab = np.load(MCNS_LABELS, mmap_mode="r")
     return _lab
+
+
+def mcns_region_at(xyz):
+    """骨架座標（管線框 µm，N×3）→ 每點所在的 MaleCNS 區名（不在任何區為 None）。"""
+    lab = mcns_labels(); names = mcns_region_names()
+    i = np.round((np.asarray(xyz) - LABEL_ORIGIN) / STEP).astype(int)[:, ::-1]
+    ok = (i >= 0).all(1) & (i < lab.shape).all(1)
+    v = np.zeros(len(i), int); v[ok] = np.asarray(lab)[tuple(i[ok].T)]
+    return [names[x - 1] if x else None for x in v]
 
 
 def mcns_region_names():
@@ -52,7 +64,7 @@ def mcns_annotations():
 def _mesh_from_mask(mask, lo, faces, sigma=1.0):
     sys.path.insert(0, BD_BUILD)
     from export_meshes import mask_mesh
-    v, f = mask_mesh(mask, lo, ORIGIN, STEP, faces, sigma=sigma)
+    v, f = mask_mesh(mask, lo, LABEL_ORIGIN, STEP, faces, sigma=sigma)
     return v, f
 
 
@@ -75,7 +87,7 @@ def mcns_brain_mesh(faces=3000):
     lab = ndimage.binary_closing(lab, iterations=2)
     sys.path.insert(0, BD_BUILD)
     from export_meshes import mask_mesh
-    v, f = mask_mesh(lab, [0, 0, 0], ORIGIN, 2.0, faces, sigma=1.5)
+    v, f = mask_mesh(lab, [0, 0, 0], LABEL_ORIGIN, 2.0, faces, sigma=1.5)
     return v, f
 
 
