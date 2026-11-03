@@ -1,0 +1,38 @@
+# 從網頁刪除條目：條目頁的「刪除這個條目」按鈕會開一個標題為「刪除條目 <編號>」的 issue。
+# 只有站主帳號（marginli）開的才會執行：刪資料夾、重建首頁、推送、關閉 issue。
+name: 刪除條目
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: site
+  cancel-in-progress: false
+jobs:
+  delete:
+    if: github.event.issue.user.login == 'marginli' && startsWith(github.event.issue.title, '刪除條目')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 刪除並重建
+        env:
+          TITLE: ${{ github.event.issue.title }}
+          NUM: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(printf '%s' "$TITLE" | sed -E 's/^刪除條目[[:space:]]*//; s/[[:space:]]+$//')
+          if ! [[ "$id" =~ ^[0-9]{8}-[a-z0-9-]+$ ]] || [ ! -d "entries/$id" ]; then
+            gh issue close "$NUM" -c "找不到條目「$id」，沒有刪除任何東西。"
+            exit 0
+          fi
+          git rm -rq "entries/$id"
+          rm -rf "entries/$id"
+          python3 build.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "remove $id（從網頁刪除，issue #$NUM）"
+          git push
+          gh issue close "$NUM" -c "已刪除條目 $id，網站約一兩分鐘後更新。要救回可以從 git 歷史還原。"

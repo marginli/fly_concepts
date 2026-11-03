@@ -1,0 +1,24 @@
+# 有人在 github.com 上直接改了 entries/（例如刪資料夾）時，自動重建首頁與條目頁。
+name: 重建網頁
+on:
+  push:
+    branches: [main]
+    paths: ["entries/**", "build.py"]
+permissions:
+  contents: write
+concurrency:
+  group: site
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 build.py
+          git add -A
+          if git diff --cached --quiet; then echo "沒有變更"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git commit -m "自動重建網頁"
+          git push

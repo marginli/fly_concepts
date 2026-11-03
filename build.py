@@ -12,9 +12,11 @@ import hashlib
 import html
 import json
 import os
+from urllib.parse import quote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENT = os.path.join(HERE, "entries")
+REPO = "https://github.com/marginli/fly_concepts"
 IMPORTMAP = """<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>"""
 
 
@@ -36,7 +38,12 @@ def entry_page(eid, m):
     for fg in m.get("figs", []):
         out.append(f'<figure><img src="{html.escape(fg["src"])}" alt=""><figcaption>{html.escape(fg.get("caption", ""))}</figcaption></figure>')
     out.append(f'<div class="desc">{desc}</div>')
-    out.append(f'<p class="meta">條目編號 {eid}。產生這一頁的程式：<a href="make.py">make.py</a>。</p></div>')
+    out.append(f'<p class="meta">條目編號 {eid}。產生這一頁的程式：<a href="make.py">make.py</a>。</p>')
+    # 刪除按鈕：開一個預填好的 GitHub issue，站主送出後由 .github/workflows/delete-entry.yml 刪除
+    del_url = (f"{REPO}/issues/new?title={quote('刪除條目 ' + eid)}"
+               f"&body={quote('送出後會自動刪除這個條目並更新網站（約一兩分鐘）。不想刪就直接關掉這一頁。只有站主帳號送出才有效。')}")
+    out.append(f'<p class="meta"><a class="del" href="{del_url}" target="_blank" rel="noopener">刪除這個條目</a>'
+               '　會開一個 GitHub 頁面，按綠色的送出鈕（Create）就會刪除，約一兩分鐘後網站更新。</p></div>')
     if m.get("scene"):
         out.append(IMPORTMAP)
         ver = hashlib.md5(open(os.path.join(HERE, "lib", "viewer.js"), "rb").read()).hexdigest()[:8]   # 改了 viewer 就換網址，避免瀏覽器用舊版

@@ -50,3 +50,4 @@ figcaption { color: var(--muted); font-size: .88rem; }
   #view { height: 60vh; }
   #panel { max-height: none; }
 }
+.meta a.del { color: #c0392b; font-weight: 600; }
