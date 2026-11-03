@@ -13,7 +13,7 @@ scene.json 格式：
   "groups": [ { "name": str, "items": [
       {"kind": "mesh", "name", "color", "opacity", "v": [x,y,z,...], "f": [i,j,k,...]},
       {"kind": "lines", "name", "color", "width", "seg": [[x,y,z, x,y,z, ...] 每條折線], "visible": bool},
-      {"kind": "points", "name", "color", "size", "p": [x,y,z,...]} ] } ] }
+      {"kind": "points", "name", "color", "size", "p": [x,y,z,...], "c": [r,g,b,...]（選用，每點顏色）} ] } ] }
 """
 import json
 import os
@@ -147,8 +147,14 @@ def lines_item(name, polylines, color="#d33", width=1.5, visible=True):
             "seg": [_r(p) for p in polylines]}
 
 
-def points_item(name, pts, color="#333", size=2.0):
-    return {"kind": "points", "name": name, "color": color, "size": size, "p": _r(pts)}
+def points_item(name, pts, color="#333", size=2.0, colors=None, opacity=None, visible=True):
+    """colors（選用）：N×3 的 RGB（0–1），每點各自上色；color 仍用於面板上的色塊。"""
+    it = {"kind": "points", "name": name, "color": color, "size": size, "p": _r(pts), "visible": visible}
+    if colors is not None:
+        it["c"] = np.round(np.asarray(colors, dtype=float).ravel(), 2).tolist()
+    if opacity is not None:
+        it["opacity"] = opacity
+    return it
 
 
 def write_scene(path, title, groups, up=MCNS_UP, front=MCNS_FRONT):

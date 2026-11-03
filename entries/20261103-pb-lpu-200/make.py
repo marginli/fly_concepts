@@ -7,7 +7,7 @@ import os, sys, json
 import numpy as np, pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "lib"))
-from flylib import mesh_item, lines_item, write_scene, swc_polylines, read_swc, BD_BUILD
+from flylib import mesh_item, lines_item, points_item, write_scene, swc_polylines, read_swc, BD_BUILD
 sys.path.insert(0, BD_BUILD)
 from export_meshes import mask_mesh
 
@@ -46,16 +46,36 @@ zz = np.nonzero(brain.any((1, 2)))[0]; brain = brain[: zz.max() + 2]
 bv, bf = mask_mesh(brain, [0, 0, 0], np.array(ORIG), 4.0, 4000, sigma=1.5)
 ref = [mesh_item("全腦輪廓", bv, bf, color="#999999", opacity=0.05, ref=True)]
 
+# ---- 突觸密度：同事切 200 區時用的 5 µm 方格突觸數（npz 的 syn 欄），方格中心換到管線框 ----
+import matplotlib; matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib import cm, colors as mcolors
+NPZ = np.load(f"{CMU}/A1_syn_200/tpl/_npz/male_MaleCNS_edge_200regions.npz", allow_pickle=False)
+FR = json.load(open(f"{CMU}/A1_syn_200/tpl/d03_tpl/frame.json"))
+SHIFT = np.array(FR["shift_um"])                       # 管線 µm＝5 µm 方格索引×5＋shift（偏移 0，見 tpl/t1_labels.py）
+VXYZ = NPZ["vox_xyz"].astype(float) * 5.0 + SHIFT + 2.5   # 方格中心
+SYN = NPZ["syn"].astype(float); LAB = NPZ["label"]
+DEN = SYN / 125.0                                      # 每立方微米的突觸數
+sel_all = np.isin(LAB, [int(n[1:4]) for n, _ in REG])
+lo_d, hi_d = np.percentile(DEN[sel_all], [2, 98])
+norm = mcolors.LogNorm(vmin=max(lo_d, 1e-3), vmax=hi_d); cmap = matplotlib.colormaps["inferno"]
+dens = []; dstat = []
+for n, c in REG:
+    m = LAB == int(n[1:4])
+    rgb = cmap(norm(np.clip(DEN[m], norm.vmin, norm.vmax)))[:, :3] * 0.92
+    dens.append(points_item(f"{n} 突觸密度", VXYZ[m], color=c, size=5.5, colors=rgb, visible=False))
+    dstat.append((n, int(m.sum()), int(SYN[m].sum()), DEN[m]))
+DSTAT = dstat
+
 write_scene(os.path.join(HERE, "scene.json"), "前腦橋 PB 的 LPU 與 200 區",
             [{"name": "官方前腦橋", "items": pb},
              {"name": "蓋到前腦橋的 5 個 200 區", "items": regs},
              {"name": "LPU（預設關閉）", "items": u20 + u30},
+             {"name": "各區的突觸密度（預設關閉）", "items": dens},
              {"name": f"r20 LPU 的 Δ7（抽 {len(d7)} 顆）", "items": neur},
              {"name": "參考", "items": ref}])
 
 # ---- 平面圖：組成表 ----
-import matplotlib; matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 from matplotlib import font_manager
 FP = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"; font_manager.fontManager.addfont(FP)
 plt.rcParams["font.family"] = font_manager.FontProperties(fname=FP).get_name()
@@ -75,3 +95,23 @@ for (i, j), c in tb.get_celld().items():
 ax.set_title("官方前腦橋 PB 被哪些 200 區蓋到，各門檻下歸屬為何（綠＝同一個 LPU 聯集的成員）", fontsize=10)
 fig.savefig(os.path.join(HERE, "composition.png"), dpi=160, bbox_inches="tight")
 print("Δ7", d7)
+
+# ---- 平面圖：各區突觸密度分布＋色標 ----
+fig, (ax, cax) = plt.subplots(1, 2, figsize=(10.5, 4.2), gridspec_kw=dict(width_ratios=[20, 0.6], wspace=0.04))
+pos = np.arange(len(DSTAT))
+vp = ax.violinplot([d[3] for d in DSTAT], positions=pos, showmedians=True, widths=0.8)
+for b, (n, c) in zip(vp["bodies"], REG):
+    b.set_facecolor(c); b.set_alpha(0.55)
+ax.set_yscale("log"); ax.set_xticks(pos)
+ax.set_xticklabels([f"{n}\n{nv:,} 格\n{ns:,} 個突觸\n中位數 {np.median(d):.1f}" for n, nv, ns, d in DSTAT], fontsize=8)
+from matplotlib.ticker import FixedLocator, FixedFormatter, NullFormatter
+TK = [2, 3, 5, 10, 20, 30]
+ax.yaxis.set_major_locator(FixedLocator(TK)); ax.yaxis.set_major_formatter(FixedFormatter([str(t) for t in TK])); ax.yaxis.set_minor_formatter(NullFormatter())
+ax.set_ylabel("突觸密度（每立方微米的突觸數，對數軸）")
+ax.axhspan(norm.vmin, norm.vmax, color="#f4f4f4", zorder=-1)
+ax.set_title("組成前腦橋 LPU 的 5 個 200 區：每個 5 µm 方格的突觸密度分布", fontsize=10)
+cb = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax); cb.set_label("3D 圖點的顏色（灰底範圍）", fontsize=8)
+cb.set_ticks([3, 5, 10, 20]); cb.set_ticklabels(["3", "5", "10", "20"]); cb.minorticks_off()
+fig.savefig(os.path.join(HERE, "density.png"), dpi=160, bbox_inches="tight")
+print("密度色標", norm.vmin, norm.vmax, [(n, nv, ns, round(float(np.median(d)), 3)) for n, nv, ns, d in DSTAT])
+
