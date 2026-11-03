@@ -5,6 +5,8 @@
 ## 使用者怎麼用
 工作中說「加一個條目：……」→ 做一頁、推上網。說「刪掉條目 X」→ `./remove_entry.sh <編號>`。沒刪的條目永久保留。
 
+網頁刪除（2026-11-03）：每個條目頁底部有「刪除這個條目」連結，開預填標題「刪除條目 <編號>」的 issue；`.github/workflows/delete-entry.yml` 只對 marginli 開的 issue 動作（刪資料夾、build.py、推送、關 issue）。`rebuild.yml`：github.com 上直接改 entries/ 時自動重建。因為 GitHub 端會自己推送，`publish.sh` 一開始先 `git pull --rebase --autostash`；手動 git 操作前也要先 pull。
+
 ## 加條目流程
 1. 問清楚（或從要求判斷）要用哪一份資料：**每次都要指定**（MaleCNS／FlyWire／hemibrain／BANC），使用者沒說就問。
 2. 建 `entries/YYYYMMDD-<英文短名>/`，內含：
