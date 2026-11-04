@@ -45,7 +45,7 @@ canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:
 
 <div class="card">
  <h2>2. 放電傳遞圖：訊號從輸入走到讀出</h2>
- <canvas id="net" height="470"></canvas>
+ <canvas id="net" height="640"></canvas>
  <div class="legend">圓圈＝一群同類型的神經元（括號內是顆數），越亮代表這群的平均放電越快（每群各自以自己在所有組合中最快的時候為最亮，不同群之間不能比亮度）。線上移動的小點是放電沿著連結往下游傳：
  <span style="color:var(--exc)">● 紅點＝興奮</span>（讓下游更容易放電），<span style="color:var(--inh)">● 藍點＝抑制</span>（讓下游更難放電）。線越粗，兩群之間的突觸越多。
  虛線框的圓圈是「抑制型」中繼神經元。最右邊一欄是讀出（第 4 部分的曲線）。</div>
@@ -125,10 +125,11 @@ async function refresh() {
 const net = $("#net"), nctx = net.getContext("2d");
 let pulses = [], lastT = performance.now(), accum = 0;
 function nodeRate(k, n, b) { return D.node_rate[k][n][b]; }
-function nodeXY(n) { const w = net.width, h = net.height; const d = devicePixelRatio; return [D.nodes[n].x * (w - 110 * d) + 55 * d, D.nodes[n].y * (h - 85 * d) + 42 * d]; }
+function nodeXY(n) { const w = net.width, h = net.height; const d = devicePixelRatio; return [D.nodes[n].x * (w - 170 * d) + 85 * d, D.nodes[n].y * (h - 95 * d) + 45 * d]; }
 function edgePath(e) {
   const [x1, y1] = nodeXY(e.s), [x2, y2] = nodeXY(e.t);
-  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 + (x2 < x1 + 5 ? 40 : 0) + (e.bend || 0);
+  const d = devicePixelRatio, same = Math.abs(x2 - x1) < 5 * d;   // 同一欄：往右彎，不要穿過中間的圓圈
+  const mx = (x1 + x2) / 2 + (same ? 70 * d * (y2 > y1 ? 1 : -1) : 0), my = (y1 + y2) / 2 + (!same && x2 < x1 ? 40 * d : 0);
   return [x1, y1, mx, my, x2, y2];
 }
 function qpt(p, t) { const u = 1 - t; return [u * u * p[0] + 2 * u * t * p[2] + t * t * p[4], u * u * p[1] + 2 * u * t * p[3] + t * t * p[5]]; }
@@ -139,7 +140,7 @@ function drawNet(dt) {
   const fg = css("--fg"), off = css("--off"), exc = css("--exc"), inh = css("--inh");
   // 欄標題
   nctx.fillStyle = css("--muted");
-  D.columns.forEach(c => nctx.fillText(c.label, c.x * (w - 110 * devicePixelRatio) + 55 * devicePixelRatio, 16 * devicePixelRatio));
+  D.columns.forEach(c => nctx.fillText(c.label, c.x * (w - 170 * devicePixelRatio) + 85 * devicePixelRatio, 16 * devicePixelRatio));
   for (const e of D.edges) {
     const p = edgePath(e);
     nctx.strokeStyle = e.sign > 0 ? exc : inh; nctx.globalAlpha = 0.22;
@@ -252,7 +253,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 function resize() {
-  for (const c of [net, brain]) { const h = +c.getAttribute("height"); c.width = c.clientWidth * devicePixelRatio; c.height = (c === net && c.clientWidth < 600 ? 520 : h) * devicePixelRatio; c.style.height = c.height / devicePixelRatio + "px"; }
+  for (const c of [net, brain]) { const h = +c.getAttribute("height"); c.width = c.clientWidth * devicePixelRatio; c.height = h * devicePixelRatio; c.style.height = c.height / devicePixelRatio + "px"; }
   if (D) { setProj(); draw(); }
 }
 async function main() {
