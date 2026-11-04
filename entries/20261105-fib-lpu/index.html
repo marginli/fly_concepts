@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>只看纖維長度判出的局部處理單元：三份果蠅資料的 3D 成果｜果蠅概念圖庫</title>
+<link rel="stylesheet" href="../../lib/style.css"></head><body><div class="wrap">
+<p><a href="../../">← 回條目清單</a></p>
+<header><h1>只看纖維長度判出的局部處理單元：三份果蠅資料的 3D 成果</h1><p class="sub">2026-11-05　資料：MaleCNS v1.0（正式 80 區＋腹神經索 23 區）、FlyWire v783（Ito 75 區）、FlyCircuit（Ito 75 區）</p></header>
+<p class="hint"><a href="lpu/index.html#p=view&amp;a=80&amp;t=20&amp;c=region" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="lpu/index.html#p=view&amp;a=80&amp;t=20&amp;c=region" style="width:100%;height:950px;border:0" loading="lazy"></iframe>
+<div class="desc"><h2>這是什麼</h2>
+<p>果蠅的腦分成幾十個腦區。有些腦區有一群「自己的」神經元，它們的分支幾乎全部留在這一區裡，只在區內處理訊號，叫<b>局部神經元</b>。一個腦區至少有 10 顆局部神經元，就算一個<b>局部處理單元</b>（LPU），可以想成腦裡一個相對獨立的處理站。實驗室用程式自動判定每個腦區是不是 LPU。</p>
+<p>這一頁是「纖維版」的結果。判定時完全不看突觸（神經元之間傳訊號的接點），只看神經元的<b>骨架</b>：把一顆神經元的形狀描成一棵從細胞本體長出來、一路分岔的樹，再量這棵樹的分支有多少比例落在每個腦區。神經元的細胞本體常常不在它工作的腦區裡，要先拉一條「電線」過去，到了才開始大量分岔；這段電線只是路過，先扣掉不算。一顆神經元扣掉這段後，分支總長度至少 80% 落在同一區、而且分支伸出這一區邊界不超過一個門檻距離（見下面「怎麼看」），就是那一區的局部神經元。只看骨架的好處是：沒有突觸資料的資料庫也能用。</p>
+<p>同一套規則跑了三份資料：MaleCNS v1.0（雄果蠅腦＋腹神經索，腹神經索相當於脊髓）、FlyWire v783（雌果蠅腦），這兩份是電子顯微鏡重建；FlyCircuit 則是光學顯微鏡一次拍一顆神經元的資料庫，本來就沒有突觸資料。</p>
+<h2>怎麼看</h2>
+<p>上方嵌入的網頁可以直接操作。左上選資料與「伸出去多遠還算局部」的門檻（10、20、30 µm，20 為主）。點一個腦區，右邊顯示它的判定，3D 裡畫出它的局部神經元。網頁上方另有「判定規則」「結果說明」「結果總表」等分頁，把每條規則與每個數字都寫清楚了。畫面太小時，可點上方連結在新分頁全螢幕開啟。</p>
+<h2>主要結果（門檻 20 µm）</h2>
+<ul>
+<li>MaleCNS 的腦（用 MaleCNS 官方的 80 區劃分）有 37 個 LPU。實驗室先前做過另一個版本：規則相同，但「80% 落在同一區」改成數突觸而不是量分支長度，判出 35 個。兩種做法的結果很接近。</li>
+<li>FlyWire 的腦有 27 個 LPU，FlyCircuit 有 40 個。這兩份用同一套腦區劃分（Ito 75 區，Ito 等人 2014 年定的腦區命名，共 75 區），兩者差在哪裡，還沒有一區一區對照過。MaleCNS 用的是另一套劃分，所以它的數字不能直接和這兩份比。</li>
+<li>判定時還有一個<b>併區</b>步驟：如果有一群神經元（至少 10 顆）的分支平均分散在幾個相連的腦區，在哪一區都到不了 80%，這幾區就先合併成一區再判定，合併後這群神經元就成了合併區的局部神經元。蕈狀體（果蠅學習氣味的腦區）在劃分圖上被切成好幾小塊，它的神經元從頭到尾穿過這些小塊，所以在三份資料裡都合併成左右兩大塊，各算一個 LPU。</li>
+</ul>
+</div>
+<p class="meta">條目編號 20261105-fib-lpu。產生這一頁的程式：<a href="make.py">make.py</a>。</p>
+<p class="meta"><a class="del" href="https://github.com/marginli/fly_concepts/issues/new?title=%E5%88%AA%E9%99%A4%E6%A2%9D%E7%9B%AE%2020261105-fib-lpu&body=%E9%80%81%E5%87%BA%E5%BE%8C%E6%9C%83%E8%87%AA%E5%8B%95%E5%88%AA%E9%99%A4%E9%80%99%E5%80%8B%E6%A2%9D%E7%9B%AE%E4%B8%A6%E6%9B%B4%E6%96%B0%E7%B6%B2%E7%AB%99%EF%BC%88%E7%B4%84%E4%B8%80%E5%85%A9%E5%88%86%E9%90%98%EF%BC%89%E3%80%82%E4%B8%8D%E6%83%B3%E5%88%AA%E5%B0%B1%E7%9B%B4%E6%8E%A5%E9%97%9C%E6%8E%89%E9%80%99%E4%B8%80%E9%A0%81%E3%80%82%E5%8F%AA%E6%9C%89%E7%AB%99%E4%B8%BB%E5%B8%B3%E8%99%9F%E9%80%81%E5%87%BA%E6%89%8D%E6%9C%89%E6%95%88%E3%80%82" target="_blank" rel="noopener">刪除這個條目</a>　會開一個 GitHub 頁面，按綠色的送出鈕（Create）就會刪除，約一兩分鐘後網站更新。</p></div>
+</body></html>
