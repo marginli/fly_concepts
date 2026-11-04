@@ -1,0 +1,38 @@
+{
+ "36778": {
+  "type": "LPi34",
+  "main": "LOP_L",
+  "soma_region": "ME_L",
+  "trunk": 113.6,
+  "d_cut_syn": 113.6,
+  "d_cut_fib": 0.0,
+  "r_syn": 1.5,
+  "r_fib": 86.3,
+  "share_syn": 1.0,
+  "share_fib": 0.961,
+  "stubs": [
+   [
+    "ME_L",
+    2.8
+   ]
+  ]
+ },
+ "906015": {
+  "type": "IN03A030",
+  "main": "LegNp_T2_R",
+  "soma_region": "分區外",
+  "trunk": 120.8,
+  "d_cut_syn": 120.8,
+  "d_cut_fib": 0.0,
+  "r_syn": 7.9,
+  "r_fib": 77.3,
+  "share_syn": 0.955,
+  "share_fib": 0.948,
+  "stubs": [
+   [
+    "LegNp_T3_R",
+    5.4
+   ]
+  ]
+ }
+}

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三工作同時進行</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5d6670;--line:#dcd8cf;--card:#fff;--view:#f1efe9;
+ --olf:#2e9e5b;--trk:#d9821b;--lom:#8d5bd6;--exc:#c2552f;--inh:#2f6fbf;--off:#c8c4bb}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45}}
+:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 16px 30px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+h2{font-size:1.02rem;margin:0 0 6px}
+.task{display:grid;grid-template-columns:auto 1fr minmax(120px,220px) 9em;gap:4px 10px;align-items:center;padding:4px 0}
+.task label.nm{font-weight:600;cursor:pointer;white-space:nowrap}
+.task .what{color:var(--muted);font-size:.86rem}
+.task .val{font-variant-numeric:tabular-nums;font-size:.86rem;text-align:right}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+button{font:inherit;padding:4px 12px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+button.on{border-color:var(--fg);font-weight:600}
+#tslider{flex:1;min-width:160px}
+#status{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.88rem;min-width:13em}
+canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:1px solid var(--line)}
+.legend{font-size:.82rem;color:var(--muted);margin-top:6px}
+.ro{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.ro div{font-size:.86rem}
+.ro b{font-variant-numeric:tabular-nums}
+#loading{color:var(--muted);font-size:.9rem}
+@media (max-width:640px){.task{grid-template-columns:auto 1fr 7em}.task .what{grid-column:1/-1;order:5}}
+</style></head><body><div class="wrap">
+
+<div class="card">
+ <h2>1. 選刺激（可任意組合、調強度）</h2>
+ <div id="tasks"></div>
+ <div class="bar">
+  <button id="play">▶ 播放</button>
+  <span>速度</span><button data-sp="0.25">慢</button><button data-sp="0.5" class="on">中</button><button data-sp="1">快</button>
+  <input id="tslider" type="range" min="0" max="29" value="0" step="1">
+  <span id="status"></span>
+ </div>
+ <div id="loading"></div>
+</div>
+
+<div class="card">
+ <h2>2. 放電傳遞圖：訊號從輸入走到讀出</h2>
+ <canvas id="net" height="470"></canvas>
+ <div class="legend">圓圈＝一群同類型的神經元（括號內是顆數），越亮代表這群的平均放電越快（每群各自以自己在所有組合中最快的時候為最亮，不同群之間不能比亮度）。線上移動的小點是放電沿著連結往下游傳：
+ <span style="color:var(--exc)">● 紅點＝興奮</span>（讓下游更容易放電），<span style="color:var(--inh)">● 藍點＝抑制</span>（讓下游更難放電）。線越粗，兩群之間的突觸越多。
+ 虛線框的圓圈是「抑制型」中繼神經元。最右邊一欄是讀出（第 4 部分的曲線）。</div>
+</div>
+
+<div class="card">
+ <h2>3. 全腦：每一點是一顆神經元（共 <span id="nn">—</span> 顆）</h2>
+ <div class="bar" style="margin:0 0 8px">
+  <span>看法</span><button data-view="front" class="on">正面</button><button data-view="top">從上往下</button><button data-view="side">側面</button>
+  <span style="margin-left:12px">顏色</span><button data-mode="rate" class="on">放電率</button><button data-mode="diff">和「各自單獨相加」比</button>
+ </div>
+ <canvas id="brain" height="560"></canvas>
+ <div class="legend" id="blegend"></div>
+</div>
+
+<div class="card">
+ <h2>4. 讀出：每件工作最後的「答案」</h2>
+ <div class="ro" id="ro"></div>
+ <div class="legend">實線＝三種刺激依你選的組合同時給時的反應；虛線＝把每種刺激「單獨給」時的反應直接相加的預測。兩條線分開，就表示同時做時互相影響了（實線低於虛線＝被壓制）。灰色區是刺激開始前的空白期。縱軸單位是每秒放電次數，左上角數字是該圖縱軸的最大值；四張圖各用各的刻度，不能互相比高低。</div>
+</div>
+
+</div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+let D, POS, N, level = [2, 2, 2], on = [true, true, true], bin = 0, playing = false, speed = 0.5, view = "front", mode = "rate";
+const cache = {}, css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const TASKC = () => [css("--olf"), css("--trk"), css("--lom")];
+const cidx = (o, v, l) => (o + 1) * 25 + (v + 1) * 5 + (l + 1);
+const curLev = () => [0, 1, 2].map(i => on[i] ? level[i] : -1);
+
+async function loadCond(k) {
+  if (cache[k]) return cache[k];
+  const buf = await (await fetch(`c/${k}.bin`)).arrayBuffer();
+  const M = new Uint32Array(buf, 0, 1)[0], idx = new Uint32Array(buf, 4, M), r = new Uint8Array(buf, 4 + 4 * M, M * D.nbin);
+  const dense = new Uint8Array(N * D.nbin);           // [bin][neuron]
+  for (let j = 0; j < M; j++) for (let b = 0; b < D.nbin; b++) dense[b * N + idx[j]] = r[j * D.nbin + b];
+  const mean = new Float32Array(N);                   // 刺激期平均（Hz）
+  const b0 = D.warm_ms / D.bin_ms, nb = D.nbin - b0;
+  for (let j = 0; j < M; j++) { let s = 0; for (let b = b0; b < D.nbin; b++) s += r[j * D.nbin + b]; mean[idx[j]] = s * D.q / nb; }
+  return cache[k] = {dense, mean, M};
+}
+
+function buildTasks() {
+  const T = D.tasks, box = $("#tasks"), col = TASKC();
+  T.forEach((t, i) => {
+    const row = document.createElement("div"); row.className = "task";
+    row.innerHTML = `<label class="nm"><input type="checkbox" ${on[i] ? "checked" : ""}> <span class="dot" style="background:${col[i]}"></span>${t.name}</label>
+      <span class="what">${t.what}</span><input type="range" min="0" max="3" step="1" value="${level[i]}"><span class="val"></span>`;
+    const cb = row.querySelector("input[type=checkbox]"), sl = row.querySelector("input[type=range]"), val = row.querySelector(".val");
+    const upd = () => { val.textContent = on[i] ? t.levels[level[i]] : "（不給）"; sl.disabled = !on[i]; };
+    cb.onchange = () => { on[i] = cb.checked; upd(); refresh(); };
+    sl.oninput = () => { level[i] = +sl.value; upd(); refresh(); };
+    upd(); box.appendChild(row);
+  });
+}
+
+let cur = null, pred = null, refreshId = 0;
+async function refresh() {
+  const id = ++refreshId, L = curLev();
+  $("#loading").textContent = "載入中…";
+  const k = cidx(...L);
+  const c = await loadCond(k);
+  let p = null;
+  if (mode === "diff") {
+    const base = await loadCond(cidx(-1, -1, -1));
+    const singles = await Promise.all([0, 1, 2].filter(i => L[i] >= 0).map(i => { const s = [-1, -1, -1]; s[i] = L[i]; return loadCond(cidx(...s)); }));
+    p = new Float32Array(N);
+    for (let n = 0; n < N; n++) { let v = base.mean[n]; for (const s of singles) v += s.mean[n] - base.mean[n]; p[n] = v; }
+  }
+  if (id !== refreshId) return;
+  cur = c; pred = p; $("#loading").textContent = `這個組合有 ${c.M.toLocaleString()} 顆神經元至少放電一次。`;
+  drawRO(); draw();
+}
+
+/* ---------- 放電傳遞圖 ---------- */
+const net = $("#net"), nctx = net.getContext("2d");
+let pulses = [], lastT = performance.now(), accum = 0;
+function nodeRate(k, n, b) { return D.node_rate[k][n][b]; }
+function nodeXY(n) { const w = net.width, h = net.height; const d = devicePixelRatio; return [D.nodes[n].x * (w - 110 * d) + 55 * d, D.nodes[n].y * (h - 85 * d) + 42 * d]; }
+function edgePath(e) {
+  const [x1, y1] = nodeXY(e.s), [x2, y2] = nodeXY(e.t);
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 + (x2 < x1 + 5 ? 40 : 0) + (e.bend || 0);
+  return [x1, y1, mx, my, x2, y2];
+}
+function qpt(p, t) { const u = 1 - t; return [u * u * p[0] + 2 * u * t * p[2] + t * t * p[4], u * u * p[1] + 2 * u * t * p[3] + t * t * p[5]]; }
+function drawNet(dt) {
+  const w = net.width, h = net.height, k = cidx(...curLev()), col = TASKC();
+  nctx.clearRect(0, 0, w, h);
+  nctx.font = `${12 * devicePixelRatio}px system-ui`; nctx.textAlign = "center";
+  const fg = css("--fg"), off = css("--off"), exc = css("--exc"), inh = css("--inh");
+  // 欄標題
+  nctx.fillStyle = css("--muted");
+  D.columns.forEach(c => nctx.fillText(c.label, c.x * (w - 110 * devicePixelRatio) + 55 * devicePixelRatio, 16 * devicePixelRatio));
+  for (const e of D.edges) {
+    const p = edgePath(e);
+    nctx.strokeStyle = e.sign > 0 ? exc : inh; nctx.globalAlpha = 0.22;
+    nctx.lineWidth = Math.max(1, Math.log10(e.w) * 1.6) * devicePixelRatio;
+    nctx.beginPath(); nctx.moveTo(p[0], p[1]); nctx.quadraticCurveTo(p[2], p[3], p[4], p[5]); nctx.stroke();
+    // 依上游放電率產生脈衝
+    const r = nodeRate(k, e.s, bin);
+    e._acc = (e._acc || 0) + r * D.node_scale[e.s] * dt * speed * 2.2;
+    while (e._acc > 1 && pulses.length < 2500) { e._acc -= 1; pulses.push({e, t: Math.random() * 0.15}); }
+    if (e._acc > 3) e._acc = 3;
+  }
+  nctx.globalAlpha = 1;
+  pulses = pulses.filter(pl => (pl.t += dt * speed * 1.4) < 1);
+  for (const pl of pulses) {
+    const [x, y] = qpt(edgePath(pl.e), pl.t);
+    nctx.fillStyle = pl.e.sign > 0 ? exc : inh;
+    nctx.beginPath(); nctx.arc(x, y, 2.6 * devicePixelRatio, 0, 7); nctx.fill();
+  }
+  D.nodes.forEach((nd, n) => {
+    const [x, y] = nodeXY(n), r = nodeRate(k, n, bin), a = Math.min(1, Math.log1p(r) / Math.log1p(D.node_max[n]));
+    const R = (11 + 5 * Math.min(1, Math.log10(nd.n + 1) / 3)) * devicePixelRatio;
+    nctx.fillStyle = off; nctx.beginPath(); nctx.arc(x, y, R, 0, 7); nctx.fill();
+    nctx.fillStyle = col[nd.task] || fg; nctx.globalAlpha = 0.12 + 0.88 * a;
+    nctx.beginPath(); nctx.arc(x, y, R, 0, 7); nctx.fill(); nctx.globalAlpha = 1;
+    if (a > 0.6) { nctx.strokeStyle = "#ffd84a"; nctx.lineWidth = 2 * devicePixelRatio; nctx.stroke(); }
+    if (nd.inh) { nctx.setLineDash([3 * devicePixelRatio, 3 * devicePixelRatio]); nctx.strokeStyle = inh; nctx.lineWidth = 1.5 * devicePixelRatio; nctx.beginPath(); nctx.arc(x, y, R + 3 * devicePixelRatio, 0, 7); nctx.stroke(); nctx.setLineDash([]); }
+    nctx.fillStyle = fg; nctx.fillText(nd.label, x, y + R + 13 * devicePixelRatio);
+    nctx.fillStyle = css("--muted"); nctx.fillText(`${Math.round(r)} 次/秒`, x, y + R + 26 * devicePixelRatio);
+  });
+}
+
+/* ---------- 全腦 ---------- */
+const brain = $("#brain"), bctx = brain.getContext("2d");
+let img = null, proj = null;
+function setProj() {
+  const w = brain.width, h = brain.height, ax = {front: [0, 1], top: [0, 2], side: [2, 1]}[view];
+  const lo = [0, 1].map(i => D.bbox[0][ax[i]]), hi = [0, 1].map(i => D.bbox[1][ax[i]]);
+  const s = Math.min((w - 20) / (hi[0] - lo[0]), (h - 20) / (hi[1] - lo[1]));
+  const ox = (w - s * (hi[0] - lo[0])) / 2, oy = (h - s * (hi[1] - lo[1])) / 2;
+  proj = new Int32Array(N);
+  for (let n = 0; n < N; n++) {
+    const x = Math.round(ox + (POS[3 * n + ax[0]] - lo[0]) * s), y = Math.round(oy + (POS[3 * n + ax[1]] - lo[1]) * s);
+    proj[n] = (x < 0 || y < 0 || x >= w || y >= h) ? -1 : y * w + x;
+  }
+  img = bctx.createImageData(w, h);
+}
+function hex(c) { c = c.replace("#", ""); return [0, 2, 4].map(i => parseInt(c.substr(i, 2), 16)); }
+const HEAT = [[60, 30, 110], [180, 40, 90], [240, 110, 30], [255, 220, 60], [255, 255, 230]];
+function heat(a) { const x = Math.min(0.999, a) * (HEAT.length - 1), i = Math.floor(x), f = x - i; return HEAT[i].map((v, j) => v + (HEAT[i + 1][j] - v) * f); }
+function drawBrain() {
+  if (!cur || !proj) return;
+  const w = brain.width, h = brain.height, px = img.data, bg = hex(css("--view")), offc = hex(css("--off"));
+  const dark = bg[0] < 100;
+  for (let i = 0; i < w * h; i++) { px[4 * i] = bg[0]; px[4 * i + 1] = bg[1]; px[4 * i + 2] = bg[2]; px[4 * i + 3] = 255; }
+  for (let n = 0; n < N; n++) { const p = proj[n]; if (p < 0) continue; const q = 4 * p;   // 安靜的神經元：淡灰底
+    px[q] = (px[q] * 3 + offc[0]) >> 2; px[q + 1] = (px[q + 1] * 3 + offc[1]) >> 2; px[q + 2] = (px[q + 2] * 3 + offc[2]) >> 2; }
+  const put = (p, c, big) => { const x = p % w, y = (p - x) / w;
+    for (let dy = -big; dy <= big; dy++) for (let dx = -big; dx <= big; dx++) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+      const q = 4 * (yy * w + xx); px[q] = c[0]; px[q + 1] = c[1]; px[q + 2] = c[2]; } };
+  const big = devicePixelRatio > 1.5 ? 2 : 1;
+  if (mode === "rate") {
+    const off = bin * N;
+    for (let n = 0; n < N; n++) { const v = cur.dense[off + n]; if (!v || proj[n] < 0) continue; put(proj[n], heat(Math.log1p(v * D.q) / Math.log1p(300)), big); }
+  } else if (pred) {
+    const up = [215, 60, 40], dn = [40, 100, 220];
+    for (let n = 0; n < N; n++) { if (proj[n] < 0) continue; const d = cur.mean[n] - pred[n]; if (Math.abs(d) < 5) continue;
+      const a = Math.min(1, Math.abs(d) / 60), c = d > 0 ? up : dn; put(proj[n], c.map((v, j) => bg[j] + (v - bg[j]) * (0.35 + 0.65 * a)), big); }
+  }
+  bctx.putImageData(img, 0, 0);
+}
+function blegend() {
+  $("#blegend").innerHTML = mode === "rate"
+    ? "灰點＝這一刻沒放電的神經元；亮點＝正在放電，從暗紫、紅、橘到黃白代表越來越快（對數刻度，最亮約每秒 300 次以上）。按播放可看放電從輸入區往外擴散。位置是每顆神經元所有突觸的平均位置。"
+    : "和預測差不到每秒 5 次的神經元畫成灰點，差超過的才上色：<span style='color:#d73c28'>紅＝比「各自單獨相加」多</span>（互相加強），<span style='color:#2864dc'>藍＝比預測少</span>（被壓制）；越濃差越多。這一模式看的是整段刺激期的平均，不隨時間變。只開一種刺激時，預測就是它自己，所以全是灰點。";
+}
+
+/* ---------- 讀出曲線 ---------- */
+function drawRO() {
+  const box = $("#ro"), L = curLev(), k = cidx(...L), base = cidx(-1, -1, -1);
+  const singles = [0, 1, 2].filter(i => L[i] >= 0).map(i => { const s = [-1, -1, -1]; s[i] = L[i]; return cidx(...s); });
+  if (!box.children.length) D.readouts.forEach(r => { const d = document.createElement("div"); d.innerHTML = `<div>${r.label}：<b></b></div><canvas height="150"></canvas>`; box.appendChild(d); });
+  D.readouts.forEach((r, j) => {
+    const cv = box.children[j].querySelector("canvas"), g = cv.getContext("2d");
+    cv.width = cv.clientWidth * devicePixelRatio; cv.height = 150 * devicePixelRatio;
+    const W = cv.width, H = cv.height, y = D.ro[k][j], pr = D.ro[base][j].map((v, b) => v + singles.reduce((s, q) => s + D.ro[q][j][b] - D.ro[base][j][b], 0));
+    const lo = Math.min(0, ...y, ...pr), hi = Math.max(10, ...y, ...pr) * 1.08, X = b => 6 + b * (W - 12) / (D.nbin - 1), Y = v => H - 16 - (v - lo) / (hi - lo) * (H - 26);
+    g.clearRect(0, 0, W, H); g.fillStyle = css("--off"); g.globalAlpha = 0.35; g.fillRect(0, 0, X(D.warm_ms / D.bin_ms) , H); g.globalAlpha = 1;
+    g.strokeStyle = css("--muted"); g.lineWidth = 1; g.beginPath(); g.moveTo(0, Y(0)); g.lineTo(W, Y(0)); g.stroke();
+    const line = (arr, dash, c) => { g.setLineDash(dash); g.strokeStyle = c; g.lineWidth = 2 * devicePixelRatio; g.beginPath(); arr.forEach((v, b) => b ? g.lineTo(X(b), Y(v)) : g.moveTo(X(b), Y(v))); g.stroke(); g.setLineDash([]); };
+    line(pr, [5 * devicePixelRatio, 4 * devicePixelRatio], css("--muted")); line(y, [], TASKC()[r.task]);
+    g.strokeStyle = css("--fg"); g.globalAlpha = .5; g.beginPath(); g.moveTo(X(bin), 0); g.lineTo(X(bin), H); g.stroke(); g.globalAlpha = 1;
+    g.fillStyle = css("--muted"); g.font = `${11 * devicePixelRatio}px system-ui`; g.fillText(`${Math.round(hi)}`, 4, 12 * devicePixelRatio);
+    const b0 = D.warm_ms / D.bin_ms, avg = a => a.slice(b0).reduce((s, v) => s + v, 0) / (D.nbin - b0);
+    box.children[j].querySelector("b").textContent = `刺激期平均 ${avg(y).toFixed(1)}（預測 ${avg(pr).toFixed(1)}）${r.unit}`;
+  });
+}
+
+/* ---------- 迴圈 ---------- */
+function status() {
+  const t = (bin * D.bin_ms) - D.warm_ms;
+  $("#status").textContent = t < 0 ? `空白期（刺激前 ${(-t / 1000).toFixed(2)} 秒）` : `刺激中 ${(t / 1000).toFixed(2)}–${((t + D.bin_ms) / 1000).toFixed(2)} 秒`;
+  $("#tslider").value = bin;
+}
+function draw() { status(); drawBrain(); drawROcursor(); }
+let roT = 0; function drawROcursor() { clearTimeout(roT); roT = setTimeout(drawRO, 0); }
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  if (playing) { accum += dt * speed * 1000 / D.bin_ms * 0.18; if (accum >= 1) { accum = 0; bin = (bin + 1) % D.nbin; draw(); } }
+  if (D) drawNet(playing ? dt : 0);
+  requestAnimationFrame(frame);
+}
+function resize() {
+  for (const c of [net, brain]) { const h = +c.getAttribute("height"); c.width = c.clientWidth * devicePixelRatio; c.height = (c === net && c.clientWidth < 600 ? 520 : h) * devicePixelRatio; c.style.height = c.height / devicePixelRatio + "px"; }
+  if (D) { setProj(); draw(); }
+}
+async function main() {
+  $("#loading").textContent = "載入資料…";
+  D = await (await fetch("data.json")).json();
+  const pb = await (await fetch("pos.bin")).arrayBuffer(); POS = new Int16Array(pb); N = POS.length / 3;
+  $("#nn").textContent = N.toLocaleString(); $("#tslider").max = D.nbin - 1;
+  bin = D.warm_ms / D.bin_ms + 4;
+  buildTasks(); blegend(); resize();
+  $("#play").onclick = () => { playing = !playing; $("#play").textContent = playing ? "❚❚ 暫停" : "▶ 播放"; };
+  $$("[data-sp]").forEach(b => b.onclick = () => { speed = +b.dataset.sp; $$("[data-sp]").forEach(x => x.classList.toggle("on", x === b)); });
+  $$("[data-view]").forEach(b => b.onclick = () => { view = b.dataset.view; $$("[data-view]").forEach(x => x.classList.toggle("on", x === b)); setProj(); drawBrain(); });
+  $$("[data-mode]").forEach(b => b.onclick = () => { mode = b.dataset.mode; $$("[data-mode]").forEach(x => x.classList.toggle("on", x === b)); blegend(); refresh(); });
+  $("#tslider").oninput = e => { bin = +e.target.value; draw(); };
+  window.addEventListener("resize", resize);
+  await refresh(); playing = true; $("#play").textContent = "❚❚ 暫停";
+  requestAnimationFrame(frame);
+}
+main();
+</script></body></html>

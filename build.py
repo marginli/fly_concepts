@@ -5,7 +5,8 @@
 entries/<id>/meta.json：
   {"title": "...", "date": "YYYY-MM-DD", "dataset": "MaleCNS v1.0", "tags": ["蕈狀體", ...],
    "summary": "首頁卡片上的一句話", "scene": "scene.json"（有 3D 才寫）,
-   "figs": [{"src": "a.png", "caption": "..."}]（有平面圖才寫）}
+   "figs": [{"src": "a.png", "caption": "..."}]（有平面圖才寫）,
+   "embed": {"src": "demo.html", "height": 1900}（互動 DEMO 頁，用 iframe 嵌入；選用）}
 entries/<id>/desc.html：說明文字（HTML 片段）。
 """
 import hashlib
@@ -35,6 +36,10 @@ def entry_page(eid, m):
     if m.get("scene"):
         out.append('<div class="stage"><div id="view"></div><div id="panel"></div></div>'
                    '<p class="hint">滑鼠左鍵拖曳＝旋轉，滾輪＝縮放，右鍵拖曳＝平移；手機用手指。右邊的勾選框可以開關各部分。</p>')
+    if m.get("embed"):
+        em = m["embed"]
+        out.append(f'<p class="hint"><a href="{html.escape(em["src"])}" target="_blank">在新分頁全螢幕開啟 DEMO</a></p>'
+                   f'<iframe src="{html.escape(em["src"])}" style="width:100%;height:{int(em.get("height", 1600))}px;border:0" loading="lazy"></iframe>')
     for fg in m.get("figs", []):
         out.append(f'<figure><img src="{html.escape(fg["src"])}" alt=""><figcaption>{html.escape(fg.get("caption", ""))}</figcaption></figure>')
     out.append(f'<div class="desc">{desc}</div>')
