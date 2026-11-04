@@ -34,7 +34,17 @@ main{padding:0}
 section.page{display:none}
 section.page.on{display:block}
 /* 3D */
-#viewWrap{display:grid;grid-template-columns:280px 1fr 340px;height:calc(100vh - 54px);min-height:520px}
+#viewWrap{display:grid;grid-template-columns:var(--lw,280px) 6px minmax(200px,1fr) 6px var(--rw,340px);height:calc(100vh - 54px);min-height:520px}
+.gut{cursor:col-resize;background:var(--line);position:relative;touch-action:none}
+.gut:hover,.gut.drag{background:var(--accent)}
+.gut::after{content:"";position:absolute;left:1px;right:1px;top:50%;height:36px;margin-top:-18px;border-left:1px dotted var(--muted);border-right:1px dotted var(--muted)}
+.cmpT td{font-size:13px}
+.cmpT .tag{display:inline-block;font-size:11px;padding:0 6px;border-radius:8px;background:var(--chip);border:1px solid var(--line);margin-right:4px;white-space:nowrap}
+.cmpT .tag.chg{border-color:var(--sel);color:var(--sel)}
+.vb{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 2px;vertical-align:middle}
+.u{white-space:nowrap}
+.orow{border-top:1px solid var(--line);padding:5px 0;font-size:12px}
+.orow b{font-size:13px}
 #left,#right{background:var(--panel);overflow:auto;padding:12px}
 #left{border-right:1px solid var(--line)}
 #right{border-left:1px solid var(--line)}
@@ -95,6 +105,7 @@ section.page.on{display:block}
 code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 @media (max-width: 900px){
   #viewWrap{grid-template-columns:1fr;height:auto}
+  .gut{display:none}
   #stage{height:62vh}
   #left,#right{border:0;max-height:none}
   #left{order:2}#right{order:3}#stage{order:1}
@@ -110,6 +121,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
   <nav id="tabs">
     <button data-p="view" class="on">3D 檢視</button>
     <button data-p="table">結果總表</button>
+    <button data-p="map">腦區對應</button>
     <button data-p="rules">判定規則</button>
     <button data-p="about">結果說明</button>
   </nav>
@@ -122,7 +134,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
     <div id="left">
       <div class="ctl"><label class="h">分區</label><div class="seg" id="segA"></div></div>
       <div class="ctl"><label class="h">reach 門檻（LN 的分支最遠可伸出自己的區幾 µm；20 為主對照）</label><div class="seg" id="segT"></div></div>
-      <div class="ctl"><label class="h">上色方式</label><div class="seg" id="segC"><button data-v="region">依區上色</button><button data-v="verdict">依判定上色</button></div></div>
+      <div class="ctl"><label class="h">上色方式</label><div class="seg" id="segC"><button data-v="region">依區上色</button><button data-v="verdict">依判定上色</button><button data-v="orig">原腦區</button></div></div>
       <div class="ctl"><label class="h">顯示</label>
         <div class="chk"><input type="checkbox" id="cHub"><label for="cHub">畫出 hub 與兩者皆非（淡色）</label></div>
         <div class="chk"><input type="checkbox" id="cVnc" checked><label for="cVnc">畫出腹神經索</label></div>
@@ -131,6 +143,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
       <input id="search" placeholder="搜尋區名（例如 MB、FB、ME）">
       <div id="list"></div>
     </div>
+    <div class="gut" id="gutL" title="拖曳調整左欄寬度（雙擊恢復預設）"></div>
     <div id="stage">
       <div class="stat" id="stat"></div>
       <div class="views">
@@ -139,11 +152,13 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
       <div class="legend" id="legend"></div>
       <div id="tip"></div>
     </div>
+    <div class="gut" id="gutR" title="拖曳調整右欄寬度（雙擊恢復預設）"></div>
     <div id="right"><div class="card" id="card"><p class="muted">點選 3D 圖或左側清單裡的區，這裡會顯示它的判定、LN 數、組成與抽樣的 LN 骨架。</p></div></div>
   </div>
 </section>
 
 <section class="page" id="p-table"><div class="doc" id="tableDoc"></div></section>
+<section class="page" id="p-map"><div class="doc" id="mapDoc" style="max-width:1200px"></div></section>
 
 <section class="page" id="p-rules"><div class="doc" id="rulesDoc">
 <!--RULES-->
@@ -310,10 +325,13 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <ul>
 <li>左上選資料與分區（MaleCNS 正式 80 區、FlyWire Ito 75 區、FlyCircuit Ito 75 區）與 reach 門檻（10、20、30 µm）。三份資料各自的腦外形不同，換資料時外框會跟著換。</li>
 <li>計數方式：成功切開的區，每個子區各算 1 個 LPU；沒切開的區整區算 1 個。</li>
-<li>上色方式有兩種，用左側「上色方式」切換。<b>依區上色</b>（預設）：每個 LPU 一種顏色，方便分出區與區的邊界。<b>依判定上色</b>：藍色＝單一 LPU（密度上只有一團）；綠色＝密度上有好幾團、但沒有成功切開的區，整區算 1 個 LPU。成功切開的子區與聯集，也照它自己的判定上色（一團藍、好幾團但沒切開綠）。勾「畫出 hub 與兩者皆非」可看到其餘的區（淡灰）。</li>
+<li>上色方式有三種，用左側「上色方式」切換。<b>依區上色</b>（預設）：每個 LPU 一種顏色，方便分出區與區的邊界。<b>依判定上色</b>：藍色＝單一 LPU（密度上只有一團）；綠色＝密度上有好幾團、但沒有成功切開的區，整區算 1 個 LPU。成功切開的子區與聯集，也照它自己的判定上色（一團藍、好幾團但沒切開綠）。勾「畫出 hub 與兩者皆非」可看到其餘的區（淡灰）。</li>
+<li><b>原腦區</b>（第三種上色方式）：改畫每份資料官方分區原本的區（還沒併、也還沒切），每區一種顏色。和「依區上色」來回切換，就能看出哪幾個原腦區被併成一個聯集、哪個原腦區被切成幾塊。這個模式下點一個原腦區，會選取它大部分體積所在的最終區。</li>
 <li>點一個區：右側顯示它的判定、LN 數、神經束數、切分結果、併區成員與 LN 的細胞型別，並在 3D 中畫出隨機抽樣的最多 20 顆 LN 骨架；卡片上的「全部 N 顆」按鈕可改畫這一區全部的 LN（大區要多等幾秒）。畫出的骨架已扣掉主幹，只畫算進份額的部分。</li>
+<li>卡片下半部的「由哪些原腦區組成」列出這一區涵蓋的原腦區與比例，3D 圖中同時用彩色半透明外殼畫出這些原腦區（外殼顏色＝卡片這張小表裡區名前圓點的顏色）。「同一批原腦區在另外兩份資料」寫出這些原腦區在另外兩份資料最後落在哪一區，點區名可直接切換過去。三份資料的完整對照表在「腦區對應」分頁。</li>
 <li>FlyCircuit 沒有細胞型別，卡片改列每顆神經元的<b>驅動品系</b>（實驗時用來讓這顆神經元發光的基因工具名稱），可以當成粗略的來源標記。</li>
 <li>按住 Shift 再點（3D 圖或左側清單）可加選好幾區一起顯示，Shift＋點已選的區則取消它；不按 Shift 直接點一區，就回到只選這一區。多選時卡片上方列出全部已選的區，點名字換成顯示那一區，按 × 取消。</li>
+<li>三欄之間的灰色細條可以左右拖曳，調整三欄的寬度（雙擊細條恢復預設寬度；這台瀏覽器會記住調整後的寬度）。</li>
 <li>拖曳旋轉；右鍵或 Shift＋拖曳平移；滾輪縮放；右上角按鈕切換正面、背面朝上、側面、後面。網址會記下目前的資料、門檻與選取的區，可直接分享。</li>
 <li>區名的寫法：聯集以代表名加「＋n 區」顯示，例如「MB_CA_R＋6 區」是右側蕈狀體 7 塊。第一輪切開的子區，第一塊沿用原名，其餘以「.2」「.3」結尾；第二輪以後切出的子區寫成「原名.r2c1」「原名.r2c2」（r2 表示第 2 輪，c1、c2 是第幾塊）。</li>
 </ul>
@@ -529,16 +547,18 @@ function buildScene(){
     meshes.push(m); regionGroup.add(m);
   });
   if (outline) outline.visible = document.getElementById("cOut").checked;
-  highlight(); stats(); legend(); render();
+  highlight(); stats(); legend(); render(); drawOrig();
 }
 function highlight(){
   const sel = cur.sel, ms = new Set(cur.multi);
   for (const m of meshes) {
     const nm = m.userData.row.name, focus = sel && nm === sel, on = sel && ms.has(nm);
     m.material.color.copy(focus ? new THREE.Color(css("--sel")) : m.userData.base);
-    m.material.opacity = sel ? (on ? 0.42 : Math.min(m.userData.op, isLPU(m.userData.row) ? 0.07 : 0.04)) : m.userData.op;
-    m.material.depthWrite = !sel && isLPU(m.userData.row);
-    m.renderOrder = on ? 2 : 0;
+    const comp = O && O[cur.a] && on && compOf(cur.a, cur.t, nm).length;   // 有原腦區外殼時選取區調淡，免得蓋住外殼的顏色
+    m.material.opacity = sel ? (on ? (origMode() || comp ? 0.12 : 0.42) : Math.min(m.userData.op, isLPU(m.userData.row) ? 0.07 : 0.04)) : m.userData.op;
+    m.material.depthWrite = !sel && isLPU(m.userData.row) && !origMode();
+    m.visible = !origMode() || !!on;
+    m.renderOrder = on ? 4 : 0;
   }
 }
 function stats(){
@@ -549,10 +569,11 @@ function stats(){
 }
 function legend(){
   const pal = byRegion();
-  document.getElementById("legend").innerHTML = (pal ? `<div>依區上色：每個 LPU 一種顏色</div><div class="muted">判定類別見右側卡片與左側清單</div>` :
+  document.getElementById("legend").innerHTML = origMode() ? `<div>原腦區：官方分區原本的區，每區一種顏色</div><div class="muted">對照「依區上色」可看出哪裡被併、哪裡被切</div>` + (cur.sel ? `<div><span class="dot" style="background:${css("--sel")}"></span>選取的最終區（很淡的橘色）</div><div class="muted">它涵蓋的原腦區：彩色（顏色對照右側卡片）；其他原腦區：淡</div>` : "") : (pal ? `<div>依區上色：每個 LPU 一種顏色</div><div class="muted">判定類別見右側卡片與左側清單</div>` :
     `<div><span class="dot" style="background:${css("--single")}"></span>單一 LPU</div><div><span class="dot" style="background:${css("--multi")}"></span>多個候選（整區 1 個 LPU）</div>`) +
     (document.getElementById("cHub").checked ? `<div><span class="dot" style="background:${css("--hub")}"></span>hub（淡）</div><div><span class="dot" style="background:${css("--neither")}"></span>兩者皆非（淡）</div>` : "") +
-    `<div><span class="dot" style="background:${css("--sel")}"></span>選取中（卡片顯示的那一區）</div>` + (cur.multi.length > 1 ? `<div class="muted">其他已選的區：原色、較不透明</div>` : "");
+    `<div><span class="dot" style="background:${css("--sel")}"></span>選取中（卡片顯示的那一區）</div>` + (cur.multi.length > 1 ? `<div class="muted">其他已選的區：原色、較不透明</div>` : "") +
+    (cur.sel && O ? `<div class="muted">${origMode() ? "" : "彩色半透明外殼：選取區涵蓋的原腦區（顏色對照右側卡片）"}</div>` : "");
 }
 function listUI(){
   const q = document.getElementById("search").value.trim().toLowerCase();
@@ -581,6 +602,12 @@ function hitAt(e){
   const rc = renderer.domElement.getBoundingClientRect();
   const p = new THREE.Vector2(((e.clientX-rc.left)/rc.width)*2-1, -((e.clientY-rc.top)/rc.height)*2+1);
   ray.setFromCamera(p, camera);
+  if (origMode()) {
+    const h = ray.intersectObjects(origObjs.filter(o => o.userData.unit), false)[0];
+    if (!h) return null;
+    const r = rows().find(x => x.name === h.object.userData.unit);
+    return r ? {userData: {row: r, orig: h.object.userData.orig}} : null;
+  }
   const hits = ray.intersectObjects(meshes, false);
   const lp = hits.find(h => isLPU(h.object.userData.row));
   return (lp || hits[0] || {}).object;
@@ -591,7 +618,7 @@ function hover(e){
   const o = hitAt(e);
   if (!o) { tip.style.display = "none"; return; }
   const r = o.userData.row, rc = stage.getBoundingClientRect();
-  tip.innerHTML = `${esc(dispName(r))}・${BUCKET[r.bucket]}・LN ${r.n_ln}`;
+  tip.innerHTML = (o.userData.orig ? `原腦區 ${esc(o.userData.orig)} → ` : "") + `${esc(dispName(r))}・${BUCKET[r.bucket]}・LN ${r.n_ln}`;
   tip.style.left = (e.clientX - rc.left + 12) + "px"; tip.style.top = (e.clientY - rc.top + 12) + "px"; tip.style.display = "block";
 }
 function select(name, focus, add){
@@ -599,7 +626,7 @@ function select(name, focus, add){
   if (!add || !name) { cur.multi = name ? [name] : []; cur.sel = name; }
   else if (!cur.multi.includes(name)) { cur.multi.push(name); cur.sel = name; }
   else { cur.multi = cur.multi.filter(x => x !== name); if (cur.sel === name) cur.sel = cur.multi[cur.multi.length - 1] || null; }
-  highlight(); legend(); listUI(); card(); drawNeurons();
+  highlight(); legend(); listUI(); card(); drawNeurons(); drawOrig();
   if (focus && name) {
     const r = rows().find(x => x.name === name);
     if (r && r.mesh != null) { const c = J.atlases[cur.a].meshes[r.mesh].c; orbit.target.set(c[0], c[1], c[2]); orbit.dist = Math.max(500, Math.min(1500, Math.cbrt(r.nvox) * 9)); placeCam(); }
@@ -621,6 +648,7 @@ function card(){
   if (r.n_home != null) h += `<tr><td>最後一步的住戶</td><td>${r.n_home} 顆</td></tr>`;
   if (r.official) h += `<tr><td>與官方分區重疊最多</td><td>${r.official.map(o => esc(o[0]) + " " + Math.round(o[1]*100) + "%").join("、")}</td></tr>`;
   h += `</table><p class="small muted" style="margin-top:2px">* 神經束：≥ 3 顆神經元走同一條路、兩端在同一對區（判定規則第 5 節）。</p>`;
+  h += origCardHTML(r);
   if (r.types) {
     h += `<h3>LN 的細胞型別（前 8 名，共 ${r.n_types} 型）</h3><table>` + r.types.map(t => `<tr><td>${esc(t[0])}</td><td>${t[1]} 顆</td></tr>`).join("") + `</table>`;
   }
@@ -748,7 +776,7 @@ async function refresh(){
   if (!cur.multi.includes(cur.sel)) cur.sel = cur.multi[cur.multi.length - 1] || null;
   buildScene(); listUI(); card(); drawNeurons(); tableUI(); writeHash();
 }
-function applyTheme(){ scene.background = new THREE.Color(css("--canvas")); if (J) { buildScene(); listUI(); card(); } render(); }
+function applyTheme(){ scene.background = new THREE.Color(css("--canvas")); if (J) { buildScene(); listUI(); card(); if (O) mapTable(); } render(); }
 function writeHash(){
   const p = document.querySelector("#tabs button.on").dataset.p;
   history.replaceState(null, "", `#p=${p}&a=${cur.a}&t=${cur.t}&c=${cur.c}` + (cur.sel ? `&r=${encodeURIComponent([cur.sel, ...cur.multi.filter(n => n !== cur.sel)].join(","))}` : ""));
@@ -758,7 +786,7 @@ function readHash(){
   if (KEYS.includes(h.get("a"))) cur.a = h.get("a");
   if (TS.includes(h.get("t"))) cur.t = h.get("t");
   if (h.get("r")) { const rs = h.get("r").split(",").filter(Boolean); cur.sel = rs[0]; cur.multi = rs; }
-  if (["region","verdict"].includes(h.get("c"))) cur.c = h.get("c");
+  if (["region","verdict","orig"].includes(h.get("c"))) cur.c = h.get("c");
   return h.get("p") || "view";
 }
 
@@ -801,16 +829,215 @@ function regTable(){
   T.querySelectorAll("a[data-n]").forEach(x => x.onclick = async e => { e.preventDefault(); cur.a = f.a; cur.t = f.t; cur.sel = x.dataset.n; cur.multi = [x.dataset.n]; showPage("view"); await refresh(); select(x.dataset.n, true); });
 }
 
+// ---------- 原腦區對應（2026-11-05）----------
+// O[分區]：names（原腦區名）、part、mesh（每區在 orig_<分區>.bin 的網格序號）、meshes、ov[門檻][最終區名] = [[原腦區, 原腦區落在此最終區的比例, 此最終區由該原腦區構成的比例]]
+let O = null; const origBuf = {}, origGeoC = {};
+const SUB = 0.05;   // 低於 5% 的零星重疊不列
+const DSN = {"80":"MaleCNS","fw75":"FlyWire","fc75":"FlyCircuit"};
+function prepOrig(){
+  for (const a of Object.keys(O)) {
+    const o = O[a]; o.idx = new Map(o.names.map((n, i) => [n, i])); o.inv = {};
+    for (const t of TS) {
+      const m = new Map();
+      for (const [rn, lst] of Object.entries(o.ov[t])) for (const [on, f, g] of lst) { if (!m.has(on)) m.set(on, []); m.get(on).push([rn, f, g]); }
+      for (const v of m.values()) v.sort((x, y) => y[1] - x[1]);
+      o.inv[t] = m;
+    }
+  }
+}
+// 原腦區 n 在分區 a 裡對應哪幾個原腦區（80 區與 Ito 75 區有幾處分法不同）；[] 表示這套分區沒有
+function alias(a, n){
+  const has = x => O[a] && O[a].idx.has(x);
+  if (has(n)) return [n];
+  let m = n.match(/^(MB_VL|MB_ML)_([LR])$/);
+  if (m) return (m[1] === "MB_VL" ? ["MB_aL", "MB_apL"] : ["MB_bL", "MB_bpL", "MB_gL"]).map(x => x + "_" + m[2]).filter(has);
+  m = n.match(/^(MB_aL|MB_apL|MB_bL|MB_bpL|MB_gL)_([LR])$/);
+  if (m) { const v = (m[1] === "MB_aL" || m[1] === "MB_apL" ? "MB_VL_" : "MB_ML_") + m[2]; return has(v) ? [v] : []; }
+  if (/^IB_[LR]$/.test(n)) return has("IB") ? ["IB"] : [];
+  if (n === "IB") return ["IB_L", "IB_R"].filter(has);
+  return [];
+}
+function aliasNote(a, n, names){
+  if (!names.length) return "這套分區沒有這一區";
+  if (names.length > 1) return `這套分區把它分成 ${names.join("、")}`;
+  if (names[0] !== n) return n.startsWith("IB_") ? `這套分區左右不分，只有一區 IB（以下是整個 IB 的去向，IB_L、IB_R 兩列相同）` : `這套分區沒有單獨的 ${n}，它屬於較大的 ${names[0]}`;
+  return "";
+}
+// 原腦區 n（分區 a 自己的名）在門檻 t 最後落在哪些最終區
+function fate(a, t, n){
+  const all = O[a].inv[t].get(n) || [];
+  let it = all.filter(x => x[1] >= SUB); if (!it.length) it = all.slice(0, 1);
+  const R = J.atlases[a].combos[t].rows;
+  const rs = it.map(x => ({r: R.find(y => y.name === x[0]), f: x[1]})).filter(x => x.r);
+  const uni = rs.filter(x => x.r.members && x.r.members.length > 1);
+  let tag = "原樣";
+  if (!rs.length) tag = "—";
+  else if (uni.length) tag = rs.length > 1 ? "併入聯集後又切開" : "併入聯集";
+  else if (rs.length > 1 || rs[0].r.kind === "子區") tag = "被切開";
+  return {tag, rs};
+}
+const VSHORT = {single:"單一 LPU", multi:"LPU（多個候選）", hub:"hub", neither:"兩者皆非"};
+function unitHTML(a, t, x, showPct){
+  const r = x.r;
+  return `<span class="u"><span class="vb" style="background:${css("--" + r.bucket)}"></span><a href="#" class="jump" data-a="${a}" data-t="${t}" data-n="${esc(r.name)}"${r.members && r.members.length > 1 ? ` title="聯集成員：${esc(r.members.join("、"))}"` : ""}>${esc(dispName(r))}</a>・${VSHORT[r.bucket]}${showPct ? `（此區的 ${Math.round(x.f * 100)}%）` : ""}</span>`;
+}
+function fateHTML(a, t, n, compact){
+  const names = alias(a, n), note = aliasNote(a, n, names);
+  if (!names.length) return `<span class="muted">${note}</span>`;
+  let h = note ? `<div class="small muted">${note}：</div>` : "";
+  for (const nm of names) {
+    const F = fate(a, t, nm), multi = F.rs.length > 1;
+    h += `<div>${names.length > 1 || nm !== n ? `<b>${esc(nm)}</b> ` : ""}<span class="tag${F.tag !== "原樣" ? " chg" : ""}">${F.tag}</span>` +
+      F.rs.map(x => unitHTML(a, t, x, multi || x.f < 0.95)).join(compact ? "、" : "<br>") + `</div>`;
+  }
+  return h;
+}
+// 最終區 rn 由哪些原腦區構成（列入：原腦區有 ≥5% 在此，或佔此區 ≥5%）
+function compOf(a, t, rn){ return ((O && O[a].ov[t][rn]) || []).filter(x => x[1] >= SUB || x[2] >= SUB); }
+function origCardHTML(r){
+  if (!O) return "";
+  const C = compOf(cur.a, cur.t, r.name); if (!C.length) return "";
+  const CC = compColors();
+  let h = `<h3>由哪些原腦區組成</h3><p class="small muted">原腦區：這份資料官方分區裡原本的區，還沒併、也還沒切。3D 圖中以半透明彩色外殼畫出，外殼顏色就是下表區名前小圓點的顏色（這裡的圓點是識別色，不是判定色）；上色方式選「原腦區」可看全部原腦區。「拿到幾成」＝那個原腦區有多少比例的體積落在這一區；「佔幾成」＝這一區的體積有多少比例來自那個原腦區。低於 5% 的零星重疊不列。</p><table><tr><td>原腦區</td><td>拿到幾成／佔幾成</td></tr>` +
+    C.map(x => `<tr><td><span class="vb" style="background:#${(CC.get(x[0]) || origColor(cur.a, x[0])).getHexString()}"></span>${esc(x[0])}</td><td>${Math.round(x[1] * 100)}%／${Math.round(x[2] * 100)}%</td></tr>`).join("") + `</table>`;
+  const others = KEYS.filter(k => k !== cur.a && O[k]);
+  if (others.length) {
+    h += `<h3>同一批原腦區在另外兩份資料</h3><p class="small muted">同名的原腦區在另一份資料最後變成哪一區（reach 同為 ${cur.t} µm）；兩套分區名稱不同的區（例如蕈狀體的葉）會先註明對應方式。標籤與圓點的意思同「腦區對應」分頁：圓點是判定色。點區名會切換到那份資料的 3D 圖。</p>`;
+    for (const x of C) h += `<div class="orow"><b>${esc(x[0])}</b>` + others.map(k => `<div><span class="muted">${DSN[k]}：</span>${fateHTML(k, cur.t, x[0], true)}</div>`).join("") + `</div>`;
+  }
+  return h;
+}
+// 3D：原腦區（上色方式「原腦區」時全部畫；其他上色方式只在選取時畫出選取區涵蓋的原腦區）
+const origMode = () => cur.c === "orig";
+let origObjs = [];
+function origColor(a, n){ return palColor((O[a].idx.get(n) || 0) * 7 + 3); }
+// 選取區涵蓋的原腦區：依卡片表格順序用分得清的顏色（避開選取用的橘色）
+const COMP_PAL = ["#d62839","#2a9d3f","#3456d1","#8e2bb0","#13a8c8","#d63bb8","#7fae1c","#2f8a7d","#8a5a1d","#6b0f1a","#1d2a80","#b58900"];
+function compColors(){
+  const m = new Map(); for (const n of cur.multi) for (const x of compOf(cur.a, cur.t, n)) if (!m.has(x[0])) m.set(x[0], new THREE.Color(COMP_PAL[m.size % COMP_PAL.length]));
+  return m;
+}
+function origGeo(a, i){
+  const key = a + ":" + i; if (origGeoC[key]) return origGeoC[key];
+  const m = O[a].meshes[i], buf = origBuf[a];
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buf, m.off, m.nv * 3), 3));
+  g.setIndex(new THREE.BufferAttribute(new Uint32Array(buf, m.off + m.nv * 12, m.nf * 3), 1));
+  g.computeVertexNormals();
+  return origGeoC[key] = g;
+}
+let origTok = 0;
+async function drawOrig(){
+  const tok = ++origTok;
+  for (const o of origObjs) { scene.remove(o); o.material.dispose(); }
+  origObjs = [];
+  if (!O || !O[cur.a]) { render(); return; }
+  const om = origMode(), showVnc = document.getElementById("cVnc").checked, o = O[cur.a];
+  const sel = compColors();
+  if (!om && !sel.size) { render(); return; }
+  if (!origBuf[cur.a]) { const b = await loadBin(`meshes/orig_${cur.a}.bin`); if (tok !== origTok) return; origBuf[cur.a] = b; }
+  if (tok !== origTok) return;
+  o.names.forEach((n, i) => {
+    const mi = o.mesh[i]; if (mi == null) return;
+    if (!showVnc && o.part[i] !== "腦") return;
+    const s = sel.has(n); if (!om && !s) return;
+    const op = om ? (sel.size ? (s ? 0.5 : 0.05) : 0.8) : 0.45;
+    const mat = new THREE.MeshLambertMaterial({color: s ? sel.get(n) : origColor(cur.a, n), transparent: true, opacity: op, depthWrite: om && !sel.size, side: THREE.DoubleSide});
+    const m = new THREE.Mesh(origGeo(cur.a, mi), mat);
+    const F = fate(cur.a, cur.t, n);
+    m.userData = {orig: n, unit: F.rs.length ? F.rs[0].r.name : null}; m.renderOrder = s ? 3 : 1;
+    scene.add(m); origObjs.push(m);
+  });
+  render();
+}
+// 對應表分頁
+let mapF = {t: "20", p: "腦", q: "", chg: false};
+function mapRows(){
+  const ref = KEYS.filter(k => O[k]);
+  const seen = new Set(), out = [];
+  const base = ref.find(k => k !== "80") || ref[0];
+  for (const n of O[base].names) { seen.add(n); out.push(n); }
+  for (const k of ref) for (const n of O[k].names) {
+    if (seen.has(n)) continue;
+    if (k === "80" && alias(base, n).length) continue;   // 80 區的細分（蕈狀體各葉、IB）併在 75 區的對應列裡
+    seen.add(n); out.push(n);
+  }
+  const key = n => n.replace(/_(L|R)$/, "") + (n.endsWith("_L") ? "1" : n.endsWith("_R") ? "2" : "0");
+  return out.sort((a, b) => key(a).localeCompare(key(b)));
+}
+function partOf(n){ for (const k of KEYS) if (O[k]) { const i = O[k].idx.get(n); if (i != null) return O[k].part[i]; } for (const k of KEYS) if (O[k]) { const al = alias(k, n); if (al.length) return O[k].part[O[k].idx.get(al[0])]; } return "腦"; }
+function mapUI(){
+  if (!O) return;
+  const ks = KEYS.filter(k => O[k]);
+  let h = `<h2>原腦區與 LPU 的對應</h2>
+<p>每份資料一開始都用一套官方分區把腦切成幾十個區，這裡稱為<b>原腦區</b>（MaleCNS 用正式 80 區；FlyWire、FlyCircuit 用 Ito 75 區）。判定流程會把幾個原腦區<b>併</b>成一個聯集，或把一個原腦區<b>切</b>成幾塊，最後得到的每一塊稱為<b>最終區</b>，再判定它是不是 LPU。下表每一列是一個原腦區，三欄分別寫出它在三份資料裡最後落在哪個最終區。</p>
+<p class="small">標籤：<span class="cmpT"><span class="tag">原樣</span></span>沒被併也沒被切；<span class="cmpT"><span class="tag chg">併入聯集</span></span>和別的區併成一個最終區。聯集寫成「代表名＋n 區」，例如「AOTU_L＋9 區」＝AOTU_L 加另外 9 區、共 10 區；代表名是成員中區號（官方分區表裡每區的編號）最小的那一區，所以同一個原腦區在不同資料裡可能落在代表名不同的聯集。滑鼠停在聯集名上可看全部成員；<span class="cmpT"><span class="tag chg">被切開</span></span>分到好幾個最終區，括號寫出原腦區有多少比例落在那一塊；<span class="cmpT"><span class="tag chg">併入聯集後又切開</span></span>先併、聯集再被切開。切開後的塊，第一塊沿用原名（聯集被切時，原名就是聯集的代表名），其餘以「.2」「.3」結尾；切出的塊有時會再切一次，這時寫成「原名.r2c2」（r2＝第 2 輪、c2＝這一輪切出的第 2 塊）。所以和原腦區同名的最終區不一定是原樣，要看標籤。</p>
+<p class="small">區名前的小圓點是判定：<span class="vb" style="background:${css("--single")}"></span>單一 LPU、<span class="vb" style="background:${css("--multi")}"></span>LPU（多個候選：區內局部神經元的分布看起來不只一團、但沒能成功切開，整區仍算 1 個 LPU；切開後的塊若仍不只一團、也沒能再切開，同樣標綠點）、<span class="vb" style="background:${css("--hub")}"></span>hub、<span class="vb" style="background:${css("--neither")}"></span>兩者皆非（各類定義見「判定規則」）。點區名會跳到 3D 圖、選取那個最終區，並畫出它涵蓋的所有原腦區。</p>
+<p class="small">兩套分區有幾處分法不同：蕈狀體的葉，75 區分成垂直葉 MB_VL、內側葉 MB_ML，80 區細分成 α、α′（對應垂直葉，區名 MB_aL、MB_apL）與 β、β′、γ（對應內側葉，區名 MB_bL、MB_bpL、MB_gL）五片葉；IB 在 75 區分左右，在 80 區只有一區；AMMC、GA 只有 75 區有；AB、Ov、LA 和腹神經索只有 80 區有。遇到這些區，格子裡會先註明對應方式。比例低於 5% 的零星重疊不列。</p>
+<div class="fbar"><label>reach <select id="mT">${TS.map(t => `<option value="${t}">${t} µm</option>`).join("")}</select></label><label>部位 <select id="mP"><option value="腦">腦</option><option value="腹">腹神經索</option><option value="all">全部</option></select></label><label class="chk" style="margin:0"><input type="checkbox" id="mC">只列至少一份資料有併或切的原腦區</label><input id="mQ" placeholder="搜尋區名（例如 MB、SAD）"></div>
+<div class="tblWrap"><table class="cmpT" id="mapTable"></table></div>`;
+  document.getElementById("mapDoc").innerHTML = h;
+  const mT = document.getElementById("mT"), mP = document.getElementById("mP"), mC = document.getElementById("mC"), mQ = document.getElementById("mQ");
+  mT.value = mapF.t; mP.value = mapF.p; mC.checked = mapF.chg; mQ.value = mapF.q;
+  const upd = () => { mapF = {t: mT.value, p: mP.value, chg: mC.checked, q: mQ.value.trim().toLowerCase()}; mapTable(); };
+  [mT, mP, mC].forEach(x => x.onchange = upd); mQ.oninput = upd; mapTable();
+}
+function mapTable(){
+  const ks = KEYS.filter(k => O[k]), t = mapF.t;
+  let h = `<tr><th>原腦區</th>${ks.map(k => `<th>${ALABEL[k]}</th>`).join("")}</tr>`, n = 0;
+  for (const nm of mapRows()) {
+    const p = partOf(nm);
+    if (mapF.p === "腦" && p !== "腦") continue;
+    if (mapF.p === "腹" && p === "腦") continue;
+    if (mapF.q && !nm.toLowerCase().includes(mapF.q)) continue;
+    if (mapF.chg && !ks.some(k => alias(k, nm).some(x => fate(k, t, x).tag !== "原樣"))) continue;
+    h += `<tr><td><b>${esc(nm)}</b></td>${ks.map(k => `<td>${fateHTML(k, t, nm, false)}</td>`).join("")}</tr>`; n++;
+  }
+  document.getElementById("mapTable").innerHTML = h + (n ? "" : `<tr><td colspan="${ks.length + 1}" class="muted">沒有符合的原腦區</td></tr>`);
+}
+async function jumpTo(a, t, n){
+  cur.a = a; cur.t = t; cur.sel = n; cur.multi = [n];
+  showPage("view"); await refresh(); select(n, true);
+}
+document.addEventListener("click", e => {
+  const x = e.target.closest && e.target.closest("a.jump"); if (!x) return;
+  e.preventDefault(); jumpTo(x.dataset.a, x.dataset.t, x.dataset.n);
+});
+// 三欄寬度可拖曳（存在這台瀏覽器）
+(function(){
+  const W = document.getElementById("viewWrap");
+  const setW = (v, px) => W.style.setProperty(v, Math.round(px) + "px");
+  try { const s = JSON.parse(localStorage.getItem("fiblpu-cols") || "null"); if (s) { if (s.l) setW("--lw", s.l); if (s.r) setW("--rw", s.r); } } catch (e) {}
+  const save = () => { try { localStorage.setItem("fiblpu-cols", JSON.stringify({l: document.getElementById("left").offsetWidth, r: document.getElementById("right").offsetWidth})); } catch (e) {} };
+  for (const [id, v, side] of [["gutL", "--lw", "left"], ["gutR", "--rw", "right"]]) {
+    const g = document.getElementById(id);
+    g.addEventListener("pointerdown", e => {
+      e.preventDefault(); g.setPointerCapture(e.pointerId); g.classList.add("drag");
+      const rc = W.getBoundingClientRect(), other = document.getElementById(side === "left" ? "right" : "left").offsetWidth;
+      const mv = ev => {
+        let px = side === "left" ? ev.clientX - rc.left : rc.right - ev.clientX;
+        px = Math.max(160, Math.min(px, rc.width - other - 12 - 200));   // 側欄至少 160 px、中間至少 200 px
+        setW(v, px); resize();
+      };
+      const up = () => { g.classList.remove("drag"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", up); save(); };
+      g.addEventListener("pointermove", mv); g.addEventListener("pointerup", up);
+    });
+    g.addEventListener("dblclick", () => { W.style.removeProperty(v); resize(); save(); });
+  }
+})();
+
 // ---------- 啟動 ----------
 (async function(){
   const page = readHash();
   scene.background = new THREE.Color(css("--canvas"));
   J = await (await fetch("data/a1syn.json")).json();
+  try { O = await (await fetch("data/orig.json")).json(); prepOrig(); } catch (e) { O = null; }
   KEYS = KEYS.filter(k => J.atlases[k]);
   seg("segA", KEYS, v => ALABEL[v].replace("密度模板 ", "模板 "), "a");
   if (!KEYS.includes(cur.a)) cur.a = KEYS[0];
   await ensureOutline(true);
   placeCam(); resize();
+  mapF.t = cur.t; mapUI();
   await refresh();
   showPage(page);
   if (cur.sel) { const rs = cur.multi.slice(); select(rs[0], true); for (const n of rs.slice(1)) select(n, false, true); if (rs.length > 1) { cur.sel = rs[0]; highlight(); listUI(); card(); render(); writeHash(); } }
