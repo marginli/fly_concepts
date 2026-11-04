@@ -6,7 +6,7 @@
   （125 種組合 × 每 50 毫秒一格 × 全部 164,587 顆神經元，8 次平均），
   神經元位置：syn_centroid.py 算的每顆神經元突觸點平均位置（MaleCNS 原生座標，8 nm → µm）。
 傳遞圖的細胞群與連結：model.load("malecns") 的接線（突觸數、正負號），細胞群是手挑的（各工作從輸入到讀出最強的中繼型，
-  依 paths_probe.py：讀出神經元上游「突觸數 × 放電變化」最大的型）。
+  2026-11-04 探勘：讀出神經元上游「突觸數 × 放電變化」最大的型，用第一階段 sweep 結果）。
 用法：~/claude_yilan/MB/MB_simulation/.venv/bin/python make.py
 輸出：data.json、pos.bin（int16 x,y,z µm × N）、c/<k>.bin（每組合一檔：uint32 M、uint32 索引[M]、uint8 放電率[M×格數]，單位 Q Hz）"""
 import os, sys, json, numpy as np
