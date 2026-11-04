@@ -111,7 +111,7 @@ RO = [("MBON11＋12 放電總和（嗅的讀出）", rate[T("MBON11") | T("MBON1
       ("巨纖維 DNp01（閃）", grp_mean(T("DNp01")), 2, "次/秒")]
 ro = np.stack([r[1] for r in RO], 1)       # (K, 4, NB)
 
-data = {"bin_ms": bin_ms, "warm_ms": warm_ms, "nbin": NB, "q": Q, "bbox": bbox,
+data = {"bin_ms": bin_ms, "warm_ms": warm_ms, "nbin": NB, "q": Q, "bbox": bbox, "conc": g["conc"].tolist(), "hz": g["hz"].tolist(),
         "tasks": [{"name": "嗅", "what": "聞 3-octanol（果蠅討厭的氣味）", "levels": [f"濃度 {x:g}" for x in g["conc"]]},
                   {"name": "追", "what": "右眼前方的小移動目標（刺激右側 LC10a）", "levels": [f"每顆 {x:g} 次/秒" for x in g["hz"]]},
                   {"name": "閃", "what": "逼近的黑影（刺激兩側 LC4、LPLC2）", "levels": [f"每顆 {x:g} 次/秒" for x in g["hz"]]}],

@@ -28,11 +28,51 @@ canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:
 .ro div{font-size:.86rem}
 .ro b{font-variant-numeric:tabular-nums}
 #loading{color:var(--muted);font-size:.9rem}
+#arena{height:460px;cursor:crosshair}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.hud{font-size:.86rem;font-variant-numeric:tabular-nums;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 14px;margin-top:6px}
+.hud b{font-weight:600}
+.mode{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
 @media (max-width:640px){.task{grid-template-columns:auto 1fr 7em}.task .what{grid-column:1/-1;order:5}}
 </style></head><body><div class="wrap">
 
 <div class="card">
+ <h2>0. 場地：果蠅自己走動，你來給刺激</h2>
+ <div class="tools">
+  <button id="tOdor">放氣味源（再點場地）</button><button id="tOdorX">拿走氣味</button>
+  <button id="tTgt">小目標：關</button>
+  <button id="tLoomL">黑影從左逼近</button><button id="tLoomR">黑影從右逼近</button>
+  <button id="tReset">果蠅放回中央</button>
+ </div>
+ <canvas id="arena" height="460"></canvas>
+ <div class="hud" id="hud"></div>
+ <div class="legend">
+ <p style="margin:4px 0">場地裡有三種刺激，對應三件工作：氣味源＝「嗅」，會動的小目標＝「追」，逼近的黑影＝「閃」（三件工作的說明見頁面最下方）。三種刺激各有「不給」和四級強度，共 5×5×5＝125 種組合，每種都事先用全腦模型模擬好。</p>
+ <ul style="margin:4px 0;padding-left:20px">
+ <li><b>模型給的</b>：兩個讀出神經元的放電次數：轉向指令 DNa02（右邊減左邊）和巨纖維 DNp01。手寫規則再把它們換成動作：DNa02 決定往哪轉、轉多快，巨纖維決定什麼時候跳開。嗅覺的讀出 MBON11＋12 只顯示數字，不影響動作。</li>
+ <li><b>讀模擬的哪一刻</b>：每段模擬是 1.5 秒，前 0.5 秒什麼都不給，後 1 秒給刺激；每 0.05 秒記一次（一「格」）。場地這樣讀：
+  <ul style="padding-left:18px">
+  <li>每一刻依「現在有哪些刺激、各多強」找出對應的組合。</li>
+  <li>組合出現的那一刻，對到模擬裡刺激開始的時間點（第 0.5 秒），之後照模擬的時間一格一格往下讀。</li>
+  <li>刺激持續超過 1 秒時，模擬已經讀完，就反覆播放刺激開始後 0.5–1 秒那一段，把它當成反應已經穩定的樣子。</li>
+  <li>組合一變（例如氣味濃度換一級，或目標從右邊移到左邊），就換成新組合，從它的刺激開始處重新讀。果蠅在兩級濃度的交界來回時，會一直重新開始。</li>
+  </ul></li>
+ <li><b>手寫的規則</b>（不是模型算的）：
+  <ul style="padding-left:18px">
+  <li>平常的閒逛：隨機小轉彎，碰到牆就轉回來。</li>
+  <li>轉向速度＝每秒 10 度 ×（DNa02 右減左的每秒放電次數），三種刺激都用這個換算；另外手設上限每秒 300 度。</li>
+  <li>巨纖維每秒放電超過 100 次就跳開，往黑影的反方向跳，會撞牆時反過來跳；跳完 2 秒內不再跳。</li>
+  </ul></li>
+ <li><b>氣味</b>：氣味源中心的濃度就是第 1 部分「嗅」拉桿的濃度，往外按距離遞減（鐘形分布），換成四級（0.25、0.5、1、2）之一：取當地濃度至少達到它 85% 的最高一級；比 0.25 的 85% 還低就算聞不到。3-octanol 雖然是果蠅不喜歡的氣味，但模型裡單有氣味時，左右兩顆 DNa02 的放電一樣，所以果蠅不會躲開它，只會改變「追」和「閃」的反應。</li>
+ <li><b>小目標</b>：在果蠅前方左右各 100 度以內就算看到；看到時的強度只看「追」的拉桿，和遠近、角度都無關；所以目標在右前方 10 度或 90 度，轉法一樣，只分左右，果蠅不會精確對準目標。在 100 度以外就等於沒給。模型只模擬了「右眼」看到目標的情形；目標在左邊時，把右邊的結果左右對調來用，所以果蠅會往左轉。</li>
+ <li><b>黑影</b>：逼近 1 秒，強度看「閃」的拉桿。模型裡的「閃」是兩隻眼睛一起刺激，所以黑影從左或從右，巨纖維的放電都一樣；黑影本身不會讓果蠅轉向，只決定跳不跳。</li>
+ </ul></div>
+</div>
+
+<div class="card">
  <h2>1. 選刺激（可任意組合、調強度）</h2>
+ <div class="mode"><span>第 2、3、4 部分顯示：</span><button id="mArena" class="on">跟著場地裡的果蠅</button><button id="mManual">手動選組合</button>
+ <span class="legend" style="margin:0">（跟著果蠅時，勾選框由場地決定，拉桿仍可調強度；氣味拉桿是氣味源中心的濃度）</span></div>
  <div id="tasks"></div>
  <div class="bar">
   <button id="play">▶ 播放</button>
@@ -75,7 +115,8 @@ let D, POS, N, level = [2, 2, 2], on = [true, true, true], bin = 0, playing = fa
 const cache = {}, css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TASKC = () => [css("--olf"), css("--trk"), css("--lom")];
 const cidx = (o, v, l) => (o + 1) * 25 + (v + 1) * 5 + (l + 1);
-const curLev = () => [0, 1, 2].map(i => on[i] ? level[i] : -1);
+let src = "arena", aLev = [-1, -1, -1];
+const curLev = () => src === "arena" ? aLev : [0, 1, 2].map(i => on[i] ? level[i] : -1);
 
 async function loadCond(k) {
   if (cache[k]) return cache[k];
@@ -97,8 +138,9 @@ function buildTasks() {
       <span class="what">${t.what}</span><input type="range" min="0" max="3" step="1" value="${level[i]}"><span class="val"></span>`;
     const cb = row.querySelector("input[type=checkbox]"), sl = row.querySelector("input[type=range]"), val = row.querySelector(".val");
     const upd = () => { val.textContent = on[i] ? t.levels[level[i]] : "（不給）"; sl.disabled = !on[i]; };
-    cb.onchange = () => { on[i] = cb.checked; upd(); refresh(); };
-    sl.oninput = () => { level[i] = +sl.value; upd(); refresh(); };
+    cb.onchange = () => { on[i] = cb.checked; setSrc("manual"); upd(); refresh(); };
+    T[i]._cb = cb;
+    sl.oninput = () => { level[i] = +sl.value; upd(); if (src === "manual") refresh(); };
     upd(); box.appendChild(row);
   });
 }
@@ -246,14 +288,142 @@ function status() {
 }
 function draw() { status(); drawBrain(); drawROcursor(); }
 let roT = 0; function drawROcursor() { clearTimeout(roT); roT = setTimeout(drawRO, 0); }
+/* ---------- 場地 ---------- */
+const MAXT = 300 * Math.PI / 180;   // 轉向上限每秒 300 度（手設）
+const arena = $("#arena"), actx = arena.getContext("2d");
+const A = {fly: null, odor: null, tgt: false, loom: null, placing: false, t: 0, k: -1, tOn: 0, jump: null, refr: 0, wander: 0, steer: 0, gf: 0, mbon: 0, side: 1, lastBin: -1};
+function setSrc(m) {
+  src = m; $("#mArena").classList.toggle("on", m === "arena"); $("#mManual").classList.toggle("on", m === "manual");
+  if (m === "arena") { playing = false; $("#play").textContent = "▶ 播放"; A.k = -1; }
+  D.tasks.forEach(t => t._cb && (t._cb.disabled = m === "arena"));
+  refresh();
+}
+function resetFly() { const w = arena.width, h = arena.height; A.fly = {x: w / 2, y: h / 2, th: -Math.PI / 2, legs: 0}; A.jump = null; }
+function arenaLevels() {
+  const w = arena.width, h = arena.height, f = A.fly, L = [-1, -1, -1];
+  if (A.odor) {                                   // 氣味：高斯分布，中心濃度＝拉桿
+    const d2 = (f.x - A.odor.x) ** 2 + (f.y - A.odor.y) ** 2, sg = 0.2 * Math.min(w, h) * 1.4;
+    const c = D.conc[level[0]] * Math.exp(-d2 / (2 * sg * sg));
+    for (let i = 0; i < 4; i++) if (c >= D.conc[i] * 0.85) L[0] = i;
+  }
+  A.tvis = false;
+  if (A.tgt) {
+    const p = tgtPos(), rx = p[0] - f.x, ry = p[1] - f.y, hx = Math.cos(f.th), hy = Math.sin(f.th);
+    const ang = Math.atan2(hx * ry - hy * rx, hx * rx + hy * ry);      // 正＝在果蠅右邊（畫面 y 向下）
+    if (Math.abs(ang) < 100 * Math.PI / 180 && Math.hypot(rx, ry) < 0.6 * Math.max(w, h)) { L[1] = level[1]; A.side = ang >= 0 ? 1 : -1; A.tvis = true; }
+  }
+  if (A.loom && A.t - A.loom.t0 < 1.0) L[2] = level[2]; else A.loom = null;
+  return L;
+}
+function tgtPos() { const w = arena.width, h = arena.height; return [w / 2 + 0.40 * w * Math.sin(0.21 * A.t), h / 2 + 0.36 * h * Math.sin(0.33 * A.t + 1.2)]; }
+function arenaStep(dt) {
+  if (!A.fly) resetFly();
+  const f = A.fly, w = arena.width, h = arena.height, d = devicePixelRatio;
+  A.t += dt;
+  const L = arenaLevels(), k = cidx(...L);
+  if (k !== A.k) { A.k = k; A.tOn = A.t; aLev = L; D.tasks.forEach((t, i) => t._cb && (t._cb.checked = L[i] >= 0)); refresh(); }
+  const b0 = D.warm_ms / D.bin_ms; let b = b0 + Math.floor((A.t - A.tOn) * 1000 / D.bin_ms);
+  if (b > D.nbin - 1) b = D.nbin - 10 + ((b - (D.nbin - 10)) % 10);    // 1 秒後：重複最後 0.5 秒（穩定期）
+  if (k === cidx(-1, -1, -1)) b = b0;
+  if (b !== bin) { bin = b; draw(); }
+  const ro = D.ro[k];
+  A.steer = ro[1][bin] * (L[1] >= 0 ? A.side : 1); A.gf = ro[3][bin]; A.mbon = ro[0][bin];
+  // 逃跑
+  A.refr -= dt;
+  if (A.loom && A.gf > 100 && A.refr <= 0 && !A.jump) {
+    const dir = f.th + (A.loom.side > 0 ? -Math.PI / 2 : Math.PI / 2);
+    let dx = Math.cos(dir), dy = Math.sin(dir); const L2 = 100 * d;
+    if (f.x + dx * L2 < 10 || f.x + dx * L2 > w - 10) dx = -dx;   // 會撞牆就反過來跳（手寫）
+    if (f.y + dy * L2 < 10 || f.y + dy * L2 > h - 10) dy = -dy;
+    A.jump = {t: 0, dx, dy}; A.refr = 2;
+  }
+  if (A.jump) {
+    A.jump.t += dt; const v = 520 * d * Math.max(0, 1 - A.jump.t / 0.3);
+    f.x += A.jump.dx * v * dt; f.y += A.jump.dy * v * dt;
+    if (A.jump.t > 0.3) A.jump = null;
+  } else {
+    A.wander += (-A.wander * 1.5 + (Math.random() - 0.5) * 9) * dt;             // 手寫閒逛
+    let turn = A.wander + Math.max(-MAXT, Math.min(MAXT, A.steer * 10 * Math.PI / 180));
+    const m = 30 * d, cx = w / 2 - f.x, cy = h / 2 - f.y;                       // 碰牆轉回（手寫）
+    if (f.x < m || f.y < m || f.x > w - m || f.y > h - m) {
+      const want = Math.atan2(cy, cx); let e = want - f.th; e = Math.atan2(Math.sin(e), Math.cos(e)); turn += 3 * e;
+    }
+    f.th += turn * dt;
+    const sp = 55 * d; f.x += Math.cos(f.th) * sp * dt; f.y += Math.sin(f.th) * sp * dt; f.legs += dt * 14;
+  }
+  f.x = Math.max(4, Math.min(w - 4, f.x)); f.y = Math.max(4, Math.min(h - 4, f.y));
+  drawArena(L);
+}
+function drawFly(f) {
+  const c = actx, d = devicePixelRatio, s = 2.0 * d;
+  c.save(); c.translate(f.x, f.y); c.rotate(f.th + Math.PI / 2); c.scale(s, s);
+  c.strokeStyle = "#3a2c1c"; c.lineWidth = 1.2;
+  for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) {                  // 腳
+    const ph = Math.sin(f.legs + i * 2.1 + (sd > 0 ? Math.PI : 0)) * 3;
+    c.beginPath(); c.moveTo(sd * 3, -2 + i * 4); c.lineTo(sd * 10, -6 + i * 7 + ph); c.stroke();
+  }
+  c.fillStyle = "rgba(190,215,235,.7)"; c.strokeStyle = "rgba(90,110,130,.6)";
+  for (const sd of [-1, 1]) { c.beginPath(); c.ellipse(sd * 5, 6, 4, 10, sd * 0.35, 0, 7); c.fill(); c.stroke(); }   // 翅
+  c.fillStyle = "#7a5a32"; c.beginPath(); c.ellipse(0, 7, 4, 8, 0, 0, 7); c.fill();                                  // 腹
+  c.fillStyle = "#5e4426"; c.beginPath(); c.ellipse(0, -2, 4.5, 4.5, 0, 0, 7); c.fill();                             // 胸
+  c.fillStyle = "#4a3520"; c.beginPath(); c.arc(0, -8, 3.3, 0, 7); c.fill();                                          // 頭
+  c.fillStyle = "#c0301e"; c.beginPath(); c.arc(-2.6, -9, 1.8, 0, 7); c.arc(2.6, -9, 1.8, 0, 7); c.fill();           // 紅眼
+  c.restore();
+}
+function drawArena(L) {
+  const c = actx, w = arena.width, h = arena.height, d = devicePixelRatio, f = A.fly;
+  c.clearRect(0, 0, w, h);
+  if (A.odor) {
+    const sg = 0.2 * Math.min(w, h) * 1.4, g = c.createRadialGradient(A.odor.x, A.odor.y, 0, A.odor.x, A.odor.y, 2.6 * sg);
+    g.addColorStop(0, "rgba(46,158,91,.55)"); g.addColorStop(1, "rgba(46,158,91,0)");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = css("--olf"); c.beginPath(); c.arc(A.odor.x, A.odor.y, 6 * d, 0, 7); c.fill();
+    c.font = `${12 * d}px system-ui`; c.textAlign = "center"; c.fillText("3-octanol", A.odor.x, A.odor.y - 10 * d);
+  }
+  if (A.tgt) {
+    const p = tgtPos(); c.fillStyle = "#222"; c.beginPath(); c.arc(p[0], p[1], 5 * d, 0, 7); c.fill();
+    if (A.tvis) { c.strokeStyle = css("--trk"); c.setLineDash([4 * d, 4 * d]); c.lineWidth = 1.5 * d; c.beginPath(); c.moveTo(f.x, f.y); c.lineTo(p[0], p[1]); c.stroke(); c.setLineDash([]); }
+  }
+  if (A.loom) {
+    const u = (A.t - A.loom.t0) / 1.0, dir = f.th + (A.loom.side > 0 ? Math.PI / 2 : -Math.PI / 2);
+    const ox = A.loom.x0 ?? (A.loom.x0 = f.x + Math.cos(dir) * 70 * d), oy = A.loom.y0 ?? (A.loom.y0 = f.y + Math.sin(dir) * 70 * d);
+    c.fillStyle = `rgba(20,10,30,${0.25 + 0.55 * u})`; c.beginPath(); c.arc(ox, oy, (6 + 60 * u * u) * d, 0, 7); c.fill();
+  }
+  drawFly(f);
+  if (A.jump) { c.fillStyle = css("--lom"); c.font = `bold ${16 * d}px system-ui`; c.textAlign = "center"; c.fillText("跳開！（巨纖維每秒超過 100 次）", f.x, f.y - 28 * d); }
+  if (A.placing) { c.fillStyle = css("--olf"); c.font = `${14 * d}px system-ui`; c.textAlign = "left"; c.fillText("點場地放氣味源", 10 * d, 20 * d); }
+  const lab = ["嗅", "追", "閃"], st = L.map((v, i) => v < 0 ? null : `${lab[i]}（${D.tasks[i].levels[v]}${i === 1 ? (A.side > 0 ? "，在右邊" : "，在左邊") : ""}）`).filter(Boolean);
+  const turn = Math.max(-MAXT, Math.min(MAXT, A.steer * 10 * Math.PI / 180)) * 180 / Math.PI;
+  $("#hud").innerHTML = `<div>現在的刺激：<b>${st.length ? st.join("＋") : "沒有"}</b></div>
+    <div>轉向指令 DNa02 右減左：<b>${A.steer.toFixed(1)}</b> 次/秒 → ${Math.abs(turn) < 1 ? "不轉" : (turn > 0 ? "往右轉 " : "往左轉 ") + Math.abs(turn).toFixed(0) + " 度/秒"}</div>
+    <div>巨纖維 DNp01：<b>${A.gf.toFixed(0)}</b> 次/秒${A.gf > 100 ? "（超過 100：逃跑）" : ""}</div>
+    <div>MBON11＋12（嗅的讀出，6 顆加總）：<b>${A.mbon.toFixed(0)}</b> 次/秒（和只聞氣味時比，看有沒有被另外兩件事改變）</div>`;
+}
+function arenaSetup() {
+  arena.addEventListener("click", e => {
+    if (!A.placing) return; const r = arena.getBoundingClientRect();
+    A.odor = {x: (e.clientX - r.left) * devicePixelRatio, y: (e.clientY - r.top) * devicePixelRatio}; A.placing = false;
+  });
+  $("#tOdor").onclick = () => { A.placing = true; };
+  $("#tOdorX").onclick = () => { A.odor = null; };
+  $("#tTgt").onclick = () => { A.tgt = !A.tgt; $("#tTgt").textContent = "小目標：" + (A.tgt ? "開" : "關"); $("#tTgt").classList.toggle("on", A.tgt); };
+  $("#tLoomL").onclick = () => { A.loom = {t0: A.t, side: -1}; };
+  $("#tLoomR").onclick = () => { A.loom = {t0: A.t, side: 1}; };
+  $("#tReset").onclick = resetFly;
+  $("#mArena").onclick = () => setSrc("arena"); $("#mManual").onclick = () => { setSrc("manual"); playing = true; $("#play").textContent = "❚❚ 暫停"; };
+}
+
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
-  if (playing) { accum += dt * speed * 1000 / D.bin_ms * 0.18; if (accum >= 1) { accum = 0; bin = (bin + 1) % D.nbin; draw(); } }
+  if (src === "arena" && D) arenaStep(dt);
+  else if (playing) { accum += dt * speed * 1000 / D.bin_ms * 0.18; if (accum >= 1) { accum = 0; bin = (bin + 1) % D.nbin; draw(); } }
   if (D) drawNet(playing ? dt : 0);
   requestAnimationFrame(frame);
 }
 function resize() {
-  for (const c of [net, brain]) { const h = +c.getAttribute("height"); c.width = c.clientWidth * devicePixelRatio; c.height = h * devicePixelRatio; c.style.height = c.height / devicePixelRatio + "px"; }
+  const fx = A.fly ? A.fly.x / arena.width : 0.5, fy = A.fly ? A.fly.y / arena.height : 0.5;
+  for (const c of [net, brain, arena]) { const h = +c.getAttribute("height"); c.width = c.clientWidth * devicePixelRatio; c.height = h * devicePixelRatio; c.style.height = c.height / devicePixelRatio + "px"; }
+  if (A.fly) { A.fly.x = fx * arena.width; A.fly.y = fy * arena.height; }
   if (D) { setProj(); draw(); }
 }
 async function main() {
@@ -263,13 +433,15 @@ async function main() {
   $("#nn").textContent = N.toLocaleString(); $("#tslider").max = D.nbin - 1;
   bin = D.warm_ms / D.bin_ms + 4;
   buildTasks(); blegend(); resize();
-  $("#play").onclick = () => { playing = !playing; $("#play").textContent = playing ? "❚❚ 暫停" : "▶ 播放"; };
+  arenaSetup();
+  $("#play").onclick = () => { if (src === "arena") setSrc("manual"); playing = !playing; $("#play").textContent = playing ? "❚❚ 暫停" : "▶ 播放"; };
   $$("[data-sp]").forEach(b => b.onclick = () => { speed = +b.dataset.sp; $$("[data-sp]").forEach(x => x.classList.toggle("on", x === b)); });
   $$("[data-view]").forEach(b => b.onclick = () => { view = b.dataset.view; $$("[data-view]").forEach(x => x.classList.toggle("on", x === b)); setProj(); drawBrain(); });
   $$("[data-mode]").forEach(b => b.onclick = () => { mode = b.dataset.mode; $$("[data-mode]").forEach(x => x.classList.toggle("on", x === b)); blegend(); refresh(); });
-  $("#tslider").oninput = e => { bin = +e.target.value; draw(); };
+  $("#tslider").oninput = e => { if (src === "arena") setSrc("manual"); bin = +e.target.value; draw(); };
   window.addEventListener("resize", resize);
-  await refresh(); playing = true; $("#play").textContent = "❚❚ 暫停";
+  resetFly(); A.tgt = true; $("#tTgt").textContent = "小目標：開"; $("#tTgt").classList.add("on");
+  setSrc("arena");
   requestAnimationFrame(frame);
 }
 main();
