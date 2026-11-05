@@ -185,7 +185,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 每顆神經元都有<b>骨架</b>：把神經元的形狀描成一串點和連線，像一棵樹，從胞體（細胞本體）出發，一路分岔到每個末端。兩份電子顯微鏡資料另有註解：大類（superclass，例如感覺、運動）、細胞型別、胞體位置；它們也有每個突觸的位置，但纖維版完全不用。</li>
 <li><b>分枝點</b>：骨架上一條線分成兩條以上的地方。從分枝點岔出去、不在主線上的那一整枝叫<b>側枝</b>。</li>
 <li><b>腹神經索</b>：胸腹部的神經組織，相當於脊髓；MaleCNS 把它分成 23 區。</li>
-<li><b>腦區劃分</b>：MaleCNS 用<b>正式 80 區</b>（資料發布時附的官方腦區）另加腹神經索 23 區，實際是 80＋23 區；MaleCNS 另跑一套<b>密度模板 160 區</b>（同事只依突觸密度切出的 160 塊，加同樣的腹神經索 23 區，共 183 區；模板是 5 µm 方格，鋪到 1 µm 標籤格時用兩種偏移各試一次，取與官方區吻合較好者）；FlyWire 與 FlyCircuit 都用 <b>Ito 75 區</b>（Ito 等人 2014 年定的果蠅腦區命名，實驗室先前已把它對齊到這兩份資料）。三份資料都放在同一個座標框裡，整個空間切成邊長 1 µm 的立方格，每一格標上它屬於哪一區（本頁說「格」時，除非另外註明，都是這種 1 µm 格）。區與區之間有一些沒有標籤的縫隙，稱為<b>分區外</b>；Ito 75 區沒有收最外側的視網膜板（LA），所以 FlyWire 的視網膜板也算分區外。</li>
+<li><b>腦區劃分</b>：MaleCNS 用<b>正式 80 區</b>（資料發布時附的官方腦區）另加腹神經索 23 區，實際是 80＋23 區；MaleCNS 另跑一套<b>密度模板 160 區</b>（同事只依突觸密度切出的 160 塊，加同樣的腹神經索 23 區，共 183 區；模板是 5 µm 方格，鋪到 1 µm 標籤格時用兩種偏移各試一次，取與官方區吻合較好者）；FlyWire 與 FlyCircuit 都用 <b>Ito 75 區</b>（Ito 等人 2014 年定的果蠅腦區命名，實驗室先前已把它對齊到這兩份資料）。FlyCircuit 另跑一套 <b>Chiang 2011 的 55 區</b>（FlyCircuit 資料庫發表時自己的腦區劃分，把公開的 3D 腦區外形（mesh）轉成和其他分區同一座標框的格子標籤，也就是每個 1 µm 格標上它落在哪個 mesh 裡；區名與 Ito 的對照見「結果說明」最後）。<b>※ 這套分區有一條規則例外</b>：mesh 之間縫很大，只對它拿掉第 2.1 節的參與資格「分支 80% 落在有標籤的組織裡」，其他四套分區照舊；理由見「結果說明」。三份資料都放在同一個座標框裡，整個空間切成邊長 1 µm 的立方格，每一格標上它屬於哪一區（本頁說「格」時，除非另外註明，都是這種 1 µm 格）。區與區之間有一些沒有標籤的縫隙，稱為<b>分區外</b>；Ito 75 區沒有收最外側的視網膜板（LA），所以 FlyWire 的視網膜板也算分區外。</li>
 <li><b>局部處理單元（LPU）</b>：Chiang 等人 2011 年的定義——擁有自己一群局部神經元、而且有神經束與外界相連的腦區。<b>hub</b>：沒有自己的局部神經元、只是神經束端點的區。實際判定時，「一群」寫成「至少 10 顆」（第 2.4 節）：LN 不到 10 顆的區就當成沒有自己的 LN 族群；神經束在第 5 節指令 12 算，用來區分 hub 與「兩者皆非」（LN 不到 10 顆、也沒有神經束的區），以及判定切出來的子區（第 6 節）。整區是不是 LPU 則只看 LN 數、不另外檢查神經束，這是沿用 A1 管線的做法。</li>
 <li><b>纖維與突觸</b>：本頁說的「纖維」就是骨架上的線段，也就是神經元的分支本身；<b>突觸</b>是神經元之間傳遞訊號的接點，在資料裡是一個個點座標，只有電子顯微鏡資料才有。</li>
 <li><b>密度</b>：把一區裡所有 LN 的纖維放進三維格子，數每一格有幾顆 LN 經過，就是這一區的纖維密度（第 5 節）。密度高的地方聚成幾團，就說這一區「分成幾團」。<b>A1 管線</b>是實驗室把 Chiang 2011 定義寫成的程式（第 5 節）；<b>讀法 A</b> 是把切分結果數成最終 LPU 清單的方法（第 6 節）。</li>
@@ -206,7 +206,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 </table>
 <p><b>FlyCircuit</b> 沒有大類註解，也沒有標記胞體在中樞外或位置不明的神經元，所以 28,573 顆全部留下。這是已知限制：FlyCircuit 裡若有感覺或運動神經元，會跟其他神經元一起參與判定。</p>
 <p>不另設最短骨架長度（MaleCNS 整顆骨架短於 100 µm 的只有 5 顆，全是完整的小型視葉神經元，不是碎片；視葉是眼睛後方處理視覺的大區塊）。</p>
-<p>另外，神經元扣掉主幹後的分支（第 2.2 節）要有 <b>80% 的長度落在有標籤的組織裡</b>（哪一區都可以）。這一步排掉的與最後參與判定的：MaleCNS 19,189 顆、剩 116,309 顆；FlyWire 5,431 顆、剩 112,686 顆；FlyCircuit 3,872 顆、剩 24,701 顆。纖維比突觸更常經過縫隙（例如區與區之間的神經纖維通道），所以 MaleCNS 這一步排掉的比突觸版多（突觸版排掉 1,991 顆）。</p>
+<p>另外，神經元扣掉主幹後的分支（第 2.2 節）要有 <b>80% 的長度落在有標籤的組織裡</b>（哪一區都可以）。這一步排掉的與最後參與判定的：MaleCNS 19,189 顆、剩 116,309 顆；FlyWire 5,431 顆、剩 112,686 顆；FlyCircuit 3,872 顆、剩 24,701 顆。<b>※ 例外：FlyCircuit × Chiang 55 區不套這一條</b>（2026-11-06 決定）。Chiang 的 mesh 區與區之間縫很大（FlyCircuit 骨架點只有 68% 落在有標籤的格裡，Ito 75 區是 88%），這條規則會排掉 16,093 顆，以嗅葉為主區的 1,985 顆只有 2 顆過得了；拿掉之後只排掉 7 顆沒有任何分支落在分區內的，28,566 顆參與。另外兩條對 Chiang 分區沒有改：份額的分母只算落在有標籤腦區裡的分支，分區外（縫裡）的分支不算進分母、也不算進任何一區（第 2.3 節）；reach 量分支伸出家區表面最遠幾 µm，縫裡的分支也算在內（第 2.4 節）。纖維比突觸更常經過縫隙（例如區與區之間的神經纖維通道），所以 MaleCNS 這一步排掉的比突觸版多（突觸版排掉 1,991 顆）。</p>
 
 <h2>2. 局部神經元（LN）與「家」</h2>
 <h3>2.1 份額：分支長度</h3>
@@ -223,10 +223,10 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <li><b>進入點</b>：骨架上第一個落在主腦區裡的點（沿骨架離胞體最近的那一個）。</li>
 <li><b>切點</b>：從胞體往進入點走的路上，第一個「有側枝的骨架伸進別區」的分枝點。<b>別區</b>指主腦區以外、有標籤的區（分區外的縫隙不算）；伸進去多短都算。找不到這種分枝點，就切在進入點。</li>
 <li>胞體到切點這一段是<b>主幹</b>，扣掉。掛在主幹上的側枝：只要有一段落在主腦區，就整枝保留、算進分支；其餘的跟主幹一起扣掉。切點之後的全部都算分支。</li>
-<li>用剩下的分支重算各區份額。如果分支最長的區換了一個，就用新的區當主腦區，從第 1 步再做一次，直到主腦區不再改變（MaleCNS 135,498 顆裡只有 89 顆需要做第二次）。少數神經元會在兩區之間來回跳（MaleCNS 7 顆、FlyWire 3 顆、FlyCircuit 6 顆），取份額較高的那一個。</li>
+<li>用剩下的分支重算各區份額。如果分支最長的區換了一個，就用新的區當主腦區，從第 1 步再做一次，直到主腦區不再改變（MaleCNS 135,498 顆裡只有 89 顆需要做第二次）。少數神經元會在兩區之間來回跳（MaleCNS 7 顆、FlyWire 3 顆、FlyCircuit 6 顆，Chiang 55 區 1 顆），取份額較高的那一個。</li>
 </ol>
 <p><b>例</b>：胞體在 A 區外 100 µm，主幹往 A 走。途中 60 µm 處分出一枝伸進 B 區：切點就在這個分枝點，前 60 µm 扣掉，之後的 40 µm 主幹和那條伸進 B 的側枝都算分支。如果那條側枝沒有伸進任何別區，切點就落在進入點，整段 100 µm 主幹都扣掉；如果那條側枝繞回伸進了 A 區，它雖然掛在被扣掉的主幹上，仍然整枝保留、算進 A 的份額。</p>
-<p><b>胞體上的短線</b>：電子顯微鏡骨架常在胞體上描出幾條放射狀的短線（重建胞體時留下的），胞體若緊貼別區，這些短線會碰到別區，讓切點落在胞體上、整條主幹都沒扣掉。所以<b>從胞體直接長出、本身沒有任何分枝點的枝，不能當切點的理由</b>。抽樣檢查從胞體直接長出的枝時，短於 10 µm 的 128 條裡只有 1 條有分枝點（其餘都是會被這條規則略過的短線），長於 90 µm、真的伸進別區的胞體分枝則全部有分枝點，所以這條規則不需要長度參數。因為這條規則而略過胞體上短線的神經元，MaleCNS 有 2,679 顆、FlyWire 1,561 顆、FlyCircuit 68 顆。已知限制：少數骨架的起點不在胞體上（骨架斷成好幾段，起點落在別段），這條規則就管不到。</p>
+<p><b>胞體上的短線</b>：電子顯微鏡骨架常在胞體上描出幾條放射狀的短線（重建胞體時留下的），胞體若緊貼別區，這些短線會碰到別區，讓切點落在胞體上、整條主幹都沒扣掉。所以<b>從胞體直接長出、本身沒有任何分枝點的枝，不能當切點的理由</b>。抽樣檢查從胞體直接長出的枝時，短於 10 µm 的 128 條裡只有 1 條有分枝點（其餘都是會被這條規則略過的短線），長於 90 µm、真的伸進別區的胞體分枝則全部有分枝點，所以這條規則不需要長度參數。因為這條規則而略過胞體上短線的神經元，MaleCNS 有 2,679 顆、FlyWire 1,561 顆、FlyCircuit 68 顆（Chiang 55 區 58 顆）。已知限制：少數骨架的起點不在胞體上（骨架斷成好幾段，起點落在別段），這條規則就管不到。</p>
 <p>3D 檢視裡畫的 LN 骨架，就是扣掉主幹之後算份額的那部分，所以有些骨架看起來從分枝點開始、和胞體斷開，這是刻意的。</p>
 
 <h3>2.3 reach：分支不能伸出去太遠</h3>
@@ -313,9 +313,9 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <section class="page" id="p-about"><div class="doc" id="aboutDoc">
 <!--ABOUT-->
 <h2>結果說明</h2>
-<p>這個網頁展示實驗室「纖維版」（內部代號 A1_fib）的計算成果：只看神經元骨架的長度、完全不用突觸，把三份果蠅資料的腦區各自判出局部處理單元（LPU）。三份資料是 <b>MaleCNS v1.0</b>（雄果蠅腦＋腹神經索，腹神經索在胸腹部，相當於脊髓；腦用正式 80 區，腹神經索另分 23 區）、<b>FlyWire v783</b>（雌果蠅腦，用 Ito 75 區）與 <b>FlyCircuit</b>（光學顯微鏡逐顆拍攝的神經元，用 Ito 75 區）。MaleCNS 另外多跑一套分區：<b>密度模板 160 區</b>（同事 2026-11-03 只依突觸密度、不看任何已知腦區邊界切出的 160 塊；腹神經索同樣另分 23 區），用來看「換一套切法，判出的 LPU 會不會差很多」。四套分區 × 兩個 reach 門檻（局部神經元的分支最遠可伸出自己的區幾 µm，見下方名詞）共 8 組，於 2026-11-05 跑完，每組都通過預先寫好的自動核對（核對程式有沒有跑對，不判斷生物上的對錯）；只有 160 區 reach 10 那一組，10 項裡有 1 項沒跑到（它檢查的是一張示範用圖表的參數，不是結果），其餘 9 項通過。reach 30 µm 這次沒有重跑，所以先不提供。</p>
+<p>這個網頁展示實驗室「纖維版」（內部代號 A1_fib）的計算成果：只看神經元骨架的長度、完全不用突觸，把三份果蠅資料的腦區各自判出局部處理單元（LPU）。三份資料是 <b>MaleCNS v1.0</b>（雄果蠅腦＋腹神經索，腹神經索在胸腹部，相當於脊髓；腦用正式 80 區，腹神經索另分 23 區）、<b>FlyWire v783</b>（雌果蠅腦，用 Ito 75 區）與 <b>FlyCircuit</b>（光學顯微鏡逐顆拍攝的神經元，用 Ito 75 區）。MaleCNS 另外多跑一套分區：<b>密度模板 160 區</b>（同事 2026-11-03 只依突觸密度、不看任何已知腦區邊界切出的 160 塊；腹神經索同樣另分 23 區），用來看「換一套切法，判出的 LPU 會不會差很多」。FlyCircuit 也多跑一套分區：<b>Chiang 2011 的 55 區</b>（FlyCircuit 資料庫 2011 年發表時自己的腦區劃分，區名和 Ito 不同；見下方「FlyCircuit：Chiang 55 區和 Ito 75 區比」）。<b>※ 注意：Chiang 55 區的分區檔（公開的 mesh）區與區之間縫很大，只對這套分區拿掉參與資格「扣掉主幹後的分支要有 80% 落在有標籤的組織裡（有標籤＝落在某個腦區的範圍內）」這一條，其他四套分區照舊；網頁上這套分區的名稱後都加了「※」提醒。</b>五套分區 × 兩個 reach 門檻（局部神經元的分支最遠可伸出自己的區幾 µm，見下方名詞）共 10 組，於 2026-11-05、06 跑完，每組都通過預先寫好的自動核對（核對程式有沒有跑對，不判斷生物上的對錯）；只有 160 區 reach 10 那一組 10 項裡有 1 項沒跑到，Chiang 55 區 reach 10 的兩輪計算（切分前一輪、切分後一輪，每輪都核對一次）也各有 1 項沒跑到（都是檢查示範用圖表的參數，不是結果），其餘項目通過。reach 30 µm 這次沒有重跑，所以先不提供。</p>
 <div class="note"><b>本頁用到的名詞</b>（完整定義見「判定規則」分頁）<br>
-<b>骨架</b>：把一顆神經元的形狀描成一串點與連線，像一棵從胞體（細胞本體）長出來、一路分岔的樹。<b>纖維份額</b>：一顆神經元的骨架總長，有多少比例落在某區。量之前先扣掉<b>主幹</b>，也就是從胞體一路通到神經元主要工作區的那段「電線」，因為它只是路過、不在那些區工作。<br>
+<b>骨架</b>：把一顆神經元的形狀描成一串點與連線，像一棵從胞體（細胞本體）長出來、一路分岔的樹。<b>纖維份額</b>：一顆神經元落在有標籤腦區裡的骨架長度，有多少比例落在某一區（落在分區外的部分不算進分母、也不算進任何一區）。量之前先扣掉<b>主幹</b>，也就是從胞體一路通到神經元主要工作區的那段「電線」，因為它只是路過、不在那些區工作。<br>
 <b>LN（局部神經元）</b>：扣掉主幹後，纖維至少 80% 落在同一區、分支也沒伸出去太遠的神經元；那一區是它的<b>家</b>。<b>LPU（局部處理單元）</b>：有至少 10 顆自己的 LN 的區，是腦裡相對獨立的處理單位（整區判定只看 LN 數；切出來的子區另外要有神經束才算）。<b>hub</b>：LN 不到 10 顆、但有長程<b>神經束</b>（至少 3 顆神經元走同一條路徑連接兩區）的區，像轉運站。<b>兩者皆非</b>：LN 不到 10 顆、也沒有神經束。<br>
 <b>reach</b>：LN 的分支最遠可以伸出家幾 µm；門檻越寬（數字越大），越多神經元算得上 LN。本頁以 20 µm 為主。<br>
 <b>併區與聯集</b>：有些神經元的纖維平均分散在幾個相連的區，每一區都不到 80%，這幾區的 LN 於是都不到 10 顆（併區這一步把 LN 不到 10 顆的區都當 hub 看待）。如果有至少 10 顆神經元剛好分散在同一組相連的 hub 裡（把它在各區的份額由大到小加到 80%，用到的正好是這組區），這組區就併成一區，稱<b>聯集</b>，再當一個區重新判定。併好的聯集還可以一輪一輪收進鄰近的 hub：只要有 10 顆以上神經元剛好分散在「聯集＋這一區」裡（還有其他條件，見判定規則 4.4）。聯集的<b>代表名</b>取成員中在分區清單上編號最小的那一區，不一定是最重要的區。<br>
@@ -325,13 +325,14 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 
 <h3>怎麼看 3D 檢視</h3>
 <ul>
-<li>左上選資料與分區（MaleCNS 正式 80 區、MaleCNS 密度模板 160 區、FlyWire Ito 75 區、FlyCircuit Ito 75 區）與 reach 門檻（10、20 µm）。三份資料各自的腦外形不同，換資料時外框會跟著換。</li>
+<li>左上選資料與分區（MaleCNS 正式 80 區、MaleCNS 密度模板 160 區、FlyWire Ito 75 區、FlyCircuit Ito 75 區、FlyCircuit Chiang 55 區※）與 reach 門檻（10、20 µm）。三份資料各自的腦外形不同，換資料時外框會跟著換。</li>
 <li>計數方式：成功切開的區，每個子區各算 1 個 LPU；沒切開的區整區算 1 個。</li>
 <li>上色方式有三種，用左側「上色方式」切換。<b>依區上色</b>（預設）：每個 LPU 一種顏色，方便分出區與區的邊界。<b>依判定上色</b>：藍色＝單一 LPU（密度上只有一團）；綠色＝密度上有好幾團、但沒有成功切開的區，整區算 1 個 LPU。成功切開的子區與聯集，也照它自己的判定上色（一團藍、好幾團但沒切開綠）。勾「畫出 hub 與兩者皆非」可看到其餘的區（淡灰）。</li>
 <li><b>原腦區</b>（第三種上色方式）：改畫每份資料官方分區原本的區（還沒併、也還沒切），每區一種顏色。和「依區上色」來回切換，就能看出哪幾個原腦區被併成一個聯集、哪個原腦區被切成幾塊。這個模式下點一個原腦區，會選取它大部分體積所在的最終區。</li>
 <li>點一個區：右側顯示它的判定、LN 數、神經束數、切分結果、併區成員與 LN 的細胞型別，並在 3D 中畫出隨機抽樣的最多 20 顆 LN 骨架；卡片上的「全部 N 顆」按鈕可改畫這一區全部的 LN（大區要多等幾秒）。畫出的骨架已扣掉主幹，只畫算進份額的部分。</li>
 <li>從聯集切出來的塊，卡片上寫的是「切開前的聯集成員」：這是整個聯集的成員，所以同一個聯集切出的塊會顯示同一份清單。每一塊實際涵蓋哪些區，要看下一點的「由哪些原腦區組成」。</li>
 <li>密度模板 160 區的區名寫成「D 編號＋同事標的主要官方區」，例如 D111_AVLP_L 是第 111 塊、突觸最多落在官方的 AVLP_L；這只是標記，不表示它和官方的 AVLP_L 範圍相同。它的卡片多一張「對應的官方 80 區」表，「腦區對應」分頁的 160 區那一欄也以官方 80 區為索引。</li>
+<li>FlyCircuit Chiang 55 區※的區名是 Chiang 2011 年論文的縮寫，和 Ito 不同：Med＝ME、Lob＝LO、LoP＝LOP、Cal＝蕈狀體萼（MB_CA）、MB＝蕈狀體其餘部分（柄與葉一整塊）、SOG＝GNG（但分左右）、PCB＝PB、Nod＝NO、OPTU＝AOTU、Lat Tri＝BU；VLP 在 Chiang 是一整塊，Ito 把同一塊地方分成前（AVLP）、後（PVLP）兩區，所以沒有一對一的對應（本頁的切分步驟後來把 Chiang 的 VLP 切成背、腹兩塊，切法又和 Ito 的前後不同）；其餘區（CCP、CMP、CVLP、DLP、DMP、FSPP、IDFP、IDLP、OG、PAN、SDFP、SPP、VMP）各自橫跨幾個 Ito 區，對照表在本頁最後。點一個區之後右側的卡片（判定資訊）多一張「對應的 Ito 75 區」表，「腦區對應」分頁（每列一個原腦區、每欄一套分區的對照表）的 Chiang 那一欄以 Ito 75 區為索引：每列的 Ito 區，寫它落在 Chiang 結果的哪個最終區。「※」表示這套分區有一條規則例外（只對這套分區拿掉參與資格「扣掉主幹後的分支要有 80% 落在有標籤的組織裡」這一條，其他四套分區照舊），詳見下方。</li>
 <li>卡片下半部的「由哪些原腦區組成」列出這一區涵蓋的原腦區與比例，3D 圖中同時用彩色半透明外殼畫出這些原腦區（外殼顏色＝卡片這張小表裡區名前圓點的顏色）。「同一批原腦區在另外兩份資料」寫出這些原腦區在另外兩份資料最後落在哪一區，點區名可直接切換過去。三份資料的完整對照表在「腦區對應」分頁。</li>
 <li>FlyCircuit 沒有細胞型別，卡片改列每顆神經元的<b>驅動品系</b>（實驗時用來讓這顆神經元發光的基因工具名稱），可以當成粗略的來源標記。</li>
 <li>按住 Shift 再點（3D 圖或左側清單）可加選好幾區一起顯示，Shift＋點已選的區則取消它；不按 Shift 直接點一區，就回到只選這一區。多選時卡片上方列出全部已選的區，點名字換成顯示那一區，按 × 取消。</li>
@@ -347,7 +348,9 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <tr><td>MaleCNS（密度模板 160 區）</td><td class="num">37</td><td class="num">13</td><td class="num">1</td><td>共 9 個（這裡的區名都指「標成該官方區的 D 塊」，不是官方區本身）：(1) 8 塊：左蕈狀體的萼 2 塊、γ 葉 1 塊，加 EB 2 塊、ICL_L、VES_L、LAL_L 各 1 塊（代表名 D070_EB）；(2) 5 塊：PB 2 塊、SPS_L 2 塊、IB 1 塊；(3) 3 塊：SPS_R 2 塊、IB 1 塊；(4)–(8) 五個各 2 塊的聯集：LOP_L 一個、LOP_R 一個、GNG 兩個、AL_L 一個；(9) 腹神經索 IntTct、NTct、HTct</td></tr>
 <tr><td>FlyWire（Ito 75 區）</td><td class="num">27</td><td class="num">（這份資料沒有腹神經索）</td><td class="num">1</td><td>共 4 個：(1) 左蕈狀體 4 塊＋CRE_L、SCL_L、PLP_L、AOTU_L；(2) 右蕈狀體 4 塊＋ICL_R、CRE_R、SCL_R、PLP_R、AOTU_R；(3) SAD、AMMC_L、WED_L；(4) EB、LAL_L</td></tr>
 <tr><td>FlyCircuit（Ito 75 區）</td><td class="num">24</td><td class="num">（這份資料沒有腹神經索）</td><td class="num">1</td><td>共 4 個：(1) 左蕈狀體 4 塊＋ICL_L、SCL_L、CRE_L；(2) 右蕈狀體 4 塊＋ICL_R、SCL_R、EB；(3) 跨左右的大聯集 10 區：LAL_R、SAD、AMMC_L、AMMC_R、WED_L、WED_R、SPS_L、SPS_R、IPS_L、IPS_R；(4) PVLP_R、PLP_R</td></tr>
+<tr><td>FlyCircuit（Chiang 55 區）※</td><td class="num">29</td><td class="num">（這份資料沒有腹神經索）</td><td class="num">2</td><td>共 1 個：跨左右的 7 區 CCP_L、CCP_R、DMP_L、DMP_R、SPP_L、SPP_R、VMP_R（大致是 Ito 的 IB、ICL、LAL、SPS、VES、SCL、PLP 一帶）。蕈狀體沒有併：Chiang 把柄與葉算成一整塊 MB，它自己就有 10 顆以上 LN</td></tr>
 </table>
+<p class="small">※ FlyCircuit Chiang 55 區：只對這套分區拿掉參與資格「扣掉主幹後的分支要有 80% 落在有標籤的組織裡」這一條，其他四套分區照舊，理由見下方「FlyCircuit：Chiang 55 區和 Ito 75 區比」。</p>
 <p class="small">「切分輪數」是真的切開了東西的輪數（再下一輪什麼都切不開，就停）。兩個門檻的完整數字見「結果總表」分頁。</p>
 
 <p class="small">下表比較兩個 reach 門檻的結果。</p>
@@ -359,10 +362,12 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <tr><td>MaleCNS 密度模板 160 區：腹神經索 LPU</td><td class="num">11</td><td class="num">13</td></tr>
 <tr><td>FlyWire 腦 LPU</td><td class="num">24</td><td class="num">27</td></tr>
 <tr><td>FlyCircuit 腦 LPU</td><td class="num">22</td><td class="num">24</td></tr>
+<tr><td>FlyCircuit Chiang 55 區※：腦 LPU</td><td class="num">25</td><td class="num">29</td></tr>
 <tr><td>MaleCNS 併出的聯集數（含腹神經索 1 個）</td><td class="num">6（6）</td><td class="num">6（6）</td></tr>
 <tr><td>MaleCNS 密度模板 160 區併出的聯集數（含腹神經索 1 個）</td><td class="num">6</td><td class="num">9</td></tr>
 <tr><td>FlyWire 併出的聯集數</td><td class="num">4</td><td class="num">4</td></tr>
 <tr><td>FlyCircuit 併出的聯集數</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>FlyCircuit Chiang 55 區※併出的聯集數</td><td class="num">1</td><td class="num">1</td></tr>
 </table>
 <p class="small">括號內是突觸版（A1_syn 第二版）同一分區、同一門檻的數字。突觸版沒有做 FlyWire 與 FlyCircuit，所以那兩列沒有括號。</p>
 
@@ -374,6 +379,17 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <li><b>對半檢查擋下了 FlyCircuit 視葉（ME、LO）很可能是假的切分。</b>沒有這道檢查時，FlyCircuit 在 reach 20 有 40 個 LPU，比 FlyWire 的 27 個還多，但它的神經元總數（28,573 顆）只有 FlyWire（139,255 顆）的四分之一不到。多出來的主要是 ME_R、ME_L、LO_R、LO_L 被切成很多塊；這四區擋下後，FlyCircuit 是 24 個。這些切分很可能是神經元太少造成的：FlyCircuit 的 ME_R 只有 661 顆 LN，切成 8 塊；MaleCNS 的 ME_R 用全部 13,395 顆 LN 不會切，但隨機抽出 661 顆，也會切成 5–6 塊。</li>
 <li><b>另外兩份資料受對半檢查的影響很小。</b>FlyWire 的 LPU 數不變。MaleCNS 只有腹神經索的 LegNp_T3_L 改變：原本切成 2 塊，現在沒過檢查、整區算 1 個，所以 reach 20 的腹神經索 LPU 由 14 個變 13 個。</li>
 <li><b>反覆切分的效果</b>：MaleCNS 切兩輪，FlyWire 與 FlyCircuit 都只切一輪就停了。MaleCNS 在 reach 20 的第二輪，再切第一輪切出的 GNG、GNG.2 與 IB.2（IB 聯集切出的塊）。只有 GNG 成功，多出 GNG.r2c2 這 1 個 LPU；GNG.2 與 IB.2 切出的塊沒有全部成立，所以各自仍算 1 個。</li>
+</ul>
+
+<h3>FlyCircuit：Chiang 55 區和 Ito 75 區比</h3>
+<p><b>※ 規則例外與理由。</b>Chiang 55 區的分區檔是 FlyCircuit 公開的 55 個腦區 mesh（由 fruitflybrain/ffbo.lib 取得），區與區之間縫很大：FlyCircuit 全部骨架點只有 68% 落在有標籤的格裡（Ito 75 區是 88%），嗅葉 mesh 的體積只有 Ito 嗅葉的一半。判定規則 2.1 有一條參與資格：扣掉主幹後的分支要有 80% 的長度落在有標籤的組織裡，否則整顆不參與。這條規則的前提是「沒有標籤的地方就不是神經纖維網」（神經纖維網指神經元分支密集交織、在那裡處理訊號的腦組織，腦區就是神經纖維網分成的一塊塊），在 Chiang 分區不成立：縫裡其實也是神經纖維網，只是 mesh 沒畫到。照規則跑時，28,573 顆只剩 12,480 顆參與（Ito 分區 24,701 顆）。嗅葉受害最深：以嗅葉為主區（份額最大的區）的 1,985 顆神經元，分支落在有標籤格裡的比例中位數只有 0.46（左）與 0.41（右），達到 0.8 的只有 2 顆，嗅葉成了 0 顆 LN 的 hub，當時腦 LPU 是 22 個。因此 2026-11-06 決定<b>只對這套分區拿掉參與資格「扣掉主幹後的分支要有 80% 落在有標籤的組織裡」這一條，其他四套分區照舊</b>。另外兩條沒有改：(a) 份額的分母只算落在有標籤腦區裡的分支，縫裡的分支不算進分母、也不算進任何一區，所以一顆嗅葉神經元就算有一半分支在縫裡，只要有標籤的那部分 80% 在嗅葉，份額仍達 80%；(b) reach 量的是分支伸出家區表面最遠幾 µm，縫裡的分支也算在內，所以伸進縫裡太遠的神經元仍會被 reach 門檻擋掉。拿掉之後 28,566 顆參與（只排掉 7 顆沒有任何分支落在分區內的）。本頁所有 Chiang 55 區的數字都是拿掉之後的結果。</p>
+<ul>
+<li><b>腦 LPU 29 個（reach 20），Ito 75 區是 24 個；reach 10 是 25 對 22。</b>兩套分區各自成立的 LPU 一區一區對過，兩邊數量相同的有 20 個：嗅葉、外側角、視葉三區（Med／ME、Lob／LO、LoP／LOP）、SDFP／SMP，這六種都左右各 1 個（12 個）；PCB／PB（1 個）；VLP 一帶各 4 個（Chiang 的 VLP 左右各切 2 塊；Ito 的 AVLP_L 切 2 塊、AVLP_R、還有 PVLP_R 代表的「PVLP_R＋PLP_R」聯集）；蕈狀體與跨左右的大塊各 3 個（Chiang：MB_L、MB_R 兩個單區加 7 區聯集；Ito：左右蕈狀體聯集加跨左右大聯集）。其餘：Chiang 多 6 個（FB 多 1、SOG 多 1、EB 多 1、CVLP 多 2、VMP_L 多 1，VMP_L 是 10 顆 LN 剛好達標），Ito 多 1 個（CRE_R，11 顆；Chiang 沒有單獨對應 CRE 的區）；20＋9＝29、20＋4＝24，淨多 5 個。多出來的幾個分別是：扇形體 FB 切成 3 塊（第 1 輪切成 2 塊、第 2 輪再把第 1 塊切成 2 塊，兩輪對半檢查的一致程度 0.88、0.94，門檻是 0.54，1 表示兩半切法完全相同；Ito 分區只切成 2 塊）；VLP 左右都切成 2 塊（Ito 的 AVLP 只有左側切開、右側沒切）；EB 自己成 LPU（25 顆 LN；Ito 分區的 EB 併進右蕈狀體聯集，不另外算）；SOG 左右各成一個（Ito 的 GNG 是中線一塊，只算 1 個）；CVLP 左右各成一個（它橫跨 Ito 的 IPS、WED、PLP，這幾區在 Ito 分區的 LN 都不到 10 顆，被併進聯集裡）。PCB 兩套分區都是 LPU，但 LN 數差很多：Chiang 81 顆、Ito 的 PB 13 顆。原因是參與資格那條：Ito 分區有套它，而 PB 神經元的分支約有三分之一落在 Ito 分區外（落在有標籤格裡的比例中位數 0.64，離門檻 0.8 很遠；Ito 的 PB 也畫得偏小，Chiang 的 PCB mesh 有 47% 在 Ito 分區外），份額達 80% 的 113 顆裡只有 13 顆過得了參與資格。Chiang 分區不套這條，83 顆份額達 80% 的有 81 顆成為 LN，另外 2 顆被 reach 門檻擋掉。</li>
+<li><b>嗅葉仍然是 LPU，但 LN 少得多</b>：AL_R 68 顆、AL_L 103 顆（Ito 分區 535、567 顆）。拿掉參與資格後，嗅葉神經元還要過 reach 這一關：它們在 Ito 嗅葉範圍內、但在 Chiang 嗅葉 mesh 外的分支，離 mesh 表面常常超過 20 µm（份額達 80% 的嗅葉神經元，分支伸出 mesh 表面最遠的距離，中位數是 30 µm；reach 門檻比的就是這個距離）。</li>
+<li><b>蕈狀體沒有併區。</b>Chiang 把柄與葉算成一整塊 MB、萼另算 Cal。reach 20 時 MB_L、MB_R 各有 18、25 顆自己的 LN，已經不是 hub，而併區只在 hub 之間進行，所以萼（Cal 左右各 0 顆 LN）沒有和 MB 併起來；蕈狀體的主要神經元 Kenyon 細胞，纖維從萼一路穿到葉，在萼、MB 哪一區都不到 80%，所以不是任何區的 LN。reach 10 時 MB_L 的 LN 不到 10 顆，才和 Cal_L、IDFP_L 併成一個聯集（355 顆 LN）；這是 reach 10 唯一的聯集，7 區聯集在 reach 10 沒有併出來。Ito 分區把蕈狀體切成 4 塊，每塊的 LN 都不到 10 顆，所以 FlyWire 與 FlyCircuit（Ito 分區）都併成左右兩個聯集；MaleCNS 的 80 區切成 7 塊，情形相同。這是 Chiang 和 Ito 兩套分區最明顯的差別之一。</li>
+<li><b>跨左右的聯集</b>：reach 20 併出一個 7 區聯集 CCP、DMP、SPP 左右加 VMP_R（352 顆 LN），切分時切成 4 塊，但只有 2 塊有 10 顆以上 LN 且有神經束，沒有全部成立，所以這次切分不算、整個聯集算 1 個 LPU。Ito 分區的跨左右大聯集是 SAD、AMMC、WED、SPS、IPS 一帶，兩者位置不同。</li>
+<li><b>對半檢查擋下的</b>和 Ito 分區一樣集中在視葉：Med、Lob、LoP 左右六區都切不開（一致程度 0.35–0.537，要達到 0.54 才算過），另有 SOG_R、SDFP 左右、CVLP_L、VMP_L。Lat Tri（＝Ito 的 BU）左右都是兩者皆非，和 Ito 的 BU 相同。</li>
+<li><b>核對</b>：每個門檻的計算分成幾輪（切分前 1 輪，之後每切開一次再算 1 輪），每輪都核對一次。reach 20 共三輪（切分前、第 1 次切分後、第 2 次切分後），10 項全過；reach 10 共兩輪（只切了 1 次），各 9 項過、1 項沒跑。沒跑的那一項屬於一個只用來畫示範圖的步驟（固定拿右嗅葉做示範），它在 reach 10 時因為右嗅葉只有 37 顆 LN、抽樣抽不夠而停掉；判定結果由另一條不經過這個步驟的路徑算完，不受影響。拿掉參與資格之前的那次結果（reach 20、reach 10 的腦 LPU 都是 22 個）保留在主機 <code>skeleton/ref_fc55_w3/</code>。</li>
 </ul>
 
 <h3>密度模板 160 區：和正式 80 區比</h3>
@@ -401,6 +417,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <li><b>FlyCircuit 不能排除感覺與運動神經元。</b>MaleCNS 與 FlyWire 有大類註解，判定前先排除感覺、運動等神經元；FlyCircuit 沒有這種註解，只能全部留下；這會讓結果偏向哪個方向，還沒有評估。FlyCircuit 最後參與判定的神經元（排除之後剩下的）也比較少：24,701 顆，MaleCNS 是 116,309 顆、FlyWire 是 112,686 顆；而且 FlyCircuit 的神經元來自不同個體。</li>
 <li><b>FlyWire 與 FlyCircuit 沒有腹神經索</b>，只能比腦的部分。</li>
 <li><b>MaleCNS 用正式 80 區，另兩份用 Ito 75 區</b>，兩種分區的切法不同（例如 80 區把蕈狀體分成 7 塊、Ito 75 區分成 4 塊），所以三份資料的 LPU 數不能直接比大小。FlyWire 與 FlyCircuit 用同一套分區，可以直接比。</li>
+<li><b>FlyCircuit Chiang 55 區※有一條規則例外。</b>只對這套分區拿掉參與資格「扣掉主幹後的分支要有 80% 落在有標籤的組織裡」這一條，其他四套分區照舊（理由見上方「FlyCircuit：Chiang 55 區和 Ito 75 區比」）。這表示 Chiang 55 區和 Ito 75 區的比較，除了分區切法之外，還差了這一條規則。另外，Chiang mesh 蓋不到的縫裡的分支仍算進 reach（伸出家區多遠），所以嗅葉等 mesh 偏小的區，很多神經元被 reach 門檻擋掉，LN 數偏低。</li>
 <li><b>對半檢查的結果會受亂數影響。</b>檢查把 LN 隨機對半、重複 20 次，要至少 10 次兩半都切開；在這些都切開的次數裡，看兩半切法的一致程度（ARI，1＝完全相同，0＝跟亂分差不多），中位數要到 0.54 才算過。同一區換一組亂數，這個中位數可能差很多：MaleCNS reach 20 的右蕈狀體聯集一次 0.91（過）、另一次 0.24（沒過）；FlyWire reach 20 的 CRE_L（左蕈狀體聯集的代表名）一次 0.51（沒過）、另一次 0.78（過）。原因是 ARI 分成兩群：兩半切成相同塊數時約 0.7–1，其中一半少切幾塊時約 0.2，中位數取決於抽到幾次哪一種。本頁是用一組固定亂數算出的結果。把這次的 20 個 ARI 重新抽樣來估計，換亂數時會改變 LPU 數的主要是 FlyCircuit 的 LO_L、LO_R（兩個門檻；它們只切成 2 塊，各差 1 個）和 MaleCNS reach 10 的 GNG（它第一輪若沒過，最後的 4 塊就變成 1 個，差 3 個）；這只是粗估，實際不穩定的程度可能更大。上面兩個例子不影響 LPU 數，因為這兩個聯集切開後的塊不是全部成立，無論過不過都整區算 1 個。</li>
 <li><b>門檻 0.54 只用 MaleCNS 校準。</b>校準只用 MaleCNS、reach 20、第 1 輪。這份資料有 15 個腦區用全部 LN 時不會切，所以從這些區隨機抽 50、100、200 或 650 顆 LN 再切（LN 要夠多才抽，每種抽 10 份，共 350 份），切開的 175 份就當作假切分。每一份再做 20 次對半檢查：其中 174 份至少 10 次兩半都切開，各得到一個 ARI 中位數。門檻取這些分數的第 95 百分位，也就是約 95% 的假切分過不了。這 174 個分數全來自視葉（ME、LO、LOP 左右共 6 區），另外 9 區幾乎不會假切分，所以門檻用在視葉以外的區、FlyWire、FlyCircuit、reach 10 和第 2 輪以後，都屬於外推。</li>
 <li><b>LegNp_T3_L 可能被誤擋。</b>對半檢查有兩個條件，除了 ARI 達 0.54，還要 20 次裡至少 10 次兩半都切開。它只有 4 次都切開，所以沒過；但這 4 次的 ARI 中位數 0.73 高於門檻（只有 4 個值，參考性有限）。「至少 10 次」的意思是至少一半的次數切得開，這個標準是直接訂的、沒有校準；校準時 175 份假切分有 174 份滿足它，也就是假切分通常都切得開。LegNp_T3_L 不滿足這個條件，不能當作它是假切分的證據，所以它可能被誤擋。</li>
@@ -430,16 +447,56 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 </table>
 <p class="small">區名後綴 _L、_R 表示左、右側；沒有後綴的區（如 IB、FB、EB、SAD）跨中線只有一個。</p>
 
+<h3>Chiang 55 區的區名與 Ito 75 區的對應</h3>
+<p class="small">Chiang 等人 2011 年的 55 區（FlyCircuit 自己的劃分）。「對應的 Ito 75 區」是用兩套分區在同一座標框裡逐格比對算出來的：Chiang 這一區的體積有幾成落在哪些 Ito 區（左右兩側合寫成範圍；只列 5% 以上；沒落在任何 Ito 區的部分不列，所以百分比加起來不到 100%）。除了名稱不同，兩套分區的切法也不同：Chiang 的 MB 把柄與葉算成一整塊、萼另算；SOG 分左右；VLP 一整塊；CCP、DMP、VMP、CVLP 等各橫跨幾個 Ito 區。</p>
+<table>
+<tr><th>Chiang 縮寫</th><th>英文</th><th>中文</th><th>對應的 Ito 75 區（體積比例）</th></tr>
+<tr><td>AL</td><td>antennal lobe</td><td>嗅葉</td><td>AL 88–93%（Chiang 的 mesh 只有 Ito 嗅葉的一半大）</td></tr>
+<tr><td>AMMC</td><td>antennal mechanosensory and motor center</td><td>觸角機械感覺與運動中樞</td><td>SAD 42%、AMMC 27%、GNG 18%</td></tr>
+<tr><td>Cal</td><td>calyx</td><td>蕈狀體萼</td><td>MB_CA 81–90%</td></tr>
+<tr><td>CCP</td><td>caudalcentral protocerebrum</td><td>尾中央原腦</td><td>IB 69%、ATL 7–8%、SPS 7–8%</td></tr>
+<tr><td>CMP</td><td>caudalmedial protocerebrum</td><td>尾內側原腦</td><td>GNG 71–79%、IPS 8–15%</td></tr>
+<tr><td>CVLP</td><td>caudal ventrolateral protocerebrum</td><td>尾腹外側原腦</td><td>IPS 42–53%、WED 12–27%、PLP 9–15%</td></tr>
+<tr><td>DLP</td><td>dorsolateral protocerebrum</td><td>背外側原腦</td><td>SLP 71–75%</td></tr>
+<tr><td>DMP</td><td>dorsomedial protocerebrum</td><td>背內側原腦</td><td>ICL 25–28%、LAL 19–21%、SPS 13–16%、VES 10–11%</td></tr>
+<tr><td>EB</td><td>ellipsoid body</td><td>橢圓體</td><td>EB 86%</td></tr>
+<tr><td>FB</td><td>fan-shaped body</td><td>扇形體</td><td>FB 86%</td></tr>
+<tr><td>FSPP</td><td>frontal superpeduncular protocerebrum</td><td>前柄上原腦</td><td>SIP 78–81%</td></tr>
+<tr><td>IDFP</td><td>inferior dorsofrontal protocerebrum</td><td>下背前原腦</td><td>LAL 44–49%、CRE 39–40%</td></tr>
+<tr><td>IDLP</td><td>inner dorsolateral protocerebrum</td><td>內背外側原腦</td><td>SLP 62–70%、SIP 17–21%</td></tr>
+<tr><td>Lat Tri</td><td>lateral triangle</td><td>外側三角</td><td>BU 77–81%</td></tr>
+<tr><td>LH</td><td>lateral horn</td><td>外側角</td><td>LH 71–79%、SLP 16–21%</td></tr>
+<tr><td>Lob</td><td>lobula</td><td>小葉</td><td>LO 86–91%</td></tr>
+<tr><td>LoP</td><td>lobula plate</td><td>小葉板</td><td>LOP 82–88%</td></tr>
+<tr><td>MB</td><td>mushroom body（不含萼）</td><td>蕈狀體的柄與葉（一整塊）</td><td>MB_ML 44–49%、MB_VL 15–18%、MB_PED 13–15%、CRE 10–12%</td></tr>
+<tr><td>Med</td><td>medulla</td><td>髓質</td><td>ME 81–83%</td></tr>
+<tr><td>Nod</td><td>noduli</td><td>結節</td><td>NO 70–72%（其餘 26–28% 落在 Ito 分區外）</td></tr>
+<tr><td>OG</td><td>optic glomerulus</td><td>視小球</td><td>PVLP 62–87%</td></tr>
+<tr><td>OPTU</td><td>optic tubercle</td><td>視結節</td><td>AOTU 65–71%</td></tr>
+<tr><td>PAN</td><td>proximal antennal protocerebrum</td><td>近觸角原腦</td><td>VES 44–48%、AL 18–28%</td></tr>
+<tr><td>PCB</td><td>protocerebral bridge</td><td>原腦橋</td><td>PB 53%（其餘 47% 落在 Ito 分區外）</td></tr>
+<tr><td>SDFP</td><td>superior dorsofrontal protocerebrum</td><td>上背前原腦</td><td>SMP 75%</td></tr>
+<tr><td>SOG</td><td>subesophageal ganglion（分左右）</td><td>食道下神經節</td><td>GNG 63%、PRW 7–8%、FLA 5%（Ito 的 GNG 是中線一塊）</td></tr>
+<tr><td>SPP</td><td>superpeduncular protocerebrum</td><td>柄上原腦</td><td>SCL 49–50%、PLP 30–36%</td></tr>
+<tr><td>VLP</td><td>ventrolateral protocerebrum</td><td>腹外側原腦</td><td>AVLP 57–63%、PVLP 14–25%（Ito 切成前／後兩塊，Chiang 的 VLP 是一整塊；本頁的切分把它切成背／腹兩塊）</td></tr>
+<tr><td>VMP</td><td>ventromedial protocerebrum</td><td>腹內側原腦</td><td>SPS 38–40%、VES 18%、IPS 13–20%</td></tr>
+</table>
+<p class="small">EB、FB、PCB 跨中線只有一個，其餘分左右（_L、_R）。</p>
+
 <h3>資料來源與檔案</h3>
-<p class="small">MaleCNS v1.0（Janelia FlyEM）、FlyWire v783、FlyCircuit；Ito 75 區對齊到 FlyWire 與 FlyCircuit 是實驗室先前的工作。計算程式與完整紀錄在實驗室主機 <code>CMU_research/skeleton/</code>（規則 <code>plan.md</code>、紀錄 <code>log_a1_fib.md</code>、一鍵重跑 <code>run_all.sh</code>）。網頁資料由 <code>web/build/export_data.py</code> 產生：腦區形狀是由標籤體積（每個 1 µm 格標上所屬腦區的三維陣列）轉成的簡化網格；LN 骨架預設每區隨機抽樣最多 20 顆（固定種子）並簡化節點，畫之前先扣掉主幹；按卡片上的「全部 N 顆」時讀取的資料，每區打包成一個檔，骨架節點吸附到 4 µm 格子上。同一顆神經元在不同門檻下的家可能不同（門檻會影響哪些區併成聯集），扣掉的主幹也跟著不同，所以換門檻時，同一顆神經元畫出來的骨架可能不一樣。</p>
+<p class="small">MaleCNS v1.0（Janelia FlyEM）、FlyWire v783、FlyCircuit；Ito 75 區對齊到 FlyWire 與 FlyCircuit 是實驗室先前的工作。Chiang 55 區的分區檔是 fruitflybrain/ffbo.lib 公開的 FlyCircuit 腦區 mesh（BSD-3-Clause），柵格化成與 Ito 同一座標框的 1 µm 標籤（實驗室先前 A1 計畫的做法）。計算程式與完整紀錄在實驗室主機 <code>CMU_research/skeleton/</code>（規則 <code>plan.md</code>、紀錄 <code>log_a1_fib.md</code>、一鍵重跑 <code>run_all.sh</code>）。網頁資料由 <code>web/build/export_data.py</code> 產生：腦區形狀是由標籤體積（每個 1 µm 格標上所屬腦區的三維陣列）轉成的簡化網格；LN 骨架預設每區隨機抽樣最多 20 顆（固定種子）並簡化節點，畫之前先扣掉主幹；按卡片上的「全部 N 顆」時讀取的資料，每區打包成一個檔，骨架節點吸附到 4 µm 格子上。同一顆神經元在不同門檻下的家可能不同（門檻會影響哪些區併成聯集），扣掉的主幹也跟著不同，所以換門檻時，同一顆神經元畫出來的骨架可能不一樣。</p>
 </div></section>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
-let KEYS = ["80","65","160","fw75","fc75"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
-const ALABEL = {"80":"MaleCNS 正式 80 區","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區"};
+let KEYS = ["80","65","160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
+// 分區的例外註記（J.atlases[k].note；目前只有 FlyCircuit Chiang 55 區：只對這套分區拿掉參與資格）。alab(k) 在名稱後加 ※，noteHTML 列出全文。
+const anote = k => (J && J.atlases[k] && J.atlases[k].note) || "";
+const alab = k => ALABEL[k] + (anote(k) ? "※" : "");
+const noteHTML = ks => { const L = (ks || KEYS).filter(k => anote(k)); return L.length ? `<p class="small"><b>※ 注意：</b>${L.map(k => `${ALABEL[k]}：${esc(anote(k))}`).join("；")}。</p>` : ""; };
+const ALABEL = {"80":"MaleCNS 正式 80 區","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
 const BUCKET = {single:"單一 LPU", multi:"多個候選（整區 1 個 LPU）", hub:"hub", neither:"兩者皆非"};
 let J = null, cur = {a:"80", t:"20", sel:null, multi:[], c:"region"};   // sel：卡片顯示的區（最後點的）；multi：所有選取的區（含 sel，Shift＋點加選）
 const meshBuf = {}, geoCache = {};
@@ -531,7 +588,7 @@ let raf = 0;
 function render(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
 
 // ---------- 資料 ----------
-const DATA_VER = "20261105d";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
+const DATA_VER = "20261106a";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
 async function loadBin(url){ const r = await fetch(url + "?v=" + DATA_VER); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
 function meshGeo(a, idx){
   const key = a + ":" + idx; if (geoCache[key]) return geoCache[key];
@@ -592,7 +649,7 @@ function stats(){
   const R = rows(), b = R.filter(r => r.part === "腦"), v = R.filter(r => r.part !== "腦");
   const c = arr => ({lpu: arr.filter(isLPU).length, single: arr.filter(r => r.bucket==="single").length, multi: arr.filter(r => r.bucket==="multi").length, hub: arr.filter(r => r.bucket==="hub").length, nei: arr.filter(r => r.bucket==="neither").length});
   const cb = c(b), cv = c(v), un = J.atlases[cur.a].combos[cur.t].unions.length;
-  document.getElementById("stat").innerHTML = `<b>${ALABEL[cur.a]}・reach ${cur.t} µm</b><br>腦：LPU ${cb.lpu}（單一 ${cb.single}＋多個候選 ${cb.multi}）、hub ${cb.hub}、兩者皆非 ${cb.nei}<br>${J.atlases[cur.a].ds === "mcns" ? `腹神經索：LPU ${cv.lpu}・` : "腹神經索：無資料・"}併出的聯集 ${un} 個`;
+  document.getElementById("stat").innerHTML = `<b>${alab(cur.a)}・reach ${cur.t} µm</b>${anote(cur.a) ? `<br><span class="small">※ ${esc(anote(cur.a))}</span>` : ""}<br>腦：LPU ${cb.lpu}（單一 ${cb.single}＋多個候選 ${cb.multi}）、hub ${cb.hub}、兩者皆非 ${cb.nei}<br>${J.atlases[cur.a].ds === "mcns" ? `腹神經索：LPU ${cv.lpu}・` : "腹神經索：無資料・"}併出的聯集 ${un} 個`;
 }
 function legend(){
   const pal = byRegion();
@@ -768,7 +825,7 @@ function seg(id, vals, lab, key){
   el.innerHTML = vals.map(v => `<button data-v="${v}">${lab(v)}</button>`).join("");
   el.querySelectorAll("button").forEach(b => b.onclick = async () => { cur[key] = b.dataset.v; await refresh(); });
 }
-seg("segA", KEYS, v => ALABEL[v].replace("密度模板 ", "模板 "), "a");
+seg("segA", KEYS, v => alab(v).replace("密度模板 ", "模板 "), "a");
 seg("segT", TS, v => v + " µm", "t");
 document.querySelectorAll("#segC button").forEach(b => b.onclick = () => { cur.c = b.dataset.v; segCUI(); buildScene(); listUI(); writeHash(); });
 function segCUI(){ document.querySelectorAll("#segC button").forEach(b => b.classList.toggle("on", b.dataset.v === cur.c)); }
@@ -828,17 +885,18 @@ function tableUI(){
   let h = `<h2>${KEYS.length > 1 ? KEYS.length + " 套分區" : ALABEL[KEYS[0]]} × ${TS.length} 個門檻的 LPU 數</h2><p>讀法 A 的最終清單。「多個候選」是密度分群數出不只一團、但沒有成功切開的區，整區算 1 個 LPU；所以 LPU ＝ 單一＋多個候選。聯集數含腹神經索。</p><div class="tblWrap"><table><tr><th>分區</th><th>reach</th><th class="num">腦 LPU</th><th class="num">單一</th><th class="num">多個候選</th><th class="num">hub</th><th class="num">兩者皆非</th><th class="num">腹神經索 LPU</th><th class="num">併出的聯集</th></tr>`;
   for (const a of KEYS) for (const t of TS) {
     const b = countOf(a, t, "腦"), v = countOf(a, t, "腹");
-    h += `<tr><td>${ALABEL[a]}</td><td>${t} µm</td><td class="num"><b>${b.lpu}</b></td><td class="num">${b.single}</td><td class="num">${b.multi}</td><td class="num">${b.hub}</td><td class="num">${b.nei}</td><td class="num">${v.lpu}</td><td class="num">${J.atlases[a].combos[t].unions.length}</td></tr>`;
+    h += `<tr><td>${alab(a)}</td><td>${t} µm</td><td class="num"><b>${b.lpu}</b></td><td class="num">${b.single}</td><td class="num">${b.multi}</td><td class="num">${b.hub}</td><td class="num">${b.nei}</td><td class="num">${v.lpu}</td><td class="num">${J.atlases[a].combos[t].unions.length}</td></tr>`;
   }
   h += `</table></div>`;
   h += `<h2>併出的聯集</h2><div class="tblWrap"><table><tr><th>分區</th><th>reach</th><th>聯集（代表名＝成員）</th><th class="num">最後一步的住戶</th><th>最終判定</th></tr>`;
   for (const a of KEYS) for (const t of TS) for (const u of J.atlases[a].combos[t].unions) {
     const fr = J.atlases[a].combos[t].rows.filter(r => r.name === u.rep || r.parent === u.rep);
     const v = fr.length ? fr.map(r => r.name + "：" + BUCKET[r.bucket]).join("；") : "—";
-    h += `<tr><td>${ALABEL[a]}</td><td>${t}</td><td>${u.members.map(esc).join("＋")}</td><td class="num">${u.n_home ?? ""}</td><td>${esc(v)}</td></tr>`;
+    h += `<tr><td>${alab(a)}</td><td>${t}</td><td>${u.members.map(esc).join("＋")}</td><td class="num">${u.n_home ?? ""}</td><td>${esc(v)}</td></tr>`;
   }
   h += `</table></div>`;
-  h += `<h2>每區明細</h2><div class="fbar"><label>分區 <select id="fA">${KEYS.map(a => `<option value="${a}">${ALABEL[a]}</option>`).join("")}</select></label><label>reach <select id="fT">${TS.map(t => `<option value="${t}">${t} µm</option>`).join("")}</select></label><label>判定 <select id="fB"><option value="lpu">只看 LPU</option><option value="all">全部</option><option value="single">單一</option><option value="multi">多個候選</option><option value="hub">hub</option><option value="neither">兩者皆非</option></select></label><input id="fQ" placeholder="搜尋區名"></div><div class="tblWrap"><table id="regTable"></table></div>`;
+  h += noteHTML();
+  h += `<h2>每區明細</h2><div class="fbar"><label>分區 <select id="fA">${KEYS.map(a => `<option value="${a}">${alab(a)}</option>`).join("")}</select></label><label>reach <select id="fT">${TS.map(t => `<option value="${t}">${t} µm</option>`).join("")}</select></label><label>判定 <select id="fB"><option value="lpu">只看 LPU</option><option value="all">全部</option><option value="single">單一</option><option value="multi">多個候選</option><option value="hub">hub</option><option value="neither">兩者皆非</option></select></label><input id="fQ" placeholder="搜尋區名"></div><div class="tblWrap"><table id="regTable"></table></div>`;
   document.getElementById("tableDoc").innerHTML = h;
   const fA = document.getElementById("fA"), fT = document.getElementById("fT"), fB = document.getElementById("fB"), fQ = document.getElementById("fQ");
   fA.value = tblFilter.a; fT.value = tblFilter.t; fB.value = tblFilter.b; fQ.value = tblFilter.q;
@@ -860,7 +918,8 @@ function regTable(){
 // O[分區]：names（原腦區名）、part、mesh（每區在 orig_<分區>.bin 的網格序號）、meshes、ov[門檻][最終區名] = [[原腦區, 原腦區落在此最終區的比例, 此最終區由該原腦區構成的比例]]
 let O = null; const origBuf = {}, origGeoC = {};
 const SUB = 0.05;   // 低於 5% 的零星重疊不列
-const DSN = {"80":"MaleCNS","160":"MaleCNS 160 區","fw75":"FlyWire","fc75":"FlyCircuit"};
+const DSN = {"80":"MaleCNS","160":"MaleCNS 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
+const REFLABEL = {"80":"官方 80 區","fc75":"Ito 75 區"};   // 有參考分區的（模板 160 區→官方 80 區、Chiang 55 區→Ito 75 區）
 function prepOrig(){
   for (const a of Object.keys(O)) {
     const o = O[a]; o.idx = new Map(o.names.map((n, i) => [n, i])); o.inv = {};
@@ -870,20 +929,20 @@ function prepOrig(){
       for (const v of m.values()) v.sort((x, y) => y[1] - x[1]);
       o.inv[t] = m;
     }
-    if (o.ov80) {   // 模板分區（160 區）：另有「最終區 ↔ 官方 80 區」的重疊，腦區對應分頁與卡片用官方 80 區當索引
-      o.idx80 = new Set(O["80"] ? O["80"].names : []); o.inv80 = {};
+    if (o.ovref) {   // 有參考分區的（模板 160 區→官方 80 區、FlyCircuit Chiang 55 區→Ito 75 區）：另有「最終區 ↔ 參考分區」的重疊，腦區對應分頁與卡片用參考分區的區當索引
+      o.idxref = new Set(O[o.ref] ? O[o.ref].names : []); o.invref = {};
       for (const t of TS) {
         const m = new Map();
-        for (const [rn, lst] of Object.entries(o.ov80[t] || {})) for (const [on, f, g] of lst) { if (!m.has(on)) m.set(on, []); m.get(on).push([rn, f, g]); }
+        for (const [rn, lst] of Object.entries(o.ovref[t] || {})) for (const [on, f, g] of lst) { if (!m.has(on)) m.set(on, []); m.get(on).push([rn, f, g]); }
         for (const v of m.values()) v.sort((x, y) => y[1] - x[1]);
-        o.inv80[t] = m;
+        o.invref[t] = m;
       }
     }
   }
 }
 // 原腦區 n 在分區 a 裡對應哪幾個原腦區（80 區與 Ito 75 區有幾處分法不同）；[] 表示這套分區沒有
 function alias(a, n){
-  const has = x => O[a] && (O[a].idx.has(x) || (O[a].idx80 && O[a].idx80.has(x)));
+  const has = x => O[a] && (O[a].idx.has(x) || (O[a].idxref && O[a].idxref.has(x)));
   if (has(n)) return [n];
   let m = n.match(/^(MB_VL|MB_ML)_([LR])$/);
   if (m) return (m[1] === "MB_VL" ? ["MB_aL", "MB_apL"] : ["MB_bL", "MB_bpL", "MB_gL"]).map(x => x + "_" + m[2]).filter(has);
@@ -901,7 +960,7 @@ function aliasNote(a, n, names){
 }
 // 原腦區 n（分區 a 自己的名）在門檻 t 最後落在哪些最終區
 function fate(a, t, n){
-  const all = O[a].inv[t].get(n) || (O[a].inv80 && O[a].inv80[t].get(n)) || [];
+  const all = O[a].inv[t].get(n) || (O[a].invref && O[a].invref[t].get(n)) || [];
   let it = all.filter(x => x[1] >= SUB); if (!it.length) it = all.slice(0, 1);
   const R = J.atlases[a].combos[t].rows;
   const rs = it.map(x => ({r: R.find(y => y.name === x[0]), f: x[1]})).filter(x => x.r);
@@ -937,9 +996,10 @@ function origCardHTML(r){
   let h = `<h3>由哪些原腦區組成</h3><p class="small muted">原腦區：這份資料官方分區裡原本的區，還沒併、也還沒切。3D 圖中以半透明彩色外殼畫出，外殼顏色就是下表區名前小圓點的顏色（這裡的圓點是識別色，不是判定色）；上色方式選「原腦區」可看全部原腦區。「拿到幾成」＝那個原腦區有多少比例的體積落在這一區；「佔幾成」＝這一區的體積有多少比例來自那個原腦區。低於 5% 的零星重疊不列。</p><table><tr><td>原腦區</td><td>拿到幾成／佔幾成</td></tr>` +
     C.map(x => `<tr><td><span class="vb" style="background:#${(CC.get(x[0]) || origColor(cur.a, x[0])).getHexString()}"></span>${esc(x[0])}</td><td>${Math.round(x[1] * 100)}%／${Math.round(x[2] * 100)}%</td></tr>`).join("") + `</table>`;
   let C2 = C;
-  if (O[cur.a].ov80) {   // 模板分區：原腦區是同事的模板區，另列對應的官方 80 區，並以官方區查另外幾份資料
-    C2 = ((O[cur.a].ov80[cur.t] || {})[r.name] || []).filter(x => x[1] >= SUB || x[2] >= SUB);
-    h += `<h3>對應的官方 80 區</h3><p class="small muted">這一區涵蓋哪些 MaleCNS 官方 80 區（官方區有幾成落在這一區／這一區有幾成是該官方區）。</p><table>` +
+  if (O[cur.a].ovref) {   // 有參考分區的：原腦區是模板區或 Chiang 區，另列對應的參考分區（官方 80 區或 Ito 75 區），並以它查另外幾份資料
+    const RL = REFLABEL[O[cur.a].ref] || O[cur.a].ref;
+    C2 = ((O[cur.a].ovref[cur.t] || {})[r.name] || []).filter(x => x[1] >= SUB || x[2] >= SUB);
+    h += `<h3>對應的${O[cur.a].ref === "80" ? "" : " "}${RL}</h3><p class="small muted">這一區涵蓋哪些${O[cur.a].ref === "80" ? "MaleCNS 官方 80 區" : " Ito 75 區（FlyWire 與 FlyCircuit 用的分區）"}（該區有幾成落在這一區／這一區有幾成是該區）。</p><table>` +
       C2.map(x => `<tr><td>${esc(x[0])}</td><td>${Math.round(x[1] * 100)}%／${Math.round(x[2] * 100)}%</td></tr>`).join("") + `</table>`;
   }
   const others = KEYS.filter(k => k !== cur.a && O[k]);
@@ -997,27 +1057,28 @@ let mapF = {t: "20", p: "腦", q: "", chg: false};
 function mapRows(){
   const ref = KEYS.filter(k => O[k]);
   const seen = new Set(), out = [];
-  const base = ref.find(k => k !== "80" && !O[k].ov80) || ref[0];
+  const base = ref.find(k => k !== "80" && !O[k].ovref) || ref[0];
   for (const n of O[base].names) { seen.add(n); out.push(n); }
   for (const k of ref) for (const n of O[k].names) {
-    if (seen.has(n) || O[k].ov80) continue;   // 模板分區（160 區）的區不當列，它的欄以官方 80 區為索引
+    if (seen.has(n) || O[k].ovref) continue;   // 有參考分區的（160 區、Chiang 55 區）的區不當列，它的欄以參考分區的區為索引
     if (k === "80" && alias(base, n).length) continue;   // 80 區的細分（蕈狀體各葉、IB）併在 75 區的對應列裡
     seen.add(n); out.push(n);
   }
   const key = n => n.replace(/_(L|R)$/, "") + (n.endsWith("_L") ? "1" : n.endsWith("_R") ? "2" : "0");
   return out.sort((a, b) => key(a).localeCompare(key(b)));
 }
-function partOf(n){ for (const k of KEYS) if (O[k] && !O[k].ov80) { const i = O[k].idx.get(n); if (i != null) return O[k].part[i]; } for (const k of KEYS) if (O[k]) { const al = alias(k, n); if (al.length) return O[k].part[O[k].idx.get(al[0])]; } return "腦"; }
+function partOf(n){ for (const k of KEYS) if (O[k] && !O[k].ovref) { const i = O[k].idx.get(n); if (i != null) return O[k].part[i]; } for (const k of KEYS) if (O[k]) { const al = alias(k, n); if (al.length) return O[k].part[O[k].idx.get(al[0])]; } return "腦"; }
 function mapUI(){
   if (!O) return;
   const ks = KEYS.filter(k => O[k]);
   let h = `<h2>原腦區與 LPU 的對應</h2>
-<p>每份資料一開始都用一套官方分區把腦切成幾十個區，這裡稱為<b>原腦區</b>（MaleCNS 用正式 80 區；FlyWire、FlyCircuit 用 Ito 75 區）。MaleCNS 密度模板 160 區那一欄，寫的是每個官方 80 區落在 160 區結果的哪一個最終區。判定流程會把幾個原腦區<b>併</b>成一個聯集，或把一個原腦區<b>切</b>成幾塊，最後得到的每一塊稱為<b>最終區</b>，再判定它是不是 LPU。下表每一列是一個原腦區，三欄分別寫出它在三份資料裡最後落在哪個最終區。</p>
+<p>每份資料一開始都用一套官方分區把腦切成幾十個區，這裡稱為<b>原腦區</b>（MaleCNS 用正式 80 區；FlyWire、FlyCircuit 用 Ito 75 區）。MaleCNS 密度模板 160 區那一欄，寫的是每個官方 80 區落在 160 區結果的哪一個最終區；FlyCircuit Chiang 55 區那一欄同理，寫的是每個 Ito 75 區落在 Chiang 55 區結果的哪一個最終區（Chiang 55 區是 FlyCircuit 2011 年發表時自己的分區，區名和 Ito 不同，例如 Med＝ME、Cal＝MB_CA、SOG＝GNG）。判定流程會把幾個原腦區<b>併</b>成一個聯集，或把一個原腦區<b>切</b>成幾塊，最後得到的每一塊稱為<b>最終區</b>，再判定它是不是 LPU。下表每一列是一個原腦區，各欄分別寫出它在每套分區的結果裡最後落在哪個最終區。</p>
 <p class="small">標籤：<span class="cmpT"><span class="tag">原樣</span></span>沒被併也沒被切；<span class="cmpT"><span class="tag chg">併入聯集</span></span>和別的區併成一個最終區。聯集寫成「代表名＋n 區」，例如「AOTU_L＋9 區」＝AOTU_L 加另外 9 區、共 10 區；代表名是成員中區號（官方分區表裡每區的編號）最小的那一區，所以同一個原腦區在不同資料裡可能落在代表名不同的聯集。滑鼠停在聯集名上可看全部成員；<span class="cmpT"><span class="tag chg">被切開</span></span>分到好幾個最終區，括號寫出原腦區有多少比例落在那一塊；<span class="cmpT"><span class="tag chg">併入聯集後又切開</span></span>先併、聯集再被切開。切開後的塊，第一塊沿用原名（聯集被切時，原名就是聯集的代表名），其餘以「.2」「.3」結尾；切出的塊有時會再切一次，這時寫成「原名.r2c2」（r2＝第 2 輪、c2＝這一輪切出的第 2 塊）。所以和原腦區同名的最終區不一定是原樣，要看標籤。</p>
 <p class="small">區名前的小圓點是判定：<span class="vb" style="background:${css("--single")}"></span>單一 LPU、<span class="vb" style="background:${css("--multi")}"></span>LPU（多個候選：區內局部神經元的分布看起來不只一團、但沒能成功切開，整區仍算 1 個 LPU；切開後的塊若仍不只一團、也沒能再切開，同樣標綠點）、<span class="vb" style="background:${css("--hub")}"></span>hub、<span class="vb" style="background:${css("--neither")}"></span>兩者皆非（各類定義見「判定規則」）。點區名會跳到 3D 圖、選取那個最終區，並畫出它涵蓋的所有原腦區。</p>
 <p class="small">兩套分區有幾處分法不同：蕈狀體的葉，75 區分成垂直葉 MB_VL、內側葉 MB_ML，80 區細分成 α、α′（對應垂直葉，區名 MB_aL、MB_apL）與 β、β′、γ（對應內側葉，區名 MB_bL、MB_bpL、MB_gL）五片葉；IB 在 75 區分左右，在 80 區只有一區；AMMC、GA 只有 75 區有；AB、Ov、LA 和腹神經索只有 80 區有。遇到這些區，格子裡會先註明對應方式。比例低於 5% 的零星重疊不列。</p>
 <div class="fbar"><label>reach <select id="mT">${TS.map(t => `<option value="${t}">${t} µm</option>`).join("")}</select></label><label>部位 <select id="mP"><option value="腦">腦</option><option value="腹">腹神經索</option><option value="all">全部</option></select></label><label class="chk" style="margin:0"><input type="checkbox" id="mC">只列至少一份資料有併或切的原腦區</label><input id="mQ" placeholder="搜尋區名（例如 MB、SAD）"></div>
 <div class="tblWrap"><table class="cmpT" id="mapTable"></table></div>`;
+  h = h.replace('<div class="fbar"><label>reach <select id="mT">', noteHTML(ks) + '<div class="fbar"><label>reach <select id="mT">');
   document.getElementById("mapDoc").innerHTML = h;
   const mT = document.getElementById("mT"), mP = document.getElementById("mP"), mC = document.getElementById("mC"), mQ = document.getElementById("mQ");
   mT.value = mapF.t; mP.value = mapF.p; mC.checked = mapF.chg; mQ.value = mapF.q;
@@ -1026,7 +1087,7 @@ function mapUI(){
 }
 function mapTable(){
   const ks = KEYS.filter(k => O[k]), t = mapF.t;
-  let h = `<tr><th>原腦區</th>${ks.map(k => `<th>${ALABEL[k]}</th>`).join("")}</tr>`, n = 0;
+  let h = `<tr><th>原腦區</th>${ks.map(k => `<th>${alab(k)}${anote(k) ? ` <span class="small muted" title="${esc(anote(k))}">（例外，見上方說明）</span>` : ""}</th>`).join("")}</tr>`, n = 0;
   for (const nm of mapRows()) {
     const p = partOf(nm);
     if (mapF.p === "腦" && p !== "腦") continue;
@@ -1075,7 +1136,7 @@ document.addEventListener("click", e => {
   J = await (await fetch("data/a1syn.json?v=" + DATA_VER)).json();
   try { O = await (await fetch("data/orig.json?v=" + DATA_VER)).json(); prepOrig(); } catch (e) { O = null; }
   KEYS = KEYS.filter(k => J.atlases[k]);
-  seg("segA", KEYS, v => ALABEL[v].replace("密度模板 ", "模板 "), "a");
+  seg("segA", KEYS, v => alab(v).replace("密度模板 ", "模板 "), "a");
   if (!KEYS.includes(cur.a)) cur.a = KEYS[0];
   await ensureOutline(true);
   placeCam(); resize();
