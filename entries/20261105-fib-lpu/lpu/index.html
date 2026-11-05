@@ -230,7 +230,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <p>3D 檢視裡畫的 LN 骨架，就是扣掉主幹之後算份額的那部分，所以有些骨架看起來從分枝點開始、和胞體斷開，這是刻意的。</p>
 
 <h3>2.3 reach：分支不能伸出去太遠</h3>
-<p>只看份額，會漏掉「一條分支伸得很遠、但長度不多」的神經元。所以 LN 還要通過幾何條件 <b>reach</b>：分支上的點離自己家（單一區或聯集）的表面最遠多少 µm（直線距離）。超過門檻就不算 LN。門檻有 <b>10、20、30 µm</b> 三組，整個流程用每個門檻各從頭跑一遍；<b>20 µm 為主對照</b>，也就是本網頁預設顯示、文字描述所用的門檻，10 與 30 用來看結果對門檻敏不敏感。</p>
+<p>只看份額，會漏掉「一條分支伸得很遠、但長度不多」的神經元。所以 LN 還要通過幾何條件 <b>reach</b>：分支上的點離自己家（單一區或聯集）的表面最遠多少 µm（直線距離）。超過門檻就不算 LN。門檻有 <b>10、20 µm</b> 兩組（30 µm 這次沒有重跑），整個流程用每個門檻各從頭跑一遍；<b>20 µm 為主對照</b>，也就是本網頁預設顯示、文字描述所用的門檻，10 與 30 用來看結果對門檻敏不敏感。</p>
 <p>量 reach 的範圍和算份額的範圍差一點：2.2 第 3 步裡「掛在主幹上、但有一段落在主腦區」而保留下來的側枝，算份額，但<b>不算 reach</b>。所以 reach 只量切點之後的部分。</p>
 
 <h3>2.4 一個區有沒有自己的 LN 族群：10 顆</h3>
@@ -287,6 +287,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <p>「候選 a–b 個 LPU」只說密度上有幾團，沒說每一團是不是 LPU。所以把這種區（<b>母區</b>）切開重判：</p>
 <ol>
 <li><b>切</b>：用平台中間的高度 17 把熱點分群，再套一次密度谷規則（θ = 0.5）。全部合回一團的區就不切。剩下兩團以上的，把母區的每一格歸給離它最近的那一團熱點，切成幾個<b>子區</b>（子區合起來就是母區）。第 1 個子區沿用母區的名字，其餘第 1 輪叫「母區名.2」「.3」，第 2 輪起叫「母區名.r2c2」（第 2 輪切出的第 2 塊）這種格式。</li>
+<li><b>對半檢查</b>：神經元太少時，纖維間的空隙也會造成假的密度低谷，所以第 1 步算出切法後，要先過這道檢查才真的切開。把這一區的 LN 隨機分成兩半，兩半各切一次，重複 20 次。要同時滿足兩個條件才切：(a) 至少 10 次兩半都切成兩塊以上；(b) 在這些次裡，比較兩半把腦區的每個 8 µm 分析體素分到哪一塊（兩半是不同的神經元，但切的是同一個腦區，所以可以逐格比），一致程度（ARI，1＝完全相同，0＝跟亂分差不多）的中位數至少 0.54。沒過就當作切不開，這一區不切、也不進下一輪。0.54 的來源：MaleCNS 有 15 個腦區用全部 LN 時不會切，從中隨機抽少量 LN 再切，切開的都算假切分；取這些假切分 ARI 分數的第 95 百分位，也就是約 95% 的假切分過不了。</li>
 <li><b>重算</b>：凡是骨架碰到母區的神經元，都在切分後的標籤上照第 1–2 節重算一次（兄弟子區彼此算別區，所以主幹的切點可能跟著改變），再跑一次 A1 管線。</li>
 <li><b>結局</b>：每個子區都有 ≥ 10 顆 LN、而且有神經束、判為 LPU（單一或候選 a–b 個都算）→ <b>全切開</b>；只有部分子區做得到 → <b>切一半</b>；都做不到 → <b>切不開</b>。</li>
 <li><b>再切</b>：全切開的母區，如果它的子區又被判為「候選 a–b 個 LPU」，就把這個子區當成下一輪的母區，回到第 1 步。某一輪沒有任何區切開，就停。（突觸版只切一輪。）</li>
@@ -299,79 +300,86 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <tr><th>數字</th><th>用在哪</th><th>來源</th></tr>
 <tr><td>80%</td><td>LN 的份額；候選聯集累加到的份額；參與判定須落在有標籤組織的比例；住戶以 U 重扣主幹後的份額</td><td>A1（沿用）</td></tr>
 <tr><td>10 顆</td><td>一區有自己 LN 族群的最低數；聯集住戶的最低數</td><td>A1（沿用）</td></tr>
-<tr><td>10／20／30 µm（主 20）</td><td>reach 門檻（不為纖維版重訂）</td><td>突觸版沿用</td></tr>
+<tr><td>10／20 µm（主 20；30 µm 這次沒重跑）</td><td>reach 門檻（不為纖維版重訂）</td><td>突觸版沿用</td></tr>
 <tr><td>1 µm</td><td>份額量長度時切的小段長、標籤格的邊長</td><td>本題</td></tr>
 <tr><td>「伸進別區多短都算」「胞體上沒有分枝點的枝不算」</td><td>2.2 主幹切點的判準（不設長度參數）</td><td>本題</td></tr>
 <tr><td>75%、3×3×3、1%、50%、30 µm、0.60</td><td>熱點、平滑、最小群、招募重疊、束的終端距離、束的長度相似度</td><td>Chiang 2011 論文</td></tr>
 <tr><td>8 µm 分析體素、2 µm 底層格、9 次、平台 14–20、切分高度 17</td><td>A1 管線的技術參數</td><td>A1（沿用，不改）</td></tr>
 <tr><td>θ = 0.5</td><td>密度谷規則</td><td>實驗室 2026-10-28 定案</td></tr>
+<tr><td>20 次、至少 10 次、ARI 0.54</td><td>對半檢查（第 6 節）</td><td>纖維版新訂：20 次、至少 10 次（至少一半次數切得開）是直接訂的，0.54 由上述假切分校準；2026-11-05 定案</td></tr>
 </table>
 </div></section>
 
 <section class="page" id="p-about"><div class="doc" id="aboutDoc">
 <!--ABOUT-->
 <h2>結果說明</h2>
-<p>這個網頁展示實驗室「纖維版」（內部代號 A1_fib）的計算成果：只看神經元骨架的長度、完全不用突觸，把三份果蠅資料的腦區各自判出局部處理單元（LPU）。三份資料是 <b>MaleCNS v1.0</b>（雄果蠅腦＋腹神經索，腹神經索在胸腹部，相當於脊髓；腦用正式 80 區，腹神經索另分 23 區）、<b>FlyWire v783</b>（雌果蠅腦，用 Ito 75 區）與 <b>FlyCircuit</b>（光學顯微鏡逐顆拍攝的神經元，用 Ito 75 區）。每份資料 × 三個 reach 門檻（局部神經元的分支最遠可伸出自己的區幾 µm，見下方名詞）共 9 組，於 2026-11-04 晚至 11-05 凌晨跑完，每組都通過預先寫好的自動核對（核對程式有沒有跑對，不判斷生物上的對錯）。</p>
+<p>這個網頁展示實驗室「纖維版」（內部代號 A1_fib）的計算成果：只看神經元骨架的長度、完全不用突觸，把三份果蠅資料的腦區各自判出局部處理單元（LPU）。三份資料是 <b>MaleCNS v1.0</b>（雄果蠅腦＋腹神經索，腹神經索在胸腹部，相當於脊髓；腦用正式 80 區，腹神經索另分 23 區）、<b>FlyWire v783</b>（雌果蠅腦，用 Ito 75 區）與 <b>FlyCircuit</b>（光學顯微鏡逐顆拍攝的神經元，用 Ito 75 區）。每份資料 × 兩個 reach 門檻（局部神經元的分支最遠可伸出自己的區幾 µm，見下方名詞）共 6 組，於 2026-11-05 重跑完，每組都通過預先寫好的自動核對（核對程式有沒有跑對，不判斷生物上的對錯）。reach 30 µm 這次沒有重跑，所以先不提供。</p>
 <div class="note"><b>本頁用到的名詞</b>（完整定義見「判定規則」分頁）<br>
 <b>骨架</b>：把一顆神經元的形狀描成一串點與連線，像一棵從胞體（細胞本體）長出來、一路分岔的樹。<b>纖維份額</b>：一顆神經元的骨架總長，有多少比例落在某區。量之前先扣掉<b>主幹</b>，也就是從胞體一路通到神經元主要工作區的那段「電線」，因為它只是路過、不在那些區工作。<br>
 <b>LN（局部神經元）</b>：扣掉主幹後，纖維至少 80% 落在同一區、分支也沒伸出去太遠的神經元；那一區是它的<b>家</b>。<b>LPU（局部處理單元）</b>：有至少 10 顆自己的 LN 的區，是腦裡相對獨立的處理單位（整區判定只看 LN 數；切出來的子區另外要有神經束才算）。<b>hub</b>：LN 不到 10 顆、但有長程<b>神經束</b>（至少 3 顆神經元走同一條路徑連接兩區）的區，像轉運站。<b>兩者皆非</b>：LN 不到 10 顆、也沒有神經束。<br>
 <b>reach</b>：LN 的分支最遠可以伸出家幾 µm；門檻越寬（數字越大），越多神經元算得上 LN。本頁以 20 µm 為主。<br>
 <b>併區與聯集</b>：有些神經元的纖維平均分散在幾個相連的區，每一區都不到 80%，這幾區的 LN 於是都不到 10 顆（併區這一步把 LN 不到 10 顆的區都當 hub 看待）。如果有至少 10 顆神經元剛好分散在同一組相連的 hub 裡（把它在各區的份額由大到小加到 80%，用到的正好是這組區），這組區就併成一區，稱<b>聯集</b>，再當一個區重新判定。併好的聯集還可以一輪一輪收進鄰近的 hub：只要有 10 顆以上神經元剛好分散在「聯集＋這一區」裡（還有其他條件，見判定規則 4.4）。聯集的<b>代表名</b>取成員中在分區清單上編號最小的那一區，不一定是最重要的區。<br>
-<b>切分</b>：A1 管線（實驗室把 LPU 定義寫成的程式）把一區所有 LN 的纖維疊成密度圖，看密集處是一團還是好幾團。好幾團的區試著切開，相鄰兩團之間要有明顯的密度低谷才分開，切出的每塊都要有 10 顆以上 LN、而且有神經束，才算切開。切出的塊如果又分成好幾團，就再切一輪，直到某一輪什麼都切不開為止（<b>反覆切分</b>）。<br>
+<b>切分</b>：A1 管線（實驗室把 LPU 定義寫成的程式）把一區所有 LN 的纖維疊成密度圖，看密集處是一團還是好幾團。好幾團的區試著切開，相鄰兩團之間要有明顯的密度低谷才分開，切出的每塊都要有 10 顆以上 LN、而且有神經束，才算切開。切開之前還要過<b>對半檢查</b>：神經元太少時，纖維間的空隙也會造成假的低谷，所以把 LN 隨機分成兩半、各切一次，看兩半切得是否一致（見判定規則第 6 節）。切出的塊如果又分成好幾團，就再切一輪，直到某一輪什麼都切不開為止（<b>反覆切分</b>）。<br>
 <b>突觸版</b>：實驗室先前用突觸位置算份額的版本（A1_syn 第二版，網址 marginli.github.io/a1_syn_lpu），只做了 MaleCNS。纖維版的規則和它幾乎相同，是它的對照組。<br>
 腦區縮寫（MB、AOTU、SAD 等）是腦區代號，對照表在本頁最後；當代號看即可。</div>
 
 <h3>怎麼看 3D 檢視</h3>
 <ul>
-<li>左上選資料與分區（MaleCNS 正式 80 區、FlyWire Ito 75 區、FlyCircuit Ito 75 區）與 reach 門檻（10、20、30 µm）。三份資料各自的腦外形不同，換資料時外框會跟著換。</li>
+<li>左上選資料與分區（MaleCNS 正式 80 區、FlyWire Ito 75 區、FlyCircuit Ito 75 區）與 reach 門檻（10、20 µm）。三份資料各自的腦外形不同，換資料時外框會跟著換。</li>
 <li>計數方式：成功切開的區，每個子區各算 1 個 LPU；沒切開的區整區算 1 個。</li>
 <li>上色方式有三種，用左側「上色方式」切換。<b>依區上色</b>（預設）：每個 LPU 一種顏色，方便分出區與區的邊界。<b>依判定上色</b>：藍色＝單一 LPU（密度上只有一團）；綠色＝密度上有好幾團、但沒有成功切開的區，整區算 1 個 LPU。成功切開的子區與聯集，也照它自己的判定上色（一團藍、好幾團但沒切開綠）。勾「畫出 hub 與兩者皆非」可看到其餘的區（淡灰）。</li>
 <li><b>原腦區</b>（第三種上色方式）：改畫每份資料官方分區原本的區（還沒併、也還沒切），每區一種顏色。和「依區上色」來回切換，就能看出哪幾個原腦區被併成一個聯集、哪個原腦區被切成幾塊。這個模式下點一個原腦區，會選取它大部分體積所在的最終區。</li>
 <li>點一個區：右側顯示它的判定、LN 數、神經束數、切分結果、併區成員與 LN 的細胞型別，並在 3D 中畫出隨機抽樣的最多 20 顆 LN 骨架；卡片上的「全部 N 顆」按鈕可改畫這一區全部的 LN（大區要多等幾秒）。畫出的骨架已扣掉主幹，只畫算進份額的部分。</li>
+<li>從聯集切出來的塊，卡片上寫的是「切開前的聯集成員」：這是整個聯集的成員，所以同一個聯集切出的塊會顯示同一份清單。每一塊實際涵蓋哪些區，要看下一點的「由哪些原腦區組成」。</li>
 <li>卡片下半部的「由哪些原腦區組成」列出這一區涵蓋的原腦區與比例，3D 圖中同時用彩色半透明外殼畫出這些原腦區（外殼顏色＝卡片這張小表裡區名前圓點的顏色）。「同一批原腦區在另外兩份資料」寫出這些原腦區在另外兩份資料最後落在哪一區，點區名可直接切換過去。三份資料的完整對照表在「腦區對應」分頁。</li>
 <li>FlyCircuit 沒有細胞型別，卡片改列每顆神經元的<b>驅動品系</b>（實驗時用來讓這顆神經元發光的基因工具名稱），可以當成粗略的來源標記。</li>
 <li>按住 Shift 再點（3D 圖或左側清單）可加選好幾區一起顯示，Shift＋點已選的區則取消它；不按 Shift 直接點一區，就回到只選這一區。多選時卡片上方列出全部已選的區，點名字換成顯示那一區，按 × 取消。</li>
 <li>三欄之間的灰色細條可以左右拖曳，調整三欄的寬度（雙擊細條恢復預設寬度；這台瀏覽器會記住調整後的寬度）。</li>
 <li>拖曳旋轉；右鍵或 Shift＋拖曳平移；滾輪縮放；右上角按鈕切換正面、背面朝上、側面、後面。網址會記下目前的資料、門檻與選取的區，可直接分享。</li>
-<li>區名的寫法：聯集以代表名加「＋n 區」顯示，例如「MB_CA_R＋6 區」是右側蕈狀體 7 塊。第一輪切開的子區，第一塊沿用原名，其餘以「.2」「.3」結尾；第二輪以後切出的子區寫成「原名.r2c1」「原名.r2c2」（r2 表示第 2 輪，c1、c2 是第幾塊）。</li>
+<li>區名的寫法：聯集以代表名加「＋n 區」顯示，例如「MB_CA_R＋6 區」是右側蕈狀體 7 塊。每次切開，第一塊都沿用切之前的區名。其餘的塊：第一輪以「.2」「.3」結尾；第二輪以後寫成「區名.r2c2」（r2 表示第 2 輪，c2 表示第 2 塊）。第一塊是熱點（纖維最密的格子）最多的那塊，所以<b>換 reach 門檻時，同名的塊可能在不同位置</b>。例如 MaleCNS 名叫 GNG 的那一塊，reach 10 和 reach 20 的位置相差約 83 µm（骨架中心的 x 座標約 −147 與 −64 µm）。跨門檻比較要看位置，不要看名字。</li>
 </ul>
 
 <h3>主要結果（reach 20 µm）</h3>
 <table>
 <tr><th>資料（分區）</th><th class="num">腦 LPU</th><th class="num">腹神經索 LPU</th><th class="num">切分輪數</th><th>併出的聯集</th></tr>
-<tr><td>MaleCNS（正式 80 區）</td><td class="num">37（突觸版 35）</td><td class="num">14（突觸版 15）</td><td class="num">2</td><td>共 6 個：(1) 右蕈狀體 7 塊；(2) 左蕈狀體 7 塊＋AOTU_L、BU_L、PLP_L（AOTU_L 編號最小，所以代表名是 AOTU_L）；(3) IB、ICL_L、SCL_L、SPS_L、SPS_R、IPS_L、IPS_R；(4) CRE_R、EB、LAL_R；(5) PLP_R、PVLP_R；(6) 腹神經索 IntTct、NTct_L、NTct_R、HTct_L、HTct_R</td></tr>
+<tr><td>MaleCNS（正式 80 區）</td><td class="num">37（突觸版 35）</td><td class="num">13（突觸版 15）</td><td class="num">2</td><td>共 6 個：(1) 右蕈狀體 7 塊；(2) 左蕈狀體 7 塊＋AOTU_L、BU_L、PLP_L（AOTU_L 編號最小，所以代表名是 AOTU_L）；(3) IB、ICL_L、SCL_L、SPS_L、SPS_R、IPS_L、IPS_R；(4) CRE_R、EB、LAL_R；(5) PLP_R、PVLP_R；(6) 腹神經索 IntTct、NTct_L、NTct_R、HTct_L、HTct_R</td></tr>
 <tr><td>FlyWire（Ito 75 區）</td><td class="num">27</td><td class="num">（這份資料沒有腹神經索）</td><td class="num">1</td><td>共 4 個：(1) 左蕈狀體 4 塊＋CRE_L、SCL_L、PLP_L、AOTU_L；(2) 右蕈狀體 4 塊＋ICL_R、CRE_R、SCL_R、PLP_R、AOTU_R；(3) SAD、AMMC_L、WED_L；(4) EB、LAL_L</td></tr>
-<tr><td>FlyCircuit（Ito 75 區）</td><td class="num">40</td><td class="num">（這份資料沒有腹神經索）</td><td class="num">3</td><td>共 4 個：(1) 左蕈狀體 4 塊＋ICL_L、SCL_L、CRE_L；(2) 右蕈狀體 4 塊＋ICL_R、SCL_R、EB；(3) 跨左右的大聯集 10 區：LAL_R、SAD、AMMC_L、AMMC_R、WED_L、WED_R、SPS_L、SPS_R、IPS_L、IPS_R；(4) PVLP_R、PLP_R</td></tr>
+<tr><td>FlyCircuit（Ito 75 區）</td><td class="num">24</td><td class="num">（這份資料沒有腹神經索）</td><td class="num">1</td><td>共 4 個：(1) 左蕈狀體 4 塊＋ICL_L、SCL_L、CRE_L；(2) 右蕈狀體 4 塊＋ICL_R、SCL_R、EB；(3) 跨左右的大聯集 10 區：LAL_R、SAD、AMMC_L、AMMC_R、WED_L、WED_R、SPS_L、SPS_R、IPS_L、IPS_R；(4) PVLP_R、PLP_R</td></tr>
 </table>
-<p class="small">「切分輪數」是真的切開了東西的輪數（再下一輪什麼都切不開，就停）。三個門檻的完整數字見「結果總表」分頁。</p>
+<p class="small">「切分輪數」是真的切開了東西的輪數（再下一輪什麼都切不開，就停）。兩個門檻的完整數字見「結果總表」分頁。</p>
 
+<p class="small">下表比較兩個 reach 門檻的結果。</p>
 <table>
-<tr><th>資料</th><th class="num">reach 10</th><th class="num">reach 20</th><th class="num">reach 30</th><th>併出的聯集數（10／20／30）</th></tr>
-<tr><td>MaleCNS 腦 LPU</td><td class="num">32（30）</td><td class="num">37（35）</td><td class="num">38（37）</td><td>6／6／5（突觸版 6／6／4）</td></tr>
-<tr><td>MaleCNS 腹神經索 LPU</td><td class="num">11（10）</td><td class="num">14（15）</td><td class="num">16（17）</td><td></td></tr>
-<tr><td>FlyWire 腦 LPU</td><td class="num">24</td><td class="num">27</td><td class="num">30</td><td>4／4／4</td></tr>
-<tr><td>FlyCircuit 腦 LPU</td><td class="num">32</td><td class="num">40</td><td class="num">43</td><td>4／4／4</td></tr>
+<tr><th>資料</th><th class="num">reach 10</th><th class="num">reach 20</th></tr>
+<tr><td>MaleCNS 腦 LPU</td><td class="num">32（30）</td><td class="num">37（35）</td></tr>
+<tr><td>MaleCNS 腹神經索 LPU</td><td class="num">11（10）</td><td class="num">13（15）</td></tr>
+<tr><td>FlyWire 腦 LPU</td><td class="num">24</td><td class="num">27</td></tr>
+<tr><td>FlyCircuit 腦 LPU</td><td class="num">22</td><td class="num">24</td></tr>
+<tr><td>MaleCNS 併出的聯集數（含腹神經索 1 個）</td><td class="num">6（6）</td><td class="num">6（6）</td></tr>
+<tr><td>FlyWire 併出的聯集數</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>FlyCircuit 併出的聯集數</td><td class="num">4</td><td class="num">4</td></tr>
 </table>
-<p class="small">括號內是突觸版（A1_syn 第二版）同一分區、同一門檻的數字。聯集數含腹神經索的聯集（MaleCNS 每個門檻都有 1 個）。突觸版沒有做 FlyWire 與 FlyCircuit，所以那兩列沒有括號。</p>
+<p class="small">括號內是突觸版（A1_syn 第二版）同一分區、同一門檻的數字。突觸版沒有做 FlyWire 與 FlyCircuit，所以那兩列沒有括號。</p>
 
 <h3>幾個值得注意的地方</h3>
 <ul>
-<li><b>MaleCNS：纖維版和突觸版很接近。</b>腦 LPU 在三個門檻都只多 1 到 2 個，併出的聯集也大致相同。纖維版的 LN 有 90.6% 在突觸版也是同一區的 LN。也就是說，在這份資料上，只看骨架形狀就能得到跟看突觸差不多的答案。</li>
+<li><b>MaleCNS：纖維版和突觸版很接近。</b>腦 LPU 在兩個門檻都只多 2 個，併出的聯集也大致相同。纖維版的 LN 有 90.6% 在突觸版也是同一區的 LN。也就是說，在這份資料上，只看骨架形狀就能得到跟看突觸差不多的答案。</li>
 <li><b>蕈狀體在三份資料都併成左右兩個聯集</b>，但聯集裡除了蕈狀體本身，常常還多了幾個鄰區。蕈狀體由幾千顆 Kenyon 細胞組成，它們的纖維一路從萼（CA）穿過柄（PED）到各葉，不會 80% 集中在某一塊，所以蕈狀體的幾塊一定會併在一起。這些鄰區是一輪一輪收進來的（每收一區，都要有 10 顆以上神經元剛好分散在「已併好的聯集＋這一區」）：MaleCNS 左側多了 AOTU_L、BU_L、PLP_L，靠的主要是 KCg-d 型 Kenyon 細胞與 TuBu01–09 型神經元；FlyWire 兩側都多了 CRE、SCL、PLP、AOTU（右側另有 ICL_R）；FlyCircuit 兩側都多了 ICL、SCL（左側另有 CRE_L，右側另有 EB）。MaleCNS 右側則沒有多收。纖維版扣掉的只有主幹，也就是胞體到「切點」（主幹結束、開始算分支的那一點，怎麼找見判定規則 2.2）那一段；切點之後，分支從一區穿到另一區時經過的纖維仍算進份額。突觸版只數突觸，穿過去的纖維上沒有突觸就不算數；MaleCNS 的突觸版，左右蕈狀體聯集都只有蕈狀體本身 7 塊。</li>
-<li><b>FlyCircuit 有一個跨越左右兩側的大聯集</b>（reach 20 時 10 區，reach 30 時 14 區），主要是聽覺與平衡相關的 SAD、AMMC、WED 加上後坡 SPS、IPS。另兩份資料沒有這麼大的聯集。原因還沒細查；FlyCircuit 的神經元是不同個體的腦對齊到同一個標準腦，位置誤差較大，可能是一部分原因。</li>
-<li><b>FlyCircuit 的 LPU 最多、FlyWire 最少。</b>同一套 Ito 75 區，FlyCircuit 在 reach 20 有 40 個 LPU，FlyWire 只有 27 個；FlyCircuit 的神經元總數（28,573 顆）只有 FlyWire（139,255 顆）的四分之一不到，LPU 卻比較多。差異出在哪些區還沒逐區比對。FlyCircuit 的視葉（ME、LO、LOP）切得最細，右側髓質 ME_R 連切了三輪。</li>
-<li><b>反覆切分的效果</b>：FlyWire 只切一輪就停了；MaleCNS 切兩輪，第二輪再切 GNG 與 IB（這裡指 IB 聯集）第一輪切出的子區（例如多出 GNG.r2c2）；FlyCircuit 最多切三輪。跟「只切一輪」比，反覆切分讓 LPU 多了幾個，都出現在本來就很大的區。</li>
+<li><b>FlyCircuit 有一個跨越左右兩側的大聯集</b>（reach 20 時 10 區），主要是聽覺與平衡相關的 SAD、AMMC、WED 加上後坡 SPS、IPS。另兩份資料在 reach 20 沒有這麼大的跨左右聯集。原因還沒細查；FlyCircuit 的神經元是不同個體的腦對齊到同一個標準腦，位置誤差較大，可能是一部分原因。</li>
+<li><b>對半檢查擋下了 FlyCircuit 視葉（ME、LO）很可能是假的切分。</b>沒有這道檢查時，FlyCircuit 在 reach 20 有 40 個 LPU，比 FlyWire 的 27 個還多，但它的神經元總數（28,573 顆）只有 FlyWire（139,255 顆）的四分之一不到。多出來的主要是 ME_R、ME_L、LO_R、LO_L 被切成很多塊；這四區擋下後，FlyCircuit 是 24 個。這些切分很可能是神經元太少造成的：FlyCircuit 的 ME_R 只有 661 顆 LN，切成 8 塊；MaleCNS 的 ME_R 用全部 13,395 顆 LN 不會切，但隨機抽出 661 顆，也會切成 5–6 塊。</li>
+<li><b>另外兩份資料受對半檢查的影響很小。</b>FlyWire 的 LPU 數不變。MaleCNS 只有腹神經索的 LegNp_T3_L 改變：原本切成 2 塊，現在沒過檢查、整區算 1 個，所以 reach 20 的腹神經索 LPU 由 14 個變 13 個。</li>
+<li><b>反覆切分的效果</b>：MaleCNS 切兩輪，FlyWire 與 FlyCircuit 都只切一輪就停了。MaleCNS 在 reach 20 的第二輪，再切第一輪切出的 GNG、GNG.2 與 IB.2（IB 聯集切出的塊）。只有 GNG 成功，多出 GNG.r2c2 這 1 個 LPU；GNG.2 與 IB.2 切出的塊沒有全部成立，所以各自仍算 1 個。</li>
 </ul>
 
 <h3>事先登錄的預測</h3>
-<p>纖維版開跑前寫定了五個預測（以 reach 20 判定），每個預測都要求 MaleCNS 的兩套分區——正式 80 區與<b>密度模板 65 區</b>（同事只依突觸在空間中的疏密切出的另一套 MaleCNS 腦區）——都符合。65 區還沒跑，所以五個預測的正式判定都還不能下；判定程式目前把它們都記成「不成立」，只是因為少了 65 區。只看 80 區的話：</p>
+<p>纖維版開跑前寫定了五個預測（以 reach 20 為主，F-H5 比較各門檻），原訂要求 MaleCNS 的兩套分區——正式 80 區與<b>密度模板 65 區</b>（同事只依突觸在空間中的疏密切出的另一套 MaleCNS 腦區）——都符合。後來決定 65 區不跑，所以這裡只看 80 區：</p>
 <table>
 <tr><th>編號</th><th>預測</th><th>80 區的結果</th></tr>
 <tr><td>F-H1</td><td>纖維版的 LN 比突觸版少</td><td>符合：41,350 顆對 41,515 顆</td></tr>
 <tr><td>F-H2</td><td>腦 LPU 數在突觸版的 ±30% 內</td><td>符合：37 對 35</td></tr>
-<tr><td>F-H3</td><td>蕈狀體左右各有一個聯集，包含蕈狀體全部七塊（多併其他區也算）</td><td>符合（左側另外多併了 3 區，代表名是 AOTU_L）</td></tr>
+<tr><td>F-H3</td><td>蕈狀體左右各有一個聯集，包含蕈狀體全部七塊</td><td>部分符合：判定條件字面上成立，兩側都有這樣的聯集。但這個預測是照突觸版寫的，突觸版兩側都只有這七塊；纖維版右側也是如此，左側卻多併了 AOTU_L、BU_L、PLP_L 三區（代表名是 AOTU_L）</td></tr>
 <tr><td>F-H4</td><td>纖維 LN 至少 85% 在突觸版也是同一區的 LN</td><td>符合：90.6%</td></tr>
-<tr><td>F-H5</td><td>三個門檻的聯集數（含腹神經索）最多差 2</td><td>符合：6／6／5</td></tr>
+<tr><td>F-H5</td><td>三個門檻的聯集數（含腹神經索）最多差 2</td><td>暫不判定：reach 30 這次沒有重跑</td></tr>
 </table>
 <p class="small">FlyWire 與 FlyCircuit 不在預測範圍內（突觸版沒做這兩份，無從比較）。</p>
 
@@ -380,7 +388,11 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <li><b>FlyCircuit 不能排除感覺與運動神經元。</b>MaleCNS 與 FlyWire 有大類註解，判定前先排除感覺、運動等神經元；FlyCircuit 沒有這種註解，只能全部留下；這會讓結果偏向哪個方向，還沒有評估。FlyCircuit 最後參與判定的神經元（排除之後剩下的）也比較少：24,701 顆，MaleCNS 是 116,309 顆、FlyWire 是 112,686 顆；而且 FlyCircuit 的神經元來自不同個體。</li>
 <li><b>FlyWire 與 FlyCircuit 沒有腹神經索</b>，只能比腦的部分。</li>
 <li><b>MaleCNS 用正式 80 區，另兩份用 Ito 75 區</b>，兩種分區的切法不同（例如 80 區把蕈狀體分成 7 塊、Ito 75 區分成 4 塊），所以三份資料的 LPU 數不能直接比大小。FlyWire 與 FlyCircuit 用同一套分區，可以直接比。</li>
-<li>密度模板 65 區還沒跑。</li>
+<li><b>對半檢查的結果會受亂數影響。</b>檢查把 LN 隨機對半、重複 20 次，要至少 10 次兩半都切開；在這些都切開的次數裡，看兩半切法的一致程度（ARI，1＝完全相同，0＝跟亂分差不多），中位數要到 0.54 才算過。同一區換一組亂數，這個中位數可能差很多：MaleCNS reach 20 的右蕈狀體聯集一次 0.91（過）、另一次 0.24（沒過）；FlyWire reach 20 的 CRE_L（左蕈狀體聯集的代表名）一次 0.51（沒過）、另一次 0.78（過）。原因是 ARI 分成兩群：兩半切成相同塊數時約 0.7–1，其中一半少切幾塊時約 0.2，中位數取決於抽到幾次哪一種。本頁是用一組固定亂數算出的結果。把這次的 20 個 ARI 重新抽樣來估計，換亂數時會改變 LPU 數的主要是 FlyCircuit 的 LO_L、LO_R（兩個門檻；它們只切成 2 塊，各差 1 個）和 MaleCNS reach 10 的 GNG（它第一輪若沒過，最後的 4 塊就變成 1 個，差 3 個）；這只是粗估，實際不穩定的程度可能更大。上面兩個例子不影響 LPU 數，因為這兩個聯集切開後的塊不是全部成立，無論過不過都整區算 1 個。</li>
+<li><b>門檻 0.54 只用 MaleCNS 校準。</b>校準只用 MaleCNS、reach 20、第 1 輪。這份資料有 15 個腦區用全部 LN 時不會切，所以從這些區隨機抽 50、100、200 或 650 顆 LN 再切（LN 要夠多才抽，每種抽 10 份，共 350 份），切開的 175 份就當作假切分。每一份再做 20 次對半檢查：其中 174 份至少 10 次兩半都切開，各得到一個 ARI 中位數。門檻取這些分數的第 95 百分位，也就是約 95% 的假切分過不了。這 174 個分數全來自視葉（ME、LO、LOP 左右共 6 區），另外 9 區幾乎不會假切分，所以門檻用在視葉以外的區、FlyWire、FlyCircuit、reach 10 和第 2 輪以後，都屬於外推。</li>
+<li><b>LegNp_T3_L 可能被誤擋。</b>對半檢查有兩個條件，除了 ARI 達 0.54，還要 20 次裡至少 10 次兩半都切開。它只有 4 次都切開，所以沒過；但這 4 次的 ARI 中位數 0.73 高於門檻（只有 4 個值，參考性有限）。「至少 10 次」的意思是至少一半的次數切得開，這個標準是直接訂的、沒有校準；校準時 175 份假切分有 174 份滿足它，也就是假切分通常都切得開。LegNp_T3_L 不滿足這個條件，不能當作它是假切分的證據，所以它可能被誤擋。</li>
+<li><b>官方蕈狀體分區的影響。</b>MaleCNS 右蕈狀體各葉的官方分區和 Kenyon 細胞的纖維位置差約 4 µm。本頁維持官方分區；把右側分區移 4 µm 測試時，右蕈狀體聯集（reach 20）的 LN 由 1,714 顆降到 1,351 顆，移位後的數字和左蕈狀體聯集的 1,379 顆接近（左聯集另含 3 區，範圍不完全相同），所以現行數字可能高估約 360 顆，但聯集仍是同樣 7 塊；為什麼位置差會讓 LN 變多，還沒細查。左側多併的三區中，AOTU_L 與 BU_L 主要來自 TuBu 型神經元：它們的纖維有一段緊貼 Kenyon 細胞，這一段在左側有 73% 被官方分區標成蕈狀體的葉，在右側有 84% 不屬於任何腦區。不屬於任何腦區的纖維不算進各區的份額，所以只有左側的 TuBu 算成分散在這幾區。這和上面的 4 µm 應該是兩件事：右側分區移位後，這批纖維也沒有落進蕈狀體的葉，右聯集仍沒有併入 AOTU_R、BU_R。PLP_L 的根本原因還沒查清楚。</li>
+<li>reach 30 µm 在加入對半檢查後沒有重跑，密度模板 65 區決定不跑。</li>
 </ul>
 
 <h3>腦區縮寫</h3>
@@ -400,7 +412,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <tr><td>LA</td><td>lamina（視網膜板，視葉最外層）</td><td>SAD</td><td>saddle</td></tr>
 <tr><td>LAL</td><td>lateral accessory lobe</td><td>SCL</td><td>superior clamp</td></tr>
 <tr><td>SIP、SMP、SLP</td><td>superior intermediate／medial／lateral protocerebrum</td><td>SPS、IPS</td><td>superior／inferior posterior slope（上、下後坡）</td></tr>
-<tr><td>WED</td><td>wedge</td><td>IntTct、NTct、HTct、LTct</td><td>腹神經索的區：intermediate／neck／haltere／lower tectulum</td></tr>
+<tr><td>WED</td><td>wedge</td><td>IntTct、NTct、HTct、LTct、LegNp</td><td>腹神經索的區：intermediate／neck／haltere／lower tectulum、leg neuropil（腳的區，T1–T3 是前、中、後腳）</td></tr>
 </table>
 <p class="small">區名後綴 _L、_R 表示左、右側；沒有後綴的區（如 IB、FB、EB、SAD）跨中線只有一個。</p>
 
@@ -412,7 +424,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
-let KEYS = ["80","65","fw75","fc75"]; const TS = ["10","20","30"];   // KEYS 載入資料後只留有結果的分區
+let KEYS = ["80","65","fw75","fc75"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
 const ALABEL = {"80":"MaleCNS 正式 80 區","65":"MaleCNS 密度模板 65 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區"};
 const BUCKET = {single:"單一 LPU", multi:"多個候選（整區 1 個 LPU）", hub:"hub", neither:"兩者皆非"};
 let J = null, cur = {a:"80", t:"20", sel:null, multi:[], c:"region"};   // sel：卡片顯示的區（最後點的）；multi：所有選取的區（含 sel，Shift＋點加選）
@@ -644,7 +656,7 @@ function card(){
   let h = chips + `<h2>${esc(dispName(r))}</h2><span class="badge" style="background:${css("--" + r.bucket)}">${BUCKET[r.bucket]}</span> <span class="small muted">${r.part}</span>`;
   h += `<table><tr><td>管線判定</td><td>${esc(r.verdict)}</td></tr><tr><td>LN 數</td><td>${r.n_ln.toLocaleString()} 顆</td></tr><tr><td>以此區為端點的神經束 *</td><td>${r.n_tracts} 條</td></tr><tr><td>切分</td><td>${esc(kindTxt)}</td></tr>`;
   if (r.nvox) h += `<tr><td>體積</td><td>${r.nvox.toLocaleString()} µm³</td></tr>`;
-  if (r.members && r.members.length > 1) h += `<tr><td>併區聯集成員（${r.members.length} 區）</td><td>${r.members.map(esc).join("、")}</td></tr>`;
+  if (r.members && r.members.length > 1) h += `<tr><td>${r.kind === "子區" || r.name.includes(".") ? "切開前的聯集成員" : "併區聯集成員"}（${r.members.length} 區）</td><td>${r.members.map(esc).join("、")}</td></tr>`;
   if (r.n_home != null) h += `<tr><td>最後一步的住戶</td><td>${r.n_home} 顆</td></tr>`;
   if (r.official) h += `<tr><td>與官方分區重疊最多</td><td>${r.official.map(o => esc(o[0]) + " " + Math.round(o[1]*100) + "%").join("、")}</td></tr>`;
   h += `</table><p class="small muted" style="margin-top:2px">* 神經束：≥ 3 顆神經元走同一條路、兩端在同一對區（判定規則第 5 節）。</p>`;
