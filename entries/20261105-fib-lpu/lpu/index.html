@@ -531,7 +531,7 @@ let raf = 0;
 function render(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
 
 // ---------- 資料 ----------
-const DATA_VER = "20261105c";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
+const DATA_VER = "20261105d";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
 async function loadBin(url){ const r = await fetch(url + "?v=" + DATA_VER); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
 function meshGeo(a, idx){
   const key = a + ":" + idx; if (geoCache[key]) return geoCache[key];
@@ -592,7 +592,7 @@ function stats(){
   const R = rows(), b = R.filter(r => r.part === "腦"), v = R.filter(r => r.part !== "腦");
   const c = arr => ({lpu: arr.filter(isLPU).length, single: arr.filter(r => r.bucket==="single").length, multi: arr.filter(r => r.bucket==="multi").length, hub: arr.filter(r => r.bucket==="hub").length, nei: arr.filter(r => r.bucket==="neither").length});
   const cb = c(b), cv = c(v), un = J.atlases[cur.a].combos[cur.t].unions.length;
-  document.getElementById("stat").innerHTML = `<b>${ALABEL[cur.a]}・reach ${cur.t} µm</b><br>腦：LPU ${cb.lpu}（單一 ${cb.single}＋多個候選 ${cb.multi}）、hub ${cb.hub}、兩者皆非 ${cb.nei}<br>${(cur.a === "80" || cur.a === "65") ? `腹神經索：LPU ${cv.lpu}・` : "腹神經索：無資料・"}併出的聯集 ${un} 個`;
+  document.getElementById("stat").innerHTML = `<b>${ALABEL[cur.a]}・reach ${cur.t} µm</b><br>腦：LPU ${cb.lpu}（單一 ${cb.single}＋多個候選 ${cb.multi}）、hub ${cb.hub}、兩者皆非 ${cb.nei}<br>${J.atlases[cur.a].ds === "mcns" ? `腹神經索：LPU ${cv.lpu}・` : "腹神經索：無資料・"}併出的聯集 ${un} 個`;
 }
 function legend(){
   const pal = byRegion();

@@ -14,7 +14,7 @@
  ],
  "summary": "不看突觸、只量神經元骨架在各腦區的長度，判定果蠅腦裡哪些區是有自己局部神經元的處理單元（LPU）。三份資料 × 兩個門檻的結果都可以在 3D 裡點區、看局部神經元骨架、看哪些區被併在一起。",
  "embed": {
-  "src": "lpu/index.html?v=20261105c#p=view&a=80&t=20&c=region",
+  "src": "lpu/index.html?v=20261105d#p=view&a=80&t=20&c=region",
   "height": 950
  }
 }
