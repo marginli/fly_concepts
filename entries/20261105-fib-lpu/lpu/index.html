@@ -517,7 +517,8 @@ let raf = 0;
 function render(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
 
 // ---------- 資料 ----------
-async function loadBin(url){ const r = await fetch(url); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
+const DATA_VER = "20261105b";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
+async function loadBin(url){ const r = await fetch(url + "?v=" + DATA_VER); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
 function meshGeo(a, idx){
   const key = a + ":" + idx; if (geoCache[key]) return geoCache[key];
   const m = J.atlases[a].meshes[idx], buf = meshBuf[a];
@@ -1042,8 +1043,8 @@ document.addEventListener("click", e => {
 (async function(){
   const page = readHash();
   scene.background = new THREE.Color(css("--canvas"));
-  J = await (await fetch("data/a1syn.json")).json();
-  try { O = await (await fetch("data/orig.json")).json(); prepOrig(); } catch (e) { O = null; }
+  J = await (await fetch("data/a1syn.json?v=" + DATA_VER)).json();
+  try { O = await (await fetch("data/orig.json?v=" + DATA_VER)).json(); prepOrig(); } catch (e) { O = null; }
   KEYS = KEYS.filter(k => J.atlases[k]);
   seg("segA", KEYS, v => ALABEL[v].replace("密度模板 ", "模板 "), "a");
   if (!KEYS.includes(cur.a)) cur.a = KEYS[0];
