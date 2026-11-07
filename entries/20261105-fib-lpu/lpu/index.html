@@ -308,6 +308,19 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <tr><td>θ = 0.5</td><td>密度谷規則</td><td>實驗室 2026-10-28 定案</td></tr>
 <tr><td>20 次、至少 10 次、ARI 0.54</td><td>對半檢查（第 6 節）</td><td>纖維版新訂：20 次、至少 10 次（至少一半次數切得開）是直接訂的，0.54 由上述假切分校準；2026-11-05 定案</td></tr>
 </table>
+
+<h2 id="rlRules">RL 規則版的判定規則</h2>
+<p>這一節只適用「MaleCNS RL 規則版」這一套，其他分區照上面的規則。同事 RL 訂了一套用突觸判定 LPU 的規則，這一版改成只看骨架，判定時完全不用突觸。和上面相同的名詞（主幹、切點、reach）意思不變。</p>
+<table><tr><th>步驟</th><th>這一版的做法</th><th>和上面的規則差在哪</th></tr>
+<tr><td>挑細胞</td><td>排除胞體在中樞外、上行、下行、運動、傳出、內分泌和沒有大類標籤的神經元。其餘都納入。</td><td>缺胞體註記的細胞也納入。主幹要從胞體算起，它們沒有胞體位置，所以不扣主幹，整顆都算分支；取消「分支 80% 落在分區內」這條參與資格。</td></tr>
+<tr><td>判 LN</td><td>主腦區是這顆細胞分支最長的區（合併後是它所在的單位）。主腦區的份額 ≥ 80%，而且 reach ≤ 門檻（10、20 µm）。合併或切分後，單位變了，LN 要對新的單位重新判定。</td><td>份額的分母包含落在 103 區以外的分支，上面的規則只算分區內。</td></tr>
+<tr><td>判 LPU</td><td>單位要有 LN ≥ 10 顆，而且至少有 1 條纖維束，否則是 hub。</td><td>多了纖維束條件，意思是有一群細胞從這個單位連到同一處。算法：區組（見下一列）同時含單位內外區的非 LN 細胞，依單位外的那幾區分組，同一組 ≥ 3 顆就算一條。</td></tr>
+<tr><td>合併</td><td>每顆細胞把各區份額由大到小累加，到 ≥ 80% 而且在腦區相鄰關係上連成一片為止，這幾區是它的區組。超過 4 區就沒有區組。一組區的<b>住戶</b>是區組正好等於這一組、而且把這組當成主腦區重新扣主幹（主幹是走到主腦區為止，主腦區變了主幹就要重算）後份額 ≥ 80%、reach 也過關的細胞。住戶 ≥ 10 顆、成員都是 LN 不到 10 顆的區、而且左右互換的那一組也 ≥ 10 顆，就算過關。過關的組只要共用區就串成一個單位。這一步只掃一次，串起來的大單位不會再檢查是否符合上面的條件，所以可能串進不相干的區。</td><td>取代上面規則的互選與輸家歸隊（候選競爭的做法）。左右區一定要經過中線區才能同組。</td></tr>
+<tr><td>分割</td><td>每個 LPU 都試切。以 LN 的細胞型別為節點建圖，邊的權重來自兩型別的骨架點在 5 µm 格子裡重疊多少；用巢狀 SBM（依連結把節點分成多層群組的統計模型）分群；由粗到細，每一層算群與群的空間重疊度 O，O ≥ 0.35 的併成一塊，第一個出現 2 塊以上的層就切。切出的塊裡，只要有一塊 LN 不到 10 顆，或沒有纖維束，這一刀就整刀退回，這個單位在這裡不再往下切。</td><td>取代上面規則依纖維密度切分的做法與對半檢查，也不用讀法 A。</td></tr>
+<tr><td>穩定度</td><td>換 5 個亂數種子重跑，報告每塊出現幾次，只當附註。</td><td>不會擋切分。</td></tr>
+<tr><td>次結構</td><td>只描述，不改 LPU 數：記錄分群樹上 LN ≥ 10 顆的塊（不要求纖維束），以及塊之間的重疊度和橋細胞（把兩塊接起來的細胞）。</td><td>上面的規則沒有這一層。</td></tr>
+</table>
+<p>RL 的規則還要求 LN 彼此互連 ≥ 2%（LN 之間的突觸數 ÷ 這些 LN 的全部輸入突觸數），這要突觸才算得出來。我們試過用骨架靠近程度取代，沒有通過事前寫定的判準，所以這一版沒有互連條件。結果與已知限制見「結果總表」最下方的「RL 規則版」一節。</p>
 </div></section>
 
 <section class="page" id="p-about"><div class="doc" id="aboutDoc">
@@ -491,12 +504,12 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
-let KEYS = ["80","65","160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
+let KEYS = ["80","rl80","65","160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
 // 分區的例外註記（J.atlases[k].note；目前只有 FlyCircuit Chiang 55 區：只對這套分區拿掉參與資格）。alab(k) 在名稱後加 ※，noteHTML 列出全文。
 const anote = k => (J && J.atlases[k] && J.atlases[k].note) || "";
 const alab = k => ALABEL[k] + (anote(k) ? "※" : "");
 const noteHTML = ks => { const L = (ks || KEYS).filter(k => anote(k)); return L.length ? `<p class="small"><b>※ 注意：</b>${L.map(k => `${ALABEL[k]}：${esc(anote(k))}`).join("；")}。</p>` : ""; };
-const ALABEL = {"80":"MaleCNS 正式 80 區","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
+const ALABEL = {"80":"MaleCNS 正式 80 區","rl80":"MaleCNS RL 規則版","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
 const BUCKET = {single:"單一 LPU", multi:"多個候選（整區 1 個 LPU）", hub:"hub", neither:"兩者皆非"};
 let J = null, cur = {a:"80", t:"20", sel:null, multi:[], c:"region"};   // sel：卡片顯示的區（最後點的）；multi：所有選取的區（含 sel，Shift＋點加選）
 const meshBuf = {}, geoCache = {};
@@ -588,7 +601,7 @@ let raf = 0;
 function render(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
 
 // ---------- 資料 ----------
-const DATA_VER = "20261106a";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
+const DATA_VER = "20261107a";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
 async function loadBin(url){ const r = await fetch(url + "?v=" + DATA_VER); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
 function meshGeo(a, idx){
   const key = a + ":" + idx; if (geoCache[key]) return geoCache[key];
@@ -879,6 +892,30 @@ function countOf(a, t, part){
   const R = J.atlases[a].combos[t].rows.filter(r => part === "腦" ? r.part === "腦" : r.part !== "腦");
   return {lpu:R.filter(isLPU).length, single:R.filter(r=>r.bucket==="single").length, multi:R.filter(r=>r.bucket==="multi").length, hub:R.filter(r=>r.bucket==="hub").length, nei:R.filter(r=>r.bucket==="neither").length, n:R.length};
 }
+// RL 規則版（第六套分區 rl80）的專屬結果：數量、預測、逐區對照、合併步驟、穩定度、次結構。資料在 J.atlases.rl80.rl。
+function rlSection(){
+  const A = J.atlases.rl80; if (!A || !A.rl) return "";
+  const X = A.rl, S = t => X[t].summary, tbl = (head, rows) => `<div class="tblWrap"><table><tr>${head.map(c => `<th>${c}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</table></div>`;
+  let h = `<h2 id="rlSec">RL 規則版（第一輪）</h2><p>同事 RL 訂了一套用突觸判定 LPU 的規則。這一套把它改成只看骨架，判定時完全不用突觸，資料只有 MaleCNS 官方 103 區（腦 80 區、腹神經索 23 區）。算法寫在「判定規則」分頁最下方。在 3D 檢視左上角選「MaleCNS RL 規則版」，就能逐區看外形與局部神經元（LN）。</p>`;
+  h += `<h3>數量</h3>` + tbl(["", "reach 20 µm", "reach 10 µm", "RL（用突觸，沒有 reach 門檻）"], [
+    ["合併後的單位", `${S(20).單位_合併後}（LPU ${S(20).LPU_合併後}、hub ${S(20).hub_合併後}）`, `${S(10).單位_合併後}（LPU ${S(10).LPU_合併後}、hub ${S(10).hub_合併後}）`, "82（LPU 43、hub 39）"],
+    ["分割後的單位", `${S(20).單位_最終}（LPU ${S(20).LPU_最終}、hub ${S(20).hub_最終}）`, `${S(10).單位_最終}（LPU ${S(10).LPU_最終}、hub ${S(10).hub_最終}）`, "110（LPU 71、hub 39）"],
+    ["分割後的 LPU：腦／腹神經索", `${S(20).腦LPU}／${S(20).腹LPU}`, `${S(10).腦LPU}／${S(10).腹LPU}`, "未分開統計"]]);
+  const PT = {"R-H1":"合併後的聯集有 4–8 個（估算 6 個；實際 reach 20 µm 是 6 個、reach 10 µm 是 3 個）","R-H2":"蕈狀體每側各併成一個單位，含 CA、PED、aL、bL、bpL、gL，不含 apL（α′ 葉）","R-H3":"左蕈狀體不再多收 PLP、AOTU、BU（本頁其他分區用的舊規則，左側會多收這三區，右側不會）","R-H4":"蕈狀體不被切開","R-H5":"分割增加的 LPU 少於 RL 的 28 個（實際 reach 20 µm 增加 14 個、reach 10 µm 增加 18 個）"};
+  h += `<h3>計算前登錄的預測</h3><p class="small">預測在計算前寫定，判定以 reach 20 µm 為準，reach 10 µm 只供參考。第二條只檢查列出的區在不在，所以判定成立；但當時沒有預測到蕈狀體單位還會多串進 CRE。</p>` + tbl(["預測","reach 20 µm","reach 10 µm"], Object.keys(PT).map(k => [PT[k], S(20).預測[k].判定 ? "成立" : "不成立", S(10).預測[k].判定 ? "成立" : "不成立"]));
+  h += `<h3>已知限制</h3><ul class="small"><li><b>蕈狀體</b>：官方分區裡它有 7 區，這裡每側只併進 6 區，α′ 葉（apL）留在外面。計算前已估到這點，但解剖上它屬於蕈狀體，所以仍是限制。另外，有一批細胞同時用到蕈狀體的區與 CRE（CRE 是緊鄰的另一區），這一組在左右兩側都有夠多細胞，合併規則又是「過關就串」，CRE 就被串進蕈狀體單位；reach 10 µm 還帶進 LAL、SIP、SMP。RL 的蕈狀體是完整 7 區，沒有 CRE。</li><li><b>沒切開的大區</b>：RL 的分割把 ME（髓質）、FB、AVLP、EB 都拆成幾塊，這裡都沒切，原因各不相同。ME 試切了：切開後要對每一塊重判 LN，分支要有 80% 落在那一塊裡才算，切出的塊裡有一塊沒有細胞達到，LN 是 0，那一刀就整刀退回。FB、AVLP 是分群時沒有分出塊。EB 是 hub，hub 不試切。</li><li><b>互連</b>：RL 要求 LN 彼此互連 ≥ 2%，骨架算不出來，這一版沒有這個條件。</li><li><b>隨機性</b>：分群有隨機性，換亂數種子切法可能不同。本頁的名單用固定的正式種子；另外換 5 個種子重跑，把結果列在下面的「穩定度」。穩定度只當附註，不會因為不穩就取消切分。</li><li><b>算法細節</b>：RL 文件沒寫的幾個細節（重疊度 O 的分母、畫塊界線時的平滑方式等）用暫定做法，還沒和他確認。O 暫時這樣算：兩群細胞的骨架點放進格子，共同佔據的格數 ÷ 任一群佔據的格數，再除以把細胞隨機重新分到兩群時的同一比例。所以 1 表示和隨機混合一樣，0 表示完全分開。</li><li><b>簡化的地方</b>：為了省計算，有三處簡化。切出的塊與外面區的相鄰關係直接沿用母單位（只影響纖維束的計算）；纖維束找到足夠判定就停，所以束數是下限；旁邊的單位切開後，沒切的單位照理要再算一次 LN，這裡沿用合併時的結果。</li></ul>`;
+  const T2 = t => { const m = {}; X[t].compare.forEach(r => m[r.region] = r); return m; }, c20 = T2(20), c10 = T2(10);
+  const mark = (o, r) => o === r ? o : `<b>${o}</b>`;
+  const regs = Object.keys(c20);
+  h += `<details open><summary><b>每個官方區：我們與 RL 的判定對照</b>（粗體是和 RL 不同的）</summary><div class="fbar"><label>只看 <select id="rlCmp"><option value="all">全部 ${regs.length} 區</option><option value="diff">reach 20 µm 和 RL 不同的</option></select></label></div><div class="tblWrap"><table id="rlCmpT"><tr><th>官方區</th><th>RL</th><th>RL 的單位</th><th>reach 20 µm</th><th>reach 20 µm 的單位</th><th>reach 10 µm</th><th>reach 10 µm 的單位</th></tr>${regs.map(r => { const a = c20[r], b = c10[r] || {}; const diff = a.ours !== a.rl; return `<tr data-d="${diff ? 1 : 0}"><td>${esc(r)}</td><td>${esc(a.rl)}</td><td class="small">${esc(a.rl_unit)}</td><td>${mark(a.ours, a.rl)}</td><td class="small">${esc(a.ours_unit)}</td><td>${mark(b.ours || "", a.rl)}</td><td class="small">${esc(b.ours_unit || "")}</td></tr>`; }).join("")}</table></div></details>`;
+  for (const t of [20, 10]) {
+    h += `<details><summary><b>合併步驟（reach ${t} µm）</b>：過關的候選組與被對側條件擋下的組</summary><p class="small">住戶是區組正好等於這一組、以這組為主腦區重扣主幹後份額 ≥ 80%、reach 也過關的細胞。過關要住戶 ≥ 10 顆，而且左右互換的那一組也 ≥ 10 顆。</p>` + tbl(["候選組","住戶","對側住戶","結果"], X[t].steps.map(r => [esc(r.cand).replaceAll("+", "＋"), r.n, r.mirror, "過關"]).concat(X[t].blocked.map(r => [esc(r.cand).replaceAll("+", "＋"), r.n, r.mirror, "擋下"]))) + `</details>`;
+    const st = X[t].stability; const sum = {}; st.forEach(r => sum[r.seen] = (sum[r.seen] || 0) + 1);
+    h += `<details><summary><b>切出的塊與穩定度（reach ${t} µm）</b>：換 5 個亂數種子，每塊出現幾次</summary><p class="small">分佈：${Object.keys(sum).sort((a,b)=>b-a).map(k => `${k} 次 ${sum[k]} 塊`).join("、")}。LN 細胞集合重疊（交集 ÷ 聯集）≥ 0.5 算同一塊。</p>` + tbl(["單位","第幾塊","LN","5 次裡出現"], st.map(r => [esc(r.unit).replaceAll("+", "＋"), r.block, r.n_ln, r.seen])) + `</details>`;
+    h += `<details><summary><b>次結構（reach ${t} µm）</b>：只描述，不影響 LPU 數</summary><p class="small">次結構和切出的塊來自同一棵分群樹，差別是次結構只要 LN ≥ 10 顆，不要求有纖維束，所以可能比切出的塊多。等級：有纖維束是甲，沒有是乙。纖維束數找到足夠判定就停，是下限。橋細胞：分群的某一群若跟兩塊的其他群平均重疊度都 ≥ 0.35，這群的細胞就叫橋細胞，代表它們把兩塊接起來。串聯表示橋 ≥ 20% 而且兩塊重疊度 &lt; 0.35。</p>` + tbl(["單位","LN","纖維束（下限）","等級"], X[t].substructure.map(r => [esc(r.unit).replaceAll("+", "＋"), r.n_ln, r.n_tract ?? "", r.grade])) + `<p class="small"><b>兄弟塊</b></p>` + tbl(["單位","重疊度 O","橋細胞 %","標籤"], X[t].siblings.map(r => [esc(r.unit).replaceAll("+", "＋"), r.O ?? "", r.bridge_pct, r.tag])) + `</details>`;
+  }
+  return h;
+}
 let tblFilter = {a:"80", t:"20", b:"lpu", q:""};
 function tableUI(){
   if (!J) return;
@@ -897,7 +934,9 @@ function tableUI(){
   h += `</table></div>`;
   h += noteHTML();
   h += `<h2>每區明細</h2><div class="fbar"><label>分區 <select id="fA">${KEYS.map(a => `<option value="${a}">${alab(a)}</option>`).join("")}</select></label><label>reach <select id="fT">${TS.map(t => `<option value="${t}">${t} µm</option>`).join("")}</select></label><label>判定 <select id="fB"><option value="lpu">只看 LPU</option><option value="all">全部</option><option value="single">單一</option><option value="multi">多個候選</option><option value="hub">hub</option><option value="neither">兩者皆非</option></select></label><input id="fQ" placeholder="搜尋區名"></div><div class="tblWrap"><table id="regTable"></table></div>`;
+  h += rlSection();
   document.getElementById("tableDoc").innerHTML = h;
+  { const sel = document.getElementById("rlCmp"); if (sel) sel.onchange = () => document.querySelectorAll("#rlCmpT tr[data-d]").forEach(tr => tr.style.display = (sel.value === "diff" && tr.dataset.d === "0") ? "none" : ""); }
   const fA = document.getElementById("fA"), fT = document.getElementById("fT"), fB = document.getElementById("fB"), fQ = document.getElementById("fQ");
   fA.value = tblFilter.a; fT.value = tblFilter.t; fB.value = tblFilter.b; fQ.value = tblFilter.q;
   const upd = () => { tblFilter = {a:fA.value, t:fT.value, b:fB.value, q:fQ.value.trim().toLowerCase()}; regTable(); };
@@ -918,7 +957,7 @@ function regTable(){
 // O[分區]：names（原腦區名）、part、mesh（每區在 orig_<分區>.bin 的網格序號）、meshes、ov[門檻][最終區名] = [[原腦區, 原腦區落在此最終區的比例, 此最終區由該原腦區構成的比例]]
 let O = null; const origBuf = {}, origGeoC = {};
 const SUB = 0.05;   // 低於 5% 的零星重疊不列
-const DSN = {"80":"MaleCNS","160":"MaleCNS 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
+const DSN = {"80":"MaleCNS","rl80":"MaleCNS RL 規則版","160":"MaleCNS 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
 const REFLABEL = {"80":"官方 80 區","fc75":"Ito 75 區"};   // 有參考分區的（模板 160 區→官方 80 區、Chiang 55 區→Ito 75 區）
 function prepOrig(){
   for (const a of Object.keys(O)) {
