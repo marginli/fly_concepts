@@ -310,7 +310,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 </table>
 
 <h2 id="rlRules">RL 規則版的判定規則</h2>
-<p>這一節只適用「MaleCNS RL 規則版」和「MaleCNS RL 規則版 160 區」兩套，其他分區照上面的規則；兩套規則相同，只差腦區劃分。同事 RL 訂了一套用突觸判定 LPU 的規則，這一版改成只看骨架，判定時完全不用突觸。和上面相同的名詞（主幹、切點、reach）意思不變。</p>
+<p>這一節只適用「MaleCNS RL 規則版」、「MaleCNS RL 規則版 160 區」和「MaleCNS RL 規則版 不鏡射 160 區」A、B 兩版，其他分區照上面的規則；這幾套規則相同，只差腦區劃分（不鏡射 160 區的 B 版另外放寬一處，見結果總表最下方）。同事 RL 訂了一套用突觸判定 LPU 的規則，這一版改成只看骨架，判定時完全不用突觸。和上面相同的名詞（主幹、切點、reach）意思不變。</p>
 <table><tr><th>步驟</th><th>這一版的做法</th><th>和上面的規則差在哪</th></tr>
 <tr><td>挑細胞</td><td>排除胞體在中樞外、上行、下行、運動、傳出、內分泌和沒有大類標籤的神經元。其餘都納入。</td><td>缺胞體註記的細胞也納入。主幹要從胞體算起，它們沒有胞體位置，所以不扣主幹，整顆都算分支；取消「分支 80% 落在分區內」這條參與資格。</td></tr>
 <tr><td>判 LN</td><td>主腦區是這顆細胞分支最長的區（合併後是它所在的單位）。主腦區的份額 ≥ 80%，而且 reach ≤ 門檻（10、20 µm）。合併或切分後，單位變了，LN 要對新的單位重新判定。</td><td>份額的分母包含落在 103 區以外的分支，上面的規則只算分區內。</td></tr>
@@ -528,12 +528,12 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
-let KEYS = ["80","rl80","rls160","65","160","ds160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
+let KEYS = ["80","rl80","rls160","rln160a","rln160b","65","160","ds160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
 // 分區的例外註記（J.atlases[k].note；目前只有 FlyCircuit Chiang 55 區：只對這套分區拿掉參與資格）。alab(k) 在名稱後加 ※，noteHTML 列出全文。
 const anote = k => (J && J.atlases[k] && J.atlases[k].note) || "";
 const alab = k => ALABEL[k] + (anote(k) ? "※" : "");
 const noteHTML = ks => { const L = (ks || KEYS).filter(k => anote(k)); return L.length ? `<p class="small"><b>※ 注意：</b>${L.map(k => `${ALABEL[k]}：${esc(anote(k))}`).join("；")}。</p>` : ""; };
-const ALABEL = {"80":"MaleCNS 正式 80 區","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則版 160 區","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","ds160":"MaleCNS 密度＋骨架＋走向 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
+const ALABEL = {"80":"MaleCNS 正式 80 區","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則版 160 區","rln160a":"MaleCNS RL 規則版 不鏡射 160 區 A","rln160b":"MaleCNS RL 規則版 不鏡射 160 區 B","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","ds160":"MaleCNS 密度＋骨架＋走向 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
 const BUCKET = {single:"單一 LPU", multi:"多個候選（整區 1 個 LPU）", hub:"hub", neither:"兩者皆非"};
 let J = null, cur = {a:"80", t:"20", sel:null, multi:[], c:"region"};   // sel：卡片顯示的區（最後點的）；multi：所有選取的區（含 sel，Shift＋點加選）
 const meshBuf = {}, geoCache = {};
@@ -625,7 +625,7 @@ let raf = 0;
 function render(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
 
 // ---------- 資料 ----------
-const DATA_VER = "20261107z";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
+const DATA_VER = "20261110a";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
 async function loadBin(url){ const r = await fetch(url + "?v=" + DATA_VER); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
 function meshGeo(a, idx){
   const key = a + ":" + idx; if (geoCache[key]) return geoCache[key];
@@ -940,6 +940,23 @@ function rl160Section(tbl){
   h += rlDetails(X, tbl);
   return h;
 }
+// 同一套 RL 規則用在同事 11-10 的「不用參考底圖、不用神經名單、不左右鏡射」160 區；沒有對側配對的區有兩種處理（rln160a、rln160b）。
+function rlN160Section(tbl){
+  const A = J.atlases.rln160a, B = J.atlases.rln160b; if (!A || !A.rl || !B || !B.rl) return "";
+  const R1 = J.atlases.rls160 && J.atlases.rls160.rl;
+  const c = (X, t) => { const S = X[t].summary; return [`${S.單位_合併後}（LPU ${S.LPU_合併後}）`, `${S.單位_最終}（LPU ${S.LPU_最終}）`, `${S.腦LPU}／${S.腹LPU}`, `${X[t].steps.length}`]; };
+  const st = (X, t) => { const s = X[t].stability; return `${s.length} 塊，${s.filter(r => r.seen == 5).length} 塊 5 次都出現`; };
+  const col = [["A", A.rl], ["B", B.rl]].concat(R1 ? [["11-07 版", R1]] : []);
+  const lab = ["合併後的單位", "分割後的單位", "分割後的 LPU：腦／腹神經索", "過關的候選組（組數）"];
+  const rows = t => lab.map((l, i) => [l].concat(col.map(([n, X]) => c(X, t)[i]))).concat([["切出的塊：共幾塊、換 5 個亂數種子重跑都出現的有幾塊"].concat(col.map(([n, X]) => st(X, t)))]);
+  let h = `<h2 id="rlN160Sec">RL 規則版用在不鏡射的 160 區</h2><p>同事 2026-11-10 給了另一版 160 區。和上一節的 160 區一樣看突觸密度與纖維走向，但拿掉三個輔助：不參考任何現成的腦區圖、不用神經元名單、左右腦不互相鏡射（左右各自決定邊界）。這是同事的對照版，他註明不建議當需要左右對應的模板。規則和「MaleCNS RL 規則版」相同：先合併，再把夠大的單位分割成幾塊（分割用到亂數，所以換 5 個亂數種子重跑看穩定度，做法見「RL 規則版（第一輪）」一節）。只有合併的一處要另外決定，所以跑了 A、B 兩版。在 3D 檢視選「MaleCNS RL 規則版 不鏡射 160 區 A」或「…B」就能看。</p>`;
+  h += `<h3>A、B 兩版差在哪</h3><p class="small">合併時，幾個相連的區組成一組；分支 80% 以上留在這組裡、reach 也過關的神經元叫這組的「住戶」。一組要過關，除了自己有 10 顆以上住戶，還要它左右互換的那一組（每區換成對側的配對區）也有 10 顆以上。這套分區左右不鏡射：160 區裡 10 個跨中線（左右互換時換成自己），其餘 150 個在左側或右側，其中 92 個在對側找不到配對（上一節的 160 區是 42 個），含這些區的組就沒有「左右互換的那一組」。<b>A</b> 照「RL 規則版（第一輪）」與「RL 規則版用在 160 區」兩節的做法：這種組不算過關。<b>B</b> 是對照：這種組只看自己這側，有 10 顆住戶就過關。</p>`;
+  h += `<h3>數量（reach 20 µm）</h3>` + tbl([""].concat(col.map(x => x[0] === "11-07 版" ? "上一節的 160 區" : x[0])), rows(20));
+  h += `<h3>數量（reach 10 µm）</h3>` + tbl([""].concat(col.map(x => x[0] === "11-07 版" ? "上一節的 160 區" : x[0])), rows(10));
+  h += `<h3>要注意的地方</h3><ul class="small"><li><b>A 版擋掉的多半是因為沒有配對</b>：reach 20 µm 有 26 組住戶夠 10 顆卻被擋下，其中 25 組含沒有配對的區（reach 10 µm 是 18 組裡 15 組）。左右嗅葉在這套分區裡各由 2–3 區組成，其中多數區沒有配對，所以在 A 都沒有併；B 版左右各併成一個 LPU。</li><li><b>B 版會串出很大的聯集</b>：合併規則是「過關就串」，只要兩組共用一區就接在一起。B 放寬之後，reach 20 µm 串出一個 18 區的聯集，從右側的 AVLP、PLP、WED、ICL，經過中線附近的 GNG、SAD、IB，一直接到左側的 SPS、VES、IPS、PLP、WED；reach 10 µm 也有一個 9 區的聯集。這些區分屬視覺、聽覺與機械感覺、味覺與運動等不同功能，解剖上不像一個處理站，是 B 版的代價。這個大聯集吞掉了 A 版的兩個 LPU（S053_SPS_L＋S069_IB、S068_GNG＋S077_GNG），本身分割成 2 塊 LPU。</li><li><b>B 的腦 LPU 為什麼比 A 少 2（reach 20 µm，37 對 35）</b>：合併的差別讓 B 多 2 個（左右嗅葉 ＋2、大聯集切成的 2 塊 ＋2、被吞掉的 A 版 2 個 −2）。但右髓質 S003_ME_R、左髓質 S140_ME_L、左小葉 S125_LO_L、左 S117_SLP_L 四區在 A 各切成 2 塊、在 B 沒有切開，B 因此少 4 個。這四區的切法在 A 換種子時多半不穩（兩個髓質 5 次只出現 2–3 次，LO 一次都沒出現；SLP 5 次都出現）。</li><li><b>蕈狀體兩版都沒有併起來</b>：沒有任何含蕈狀體區的組過關，所以它的各塊（萼、柄、葉）仍各自是 hub，和上一節的 160 區相同。</li><li><b>其他限制</b>：和「RL 規則版（第一輪）」一節的「已知限制」相同（沒有 LN 互連條件、算法細節未和 RL 確認、穩定度只當附註）。區名取同事記錄的該區突觸最多的 Ito 分區，例如 S069_IB。區名裡的 _L、_R 是那個 Ito 區的左右，不一定是該區的所在側（例如 S053_SPS_L 同事記為跨中線）；合併判左右時看同事記錄的所在側。</li></ul>`;
+  h += `<h3>A 版細節</h3>` + rlDetails(A.rl, tbl) + `<h3>B 版細節</h3>` + rlDetails(B.rl, tbl);
+  return h;
+}
 function rlSection(){
   const A = J.atlases.rl80; if (!A || !A.rl) return "";
   const X = A.rl, S = t => X[t].summary, tbl = (head, rows) => `<div class="tblWrap"><table><tr>${head.map(c => `<th>${c}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</table></div>`;
@@ -957,6 +974,7 @@ function rlSection(){
   h += `<details open><summary><b>每個官方區：我們與 RL 的判定對照</b>（粗體是和 RL 不同的）</summary><div class="fbar"><label>只看 <select id="rlCmp"><option value="all">全部 ${regs.length} 區</option><option value="diff">reach 20 µm 和 RL 不同的</option></select></label></div><div class="tblWrap"><table id="rlCmpT"><tr><th>官方區</th><th>RL</th><th>RL 的單位</th><th>reach 20 µm</th><th>reach 20 µm 的單位</th><th>reach 10 µm</th><th>reach 10 µm 的單位</th></tr>${regs.map(r => { const a = c20[r], b = c10[r] || {}; const diff = a.ours !== a.rl; return `<tr data-d="${diff ? 1 : 0}"><td>${esc(r)}</td><td>${esc(a.rl)}</td><td class="small">${esc(a.rl_unit)}</td><td>${mark(a.ours, a.rl)}</td><td class="small">${esc(a.ours_unit)}</td><td>${mark(b.ours || "", a.rl)}</td><td class="small">${esc(b.ours_unit || "")}</td></tr>`; }).join("")}</table></div></details>`;
   h += rlDetails(X, tbl);
   h += rl160Section(tbl);
+  h += rlN160Section(tbl);
   return h;
 }
 let tblFilter = {a:"80", t:"20", b:"lpu", q:""};
@@ -1000,7 +1018,7 @@ function regTable(){
 // O[分區]：names（原腦區名）、part、mesh（每區在 orig_<分區>.bin 的網格序號）、meshes、ov[門檻][最終區名] = [[原腦區, 原腦區落在此最終區的比例, 此最終區由該原腦區構成的比例]]
 let O = null; const origBuf = {}, origGeoC = {};
 const SUB = 0.05;   // 低於 5% 的零星重疊不列
-const DSN = {"80":"MaleCNS","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則 160 區","160":"MaleCNS 160 區","ds160":"MaleCNS 密度＋骨架 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
+const DSN = {"80":"MaleCNS","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則 160 區","rln160a":"MaleCNS RL 不鏡射 160 區 A","rln160b":"MaleCNS RL 不鏡射 160 區 B","160":"MaleCNS 160 區","ds160":"MaleCNS 密度＋骨架 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
 const REFLABEL = {"80":"官方 80 區","fc75":"Ito 75 區"};   // 有參考分區的（模板 160 區→官方 80 區、Chiang 55 區→Ito 75 區）
 function prepOrig(){
   for (const a of Object.keys(O)) {
