@@ -9,69 +9,78 @@
 :root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
-.wrap{max-width:1100px;margin:0 auto;padding:12px 16px 30px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
-h2{font-size:1.02rem;margin:0 0 6px}
-.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px}
-@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.wrap{max-width:1400px;margin:0 auto;padding:8px 10px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+h2{font-size:.98rem;margin:0 0 4px}
+.grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:8px;align-items:stretch}
+.left{display:flex;flex-direction:column;margin-bottom:8px}.left canvas{flex:1 1 auto;height:0;min-height:340px}
+.right>.card:last-child{margin-bottom:8px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}.left canvas{flex:none;height:420px}}
 canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:1px solid var(--line)}
-#arena{height:470px}
-.task{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.task{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:2px 8px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line)}
 .task:last-child{border-bottom:0}
 .task label{font-weight:600;cursor:pointer;white-space:nowrap}
-.task .what{color:var(--muted);font-size:.84rem}
-.task .lv{grid-column:2;display:flex;gap:4px;flex-wrap:wrap}
+.task .what{color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task .lv{display:flex;gap:3px}
+.task .lv button{padding:1px 6px;font-size:.8rem}
 button{font:inherit;font-size:.86rem;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
 button.on{border-color:var(--fg);font-weight:600}
 button:disabled{opacity:.4;cursor:default}
 .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
-table{border-collapse:collapse;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums}
-th,td{border-bottom:1px solid var(--line);padding:4px 5px;text-align:right;vertical-align:top}
+table{border-collapse:collapse;width:100%;font-size:.8rem;line-height:1.4;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:3px 4px;text-align:right;vertical-align:top}
 th:first-child,td:first-child{text-align:left}
 td.st{text-align:left}
 .do{color:var(--good);font-weight:600}.sup{color:var(--bad);font-weight:600}.busy{color:var(--busy);font-weight:600}
 .bar{height:8px;border-radius:4px;background:var(--line);position:relative;min-width:60px}
 .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
 .bar b{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--fg);opacity:.5}
-.legend{font-size:.84rem;color:var(--muted);margin-top:6px}
-#now{font-size:.95rem;margin:6px 0 2px}
+.legend{font-size:.82rem;color:var(--muted);margin-top:4px}
+.ctl{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.ctl button{font-size:.78rem;padding:1px 7px}
+details.help{font-size:.84rem;color:var(--muted)}details.help summary{cursor:pointer;color:var(--fg);font-weight:600}details.help p{margin:4px 0}
+#now{font-size:.88rem;margin:4px 0 0;line-height:1.45}
 .warn{background:#fff3cd;color:#5c4400;border-radius:6px;padding:6px 10px;font-size:.86rem;margin-bottom:8px}
 :root[data-theme="dark"] .warn{background:#3a3220;color:#f0dca0}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .warn{background:#3a3220;color:#f0dca0}}
 </style></head><body><div class="wrap">
 <div id="prelim" class="warn" hidden>目前用的是暫代資料：只有「關」與「中」兩檔有模擬結果（取自研究報告 fly_multiwork 第十一節那批模擬：那批共 8 件工作，多了「嗅」與「避」，各開或關共 256 種組合；這裡只用其中六件的 64 種。強度是報告的校準值：退與梳等於這頁的「弱」，其他等於「中」，暫時都放在「中」那一格），「弱」與「強」暫時不能選。四檔完整的 4,096 種組合還在模擬中。</div>
 <div class="grid">
- <div class="card">
+ <div class="card left">
   <h2>場地</h2>
   <canvas id="arena" height="470"></canvas>
   <div id="now"></div>
-  <div class="legend">什麼刺激都不給時，果蠅隨機走動（手寫規則）。給了刺激後，果蠅的動作完全由下方表格的判定決定，判定依據是 MaleCNS 全腦模型算出的指令神經元放電。</div>
  </div>
- <div class="card">
-  <h2>刺激（可任意勾選、調強度）</h2>
-  <div id="tasks"></div>
-  <div class="legend" style="margin-top:8px"><button id="allOff">全部關掉</button> <button id="allOn">六件全開（中）</button> <button id="moveSugar">移動糖的位置（再點場地）</button> <button id="choice">示範：吃糖時目標出現</button> <button id="moveFem">移動雌蠅（再點場地）</button> <button id="choiceSong">示範：在雌蠅前唱歌時目標出現</button></div>
-  <div class="legend">追、吃、唱是場地裡的東西：按「弱、中、強」會把目標、糖或雌蠅放進場地（強度代表目標多明顯、糖多濃、求偶神經元被推得多強），按「關」就拿走。目標進到果蠅前方左右各 100 度內才算看到，頭碰到糖才嚐得到，走到雌蠅面前、面向她才會唱；所以場地裡有這些東西，不代表果蠅此刻收得到。吃和唱的時候都要站定，所以吃、唱、追彼此不能同時做，最多做一個；閃、退、梳一開就一直作用在果蠅身上。</div>
+ <div class="right">
+  <div class="card">
+   <h2>刺激（可任意勾選、調強度；括號是強度）</h2>
+   <div id="tasks"></div>
+   <div class="ctl"><button id="allOff">全部關掉</button><button id="allOn">六件全開（中）</button><button id="moveSugar">移動糖（再點場地）</button><button id="moveFem">移動雌蠅（再點場地）</button><button id="choice">示範：吃糖時目標出現</button><button id="choiceSong">示範：在雌蠅前唱歌時目標出現</button></div>
+  </div>
+  <div class="card">
+   <h2>判定：每件動作被保住還是被壓掉</h2>
+   <table id="tbl"></table>
+  </div>
  </div>
 </div>
-<div class="card">
- <h2>判定：每件動作被保住還是被壓掉</h2>
- <table id="tbl"></table>
- <div class="legend">按鈕括號裡的數字是刺激強度：被刺激的每顆輸入神經元每秒收到幾次訊號。表中「只給這一件」「同時給」是指令神經元的放電比什麼都不給時多了幾次（每秒次數）。「保持比例」＝同時給時指令神經元的效果 ÷ 只給這一件、同樣強度時的效果（效果＝減掉什麼都不給時的放電）。直條從 0 畫到 1.5，三分之一處的細線是 0.5；大於 1 表示同時給時反而被加強。
- 判定規則：保持比例 0.5 以上才算這個動作被保住；保住的動作依保持比例由高到低，逐一占用它需要的身體部位（腳、翅、吻），部位已被占用的就做不了（黃字）。若所有給了的動作都被壓到 0.5 以下，就做保持比例最高的那一個（備用規則，手訂）。</div>
-</div>
+<details class="help card"><summary>怎麼讀這一頁（按這裡展開）</summary>
+ <p>什麼刺激都不給時，果蠅隨機走動（手寫規則）。給了刺激後，果蠅的動作完全由判定表決定，判定依據是 MaleCNS 全腦模型算出的指令神經元放電。</p>
+ <p id="whatAll"></p>
+ <p>追、吃、唱是場地裡的東西：按「弱、中、強」會把目標、糖或雌蠅放進場地（強度代表目標多明顯、糖多濃、求偶神經元被推得多強），按「關」就拿走。目標進到果蠅前方左右各 100 度內才算看到，頭碰到糖才嚐得到，走到雌蠅面前、面向她才會唱；所以場地裡有這些東西，不代表果蠅此刻收得到。吃和唱的時候都要站定，所以吃、唱、追彼此不能同時做，最多做一個；閃、退、梳一開就一直作用在果蠅身上。</p>
+ <p>按鈕括號裡的數字是刺激強度：被刺激的每顆輸入神經元每秒收到幾次訊號。表中「只給這件」「同時給」是指令神經元的放電比什麼都不給時多了幾次（每秒次數）。「保持比例」＝同時給時指令神經元的效果 ÷ 只給這一件、同樣強度時的效果（效果＝減掉什麼都不給時的放電）。直條從 0 畫到 1.5，三分之一處的細線是 0.5；大於 1 表示同時給時反而被加強。</p>
+ <p>判定規則：保持比例 0.5 以上才算這個動作被保住；保住的動作依保持比例由高到低，逐一占用它需要的身體部位（腳、翅、吻），部位已被占用的就做不了（黃字）。若所有給了的動作都被壓到 0.5 以下，就做保持比例最高的那一個（備用規則，手訂）。「被壓掉」後面列的是：只給它和那一種刺激兩種時，保持比例就已低於 0.5 的刺激，括號是那時的保持比例。</p>
+</details>
 </div>
 <script>
 "use strict";
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TASK = [
- {n: "追", act: "轉向追小目標", what: "場地裡有一個會動的小目標，進到果蠅前方視野才算看到（刺激 LC10a 視覺神經元）", ro: "DNa02 右減左", parts: ["腳"]},
- {n: "閃", act: "跳起逃跑", what: "上方有黑影逼近（刺激兩側 LC4 與 LPLC2）", ro: "巨纖維 DNp01", parts: ["腳", "翅"]},
- {n: "退", act: "倒退走", what: "正前方有物體逼近（刺激 LC16）", ro: "MDN", parts: ["腳"]},
- {n: "吃", act: "站定伸出吻管吃糖", what: "場地裡放一滴糖水，果蠅的頭碰到糖才嚐得到（刺激咽部與唇瓣內側的糖味覺神經元 PhG9、dorsal_tpGRN）；吃的時候要站定", ro: "MN9", parts: ["吻", "腳"]},
- {n: "梳", act: "前腳梳觸角", what: "觸角被吹動（刺激觸角機械感覺 JO-C、JO-E）", ro: "aDN1、aDN2", parts: ["腳"]},
- {n: "唱", act: "站在雌蠅前伸單翅唱求偶歌", what: "場地裡放一隻不動的雌蠅，雄蠅走到她面前、面向她時才算收到；模型裡用直接活化求偶神經元 P1 代表（以接到 pIP10 最多的五型 pC1 代表 P1；費洛蒙訊號在模型裡進不了腦，所以用這個代替）；唱的時候要站定", ro: "pIP10", parts: ["翅", "腳"]},
+ {n: "追", short: "會動的小目標，進到前方視野才看到（LC10a）", act: "轉向追小目標", what: "場地裡有一個會動的小目標，進到果蠅前方視野才算看到（刺激 LC10a 視覺神經元）", ro: "DNa02 右減左", parts: ["腳"]},
+ {n: "閃", short: "上方黑影逼近（LC4、LPLC2）", act: "跳起逃跑", what: "上方有黑影逼近（刺激兩側 LC4 與 LPLC2）", ro: "巨纖維 DNp01", parts: ["腳", "翅"]},
+ {n: "退", short: "正前方物體逼近（LC16）", act: "倒退走", what: "正前方有物體逼近（刺激 LC16）", ro: "MDN", parts: ["腳"]},
+ {n: "吃", short: "糖水，頭碰到才嚐到；要站定（PhG9、dorsal_tpGRN）", act: "站定伸出吻管吃糖", what: "場地裡放一滴糖水，果蠅的頭碰到糖才嚐得到（刺激咽部與唇瓣內側的糖味覺神經元 PhG9、dorsal_tpGRN）；吃的時候要站定", ro: "MN9", parts: ["吻", "腳"]},
+ {n: "梳", short: "觸角被吹動（JO-C、JO-E）", act: "前腳梳觸角", what: "觸角被吹動（刺激觸角機械感覺 JO-C、JO-E）", ro: "aDN1、aDN2", parts: ["腳"]},
+ {n: "唱", short: "雌蠅，走到她面前才收到；直接活化 P1；要站定", act: "站在雌蠅前伸單翅唱求偶歌", what: "場地裡放一隻不動的雌蠅，雄蠅走到她面前、面向她時才算收到；模型裡用直接活化求偶神經元 P1 代表（以接到 pIP10 最多的五型 pC1 代表 P1；費洛蒙訊號在模型裡進不了腦，所以用這個代替）；唱的時候要站定", ro: "pIP10", parts: ["翅", "腳"]},
 ];
 const LEV = ["關", "弱", "中", "強"], THR = 0.5;
 let D, userLev = [0, 0, 0, 0, 0, 0];
@@ -103,13 +112,13 @@ function decide(lev) {
 let DEC = {res: [], doing: []}, E = [0, 0, 0, 0, 0, 0], lastE = "";
 function update() {
   const lev = E; DEC = decide(E); const box = $("#tbl"), col = i => css("--c" + i);
-  let h = "<tr><th>動作</th><th>指令神經元</th><th>只給這一件</th><th>同時給</th><th style='width:22%'>保持比例</th><th>判定</th></tr>";
+  let h = "<tr><th>動作</th><th>指令神經元</th><th>只給這件</th><th>同時給</th><th style='width:20%'>保持比例</th><th>判定</th></tr>";
   for (let i = 0; i < 6; i++) {
     const r = DEC.res[i], t = TASK[i];
     if (!r) { const why = i === 0 && userLev[0] ? "目標現在不在視野內" : i === 3 && userLev[3] ? "現在沒碰到糖" : "沒有給這種刺激";
       h += `<tr><td><span class="dot" style="background:${col(i)}"></span>${t.n}：${t.act}</td><td>${t.ro}</td><td colspan="4" style="text-align:left;color:var(--muted)">${why}</td></tr>`; continue; }
     const w = isNaN(r.kp) ? 0 : Math.max(0, Math.min(1.5, r.kp)) / 1.5 * 100;
-    const st = isNaN(r.kp) ? "單獨時指令神經元幾乎不放電，無法判定" : r.fallback ? `<span class="busy">做（備用規則）</span>：所有動作都被壓到 0.5 以下，取保持比例最高的這一個` : r.doing ? `<span class="do">做</span>` : !r.ok ? `<span class="sup">被壓掉</span>` + (r.by.length ? `：只給它和 ${r.by.map(([j, v]) => TASK[j].n + "（這兩種一起給時保持比例 " + v.toFixed(2) + "）").join("、")} 兩種時，就已壓到 0.5 以下` : "：只和任一種刺激配對時都還在 0.5 以上，是好幾種疊起來才壓到 0.5 以下") : `<span class="busy">保住了但沒做</span>：${t.parts.join("、")}被「${r.busy.join("、")}」占用`;
+    const st = isNaN(r.kp) ? "單獨時幾乎不放電，無法判定" : r.fallback ? `<span class="busy">做（備用規則）</span>：全部低於 0.5，取最高的這個` : r.doing ? `<span class="do">做</span>` : !r.ok ? `<span class="sup">被壓掉</span>` + (r.by.length ? `：單和 ${r.by.map(([j, v]) => TASK[j].n + "（" + v.toFixed(2) + "）").join("、")} 配對就低於 0.5` : "：單和任一種配對都還在 0.5 以上，是好幾種疊起來才壓下去") : `<span class="busy">保住但沒做</span>：${t.parts.join("、")}被「${r.busy.join("、")}」占用`;
     h += `<tr><td><span class="dot" style="background:${col(i)}"></span>${t.n}：${t.act}</td><td>${t.ro}</td><td>${r.one.toFixed(0)}</td><td>${r.all.toFixed(0)}</td>
       <td><div style="display:flex;gap:6px;align-items:center"><div class="bar" style="flex:1"><i style="width:${w}%;background:${r.ok ? css("--good") : css("--bad")}"></i><b style="left:${0.5 / 1.5 * 100}%"></b></div><span>${isNaN(r.kp) ? "—" : r.kp.toFixed(2)}</span></div></td><td class="st">${st}</td></tr>`;
   }
@@ -127,11 +136,11 @@ function buildTasks() {
   const box = $("#tasks");
   TASK.forEach((t, i) => {
     const row = document.createElement("div"); row.className = "task";
-    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><span class="what">${t.what}</span>
-      <div class="lv">${LEV.map((l, v) => `<button data-v="${v}">${l}${v && D.hz[i][v - 1] != null ? "（" + D.hz[i][v - 1] + "）" : ""}</button>`).join("")}</div>`;
+    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><div class="lv">${LEV.map((l, v) => `<button data-v="${v}">${l}${v && D.hz[i][v - 1] != null ? " " + D.hz[i][v - 1] : ""}</button>`).join("")}</div><span class="what" title="${t.what}">${t.short}</span>`;
     row.querySelectorAll("button").forEach(b => b.onclick = () => { userLev[i] = +b.dataset.v; if (i === 3 && userLev[3] && !W.sugar) placeSugarDefault(); if (i === 5 && userLev[5] && !W.fem) placeFemDefault(); sync(); });
     box.appendChild(row);
   });
+  $("#whatAll").innerHTML = "六種刺激：" + TASK.map(t => `<b>${t.n}</b>：${t.what}`).join("；") + "。";
   $("#allOff").onclick = () => { userLev = [0, 0, 0, 0, 0, 0]; sync(); };
   $("#allOn").onclick = () => { userLev = [2, 2, 2, 2, 2, 2]; if (!W.sugar) placeSugarDefault(); if (!W.fem) placeFemDefault(); sync(); };
   $("#moveFem").onclick = () => { W.placeFem = true; };
@@ -154,7 +163,7 @@ function sync() {
 const arena = $("#arena"), ctx = arena.getContext("2d");
 const U = () => 1.6 * devicePixelRatio;              // 1 單位＝幾像素
 const F = {x: 0, y: 0, th: -Math.PI / 2, ph: 0, t: 0, jump: null, refr: 0, init: false, idle: {walk: true, left: 2, turn: 0}};
-function size() { const w = arena.clientWidth * devicePixelRatio, h = 470 * devicePixelRatio; if (arena.width !== w) { arena.width = w; arena.height = h; } if (!F.init) { F.x = w / 2; F.y = h / 2; F.init = true; } }
+function size() { const w = arena.clientWidth * devicePixelRatio, h = arena.clientHeight * devicePixelRatio; if (arena.width !== w || arena.height !== h) { arena.width = w; arena.height = h; } if (!F.init) { F.x = w / 2; F.y = h / 2; F.init = true; } }
 const W = {sugar: null, placing: false, seen: 0, onSugar: false, fem: null, placeFem: false, femSide: 1};
 function tgtPos() { const w = arena.width, h = arena.height; return [w * (0.5 + 0.36 * Math.sin(0.31 * F.t)), h * (0.5 + 0.32 * Math.sin(0.47 * F.t + 1.1))]; }
 function headPos() { const u = U(); return [F.x + Math.cos(F.th) * 22 * u, F.y + Math.sin(F.th) * 22 * u]; }
