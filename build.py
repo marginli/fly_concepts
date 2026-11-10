@@ -22,16 +22,16 @@ REPO = "https://github.com/marginli/fly_concepts"
 IMPORTMAP = """<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>"""
 
 
-def head(title, css):
+def head(title, css, full=False):
     return f"""<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>{html.escape(title)}</title>
-<link rel="stylesheet" href="{css}"></head><body><div class="wrap">"""
+<link rel="stylesheet" href="{css}"></head><body><div class="wrap{' full' if full else ''}">"""
 
 
 def entry_page(eid, m):
     d = os.path.join(ENT, eid)
     desc = open(os.path.join(d, "desc.html"), encoding="utf-8").read() if os.path.exists(os.path.join(d, "desc.html")) else ""
-    out = [head(m["title"] + "｜果蠅概念圖庫", "../../lib/style.css"),
+    out = [head(m["title"] + "｜果蠅概念圖庫", "../../lib/style.css", m.get("full_width")),
            '<p><a href="../../">← 回條目清單</a></p>',
            f'<header><h1>{html.escape(m["title"])}</h1><p class="sub">{html.escape(m.get("date", ""))}　資料：{html.escape(m.get("dataset", ""))}</p></header>']
     if m.get("scene"):

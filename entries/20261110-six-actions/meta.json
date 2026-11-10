@@ -1,4 +1,4 @@
 {"title": "六件動作同時給：果蠅最後做哪些、哪些被壓掉", "date": "2026-11-10", "dataset": "MaleCNS v1.0（全腦 LIF 模擬）",
  "tags": ["多工", "模擬", "動畫", "互動", "動作選擇", "下行神經元", "互相壓制"],
  "summary": "任選追、閃、退、吃、梳、唱六種刺激與強度，果蠅照 MaleCNS 全腦模型算出的動作指令神經元放電，即時決定做哪些動作；沒給刺激時就走走停停。",
- "embed": {"src": "demo.html", "height": 760}, "desc_wide": true}
+ "embed": {"src": "demo.html", "height": 760}, "desc_wide": true, "full_width": true}
