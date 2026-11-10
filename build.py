@@ -7,7 +7,8 @@ entries/<id>/meta.json：
    "summary": "首頁卡片上的一句話", "scene": "scene.json"（有 3D 才寫）,
    "figs": [{"src": "a.png", "caption": "..."}]（有平面圖才寫）,
    "embed": {"src": "demo.html", "height": 1900}（互動 DEMO 頁，用 iframe 嵌入；選用）,
-   "desc_wide": true（說明欄和上方同寬，不限 760px；選用）}
+   "desc_wide": true（說明欄和上方同寬，不限 760px；選用）,
+   "desc_collapse": true（說明欄除第一節外，每節做成可收合；選用）}
 entries/<id>/desc.html：說明文字（HTML 片段）。
 """
 import hashlib
@@ -20,6 +21,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ENT = os.path.join(HERE, "entries")
 REPO = "https://github.com/marginli/fly_concepts"
 IMPORTMAP = """<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>"""
+
+
+def _collapse(desc):
+    """說明欄：第一個 <h2> 那節照常顯示，之後每一節包成可收合的 <details>（標題當 summary），預設收合。"""
+    import re
+    parts = re.split(r'(?=<h2>)', desc)
+    out, first = [], True
+    for part in parts:
+        mm = re.match(r'<h2>(.*?)</h2>(.*)', part, re.S)
+        if not mm or first:
+            out.append(part); first = first and not mm; continue
+        out.append(f'<details class="sec"><summary>{mm.group(1)}</summary>{mm.group(2)}</details>')
+    return "".join(out)
 
 
 def _ver(path):
@@ -51,6 +65,8 @@ def entry_page(eid, m):
                    + '<script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>')
     for fg in m.get("figs", []):
         out.append(f'<figure><img src="{html.escape(fg["src"])}" alt=""><figcaption>{html.escape(fg.get("caption", ""))}</figcaption></figure>')
+    if m.get("desc_collapse"):
+        desc = _collapse(desc)
     out.append(f'<div class="desc{" wide" if m.get("desc_wide") else ""}">{desc}</div>')
     out.append(f'<p class="meta">條目編號 {eid}。產生這一頁的程式：<a href="make.py">make.py</a>。</p>')
     # 刪除按鈕：開一個預填好的 GitHub issue，站主送出後由 .github/workflows/delete-entry.yml 刪除

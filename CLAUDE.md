@@ -32,3 +32,4 @@
 - `"embed": {"src": "demo.html", "height": N}` 用 iframe 嵌入；demo 若在 iframe 內 `parent.postMessage({demoH: 高度}, "*")`，條目頁會自動把 iframe 調成那個高度（範例見 `entries/20261110-six-actions/demo.html` 開頭的 script）。
 - `"desc_wide": true`：下方說明欄和上方同寬（預設限 760px）。
 - `"full_width": true`：整頁不限寬（預設 1100px），欄寬隨視窗大小變，DEMO 在 iframe 內也不限寬。
+- `"desc_collapse": true`：說明欄除第一節外，每節包成可收合的 details（預設收合）。

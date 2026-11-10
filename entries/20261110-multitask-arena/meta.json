@@ -1,4 +1,4 @@
 {"title": "嗅、追、閃同時給：真接線讓三件事互相影響（場地展示第二版）", "date": "2026-11-10", "dataset": "MaleCNS v1.0（全腦 LIF 模擬）",
  "tags": ["多工", "模擬", "動畫", "互動", "巨纖維", "DNa02", "蕈狀體", "閉迴路示意"],
  "summary": "場地裡兩隻果蠅收到一樣的氣味、小目標與逼近黑影：一隻照全腦模型「同時給」的結果動，另一隻照「各自單獨相加」動；兩隻走得不一樣，就是三件事互相影響的效果。",
- "embed": {"src": "demo.html", "height": 2150}, "desc_wide": true, "full_width": true}
+ "embed": {"src": "demo.html", "height": 2150}, "desc_wide": true, "full_width": true, "desc_collapse": true}
