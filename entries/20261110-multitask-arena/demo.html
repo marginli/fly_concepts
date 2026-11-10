@@ -15,7 +15,8 @@ h2{font-size:1.02rem;margin:0 0 6px}
 button{font:inherit;padding:4px 12px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
 button.on{border-color:var(--fg);font-weight:600}
 canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:1px solid var(--line)}
-#arena{height:480px;cursor:crosshair}
+#arena{aspect-ratio:2.2/1;height:auto;min-height:320px;max-height:85vh;cursor:crosshair}
+#net{aspect-ratio:1.67/1;height:auto;min-height:420px;max-height:95vh}
 .tools{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .tools .lab{color:var(--muted);font-size:.86rem;align-self:center;margin-left:6px}
 .sl{display:grid;grid-template-columns:7em minmax(120px,260px) 12em;gap:4px 10px;align-items:center;font-size:.9rem;margin:2px 0}
@@ -282,7 +283,7 @@ function drawNet(dt) {
 }
 
 /* ---------- 控制 ---------- */
-function sizeCanvases() { for (const cv of [arena, net]) { const w = cv.clientWidth * devicePixelRatio, h = (cv === arena ? 480 : 640) * devicePixelRatio; if (cv.width !== w) { cv.width = w; cv.height = h; } } }
+function sizeCanvases() { for (const cv of [arena, net]) { const w = cv.clientWidth * devicePixelRatio, h = cv.clientHeight * devicePixelRatio; if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } } }
 function scenario(n) {
   resetFlies(); S.t = 0; S.odor = null; S.tgt = false; S.loom = null;
   const w = arena.width, h = arena.height;

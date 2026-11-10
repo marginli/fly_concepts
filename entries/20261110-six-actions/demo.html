@@ -17,11 +17,12 @@ h2{font-size:.98rem;margin:0 0 4px}
 .right>.card:last-child{margin-bottom:8px}
 @media (max-width:820px){.grid{grid-template-columns:1fr}.left canvas{flex:none;height:420px}}
 canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:1px solid var(--line)}
-.task{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:2px 8px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line)}
+.task{display:grid;grid-template-columns:auto auto minmax(0,max-content) minmax(max-content,1fr);gap:2px 8px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line)}
 .task:last-child{border-bottom:0}
 .task label{font-weight:600;cursor:pointer;white-space:nowrap}
 .task .what{color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task .lv{display:flex;gap:3px}
+.task .ref{font-size:.78rem;white-space:nowrap;color:var(--fg);margin-left:6px}
 .task .lv button{padding:1px 6px;font-size:.8rem}
 button{font:inherit;font-size:.86rem;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
 button.on{border-color:var(--fg);font-weight:600}
@@ -53,7 +54,8 @@ details.help{font-size:.84rem;color:var(--muted)}details.help summary{cursor:poi
  </div>
  <div class="right">
   <div class="card">
-   <h2>刺激（可任意勾選、調強度；括號是強度）</h2>
+   <h2>刺激（可任意勾選、調強度）</h2>
+   <div class="legend" style="margin:0 0 2px">按鈕上的數字＝模型給每顆輸入神經元每秒幾次訊號；每列後面的「文獻」＝真果蠅這群輸入神經元量到的每秒放電次數，當參考值。</div>
    <div id="tasks"></div>
    <div class="ctl"><button id="allOff">全部關掉</button><button id="allOn">六件全開（中）</button><button id="moveSugar">移動糖（再點場地）</button><button id="moveFem">移動雌蠅（再點場地）</button><button id="choice">示範：吃糖時目標出現</button><button id="choiceSong">示範：在雌蠅前唱歌時目標出現</button></div>
   </div>
@@ -76,12 +78,12 @@ details.help{font-size:.84rem;color:var(--muted)}details.help summary{cursor:poi
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TASK = [
- {n: "追", short: "會動的小目標，進到前方視野才看到（LC10a）", act: "轉向追小目標", what: "場地裡有一個會動的小目標，進到果蠅前方視野才算看到（刺激 LC10a 視覺神經元）", ro: "DNa02 右減左", parts: ["腳"]},
- {n: "閃", short: "上方黑影逼近（LC4、LPLC2）", act: "跳起逃跑", what: "上方有黑影逼近（刺激兩側 LC4 與 LPLC2）", ro: "巨纖維 DNp01", parts: ["腳", "翅"]},
- {n: "退", short: "正前方物體逼近（LC16）", act: "倒退走", what: "正前方有物體逼近（刺激 LC16）", ro: "MDN", parts: ["腳"]},
- {n: "吃", short: "糖水，頭碰到才嚐到；要站定（PhG9、dorsal_tpGRN）", act: "站定伸出吻管吃糖", what: "場地裡放一滴糖水，果蠅的頭碰到糖才嚐得到（刺激咽部與唇瓣內側的糖味覺神經元 PhG9、dorsal_tpGRN）；吃的時候要站定", ro: "MN9", parts: ["吻", "腳"]},
- {n: "梳", short: "觸角被吹動（JO-C、JO-E）", act: "前腳梳觸角", what: "觸角被吹動（刺激觸角機械感覺 JO-C、JO-E）", ro: "aDN1、aDN2", parts: ["腳"]},
- {n: "唱", short: "雌蠅，走到她面前才收到；直接活化 P1；要站定", act: "站在雌蠅前伸單翅唱求偶歌", what: "場地裡放一隻不動的雌蠅，雄蠅走到她面前、面向她時才算收到；模型裡用直接活化求偶神經元 P1 代表（以接到 pIP10 最多的五型 pC1 代表 P1；費洛蒙訊號在模型裡進不了腦，所以用這個代替）；唱的時候要站定", ro: "pIP10", parts: ["翅", "腳"]},
+ {n: "追", ref: "文獻：無（只有鈣影像）", refFull: "LC10a 文獻只有鈣影像，沒有每秒放電次數（Ribeiro 等 2018；Hindmarsh Sten 等 2021）", short: "會動的小目標，進到前方視野才看到（LC10a）", act: "轉向追小目標", what: "場地裡有一個會動的小目標，進到果蠅前方視野才算看到（刺激 LC10a 視覺神經元）", ro: "DNa02 右減左", parts: ["腳"]},
+ {n: "閃", ref: "文獻：無（只有鈣影像）", refFull: "LC4 與 LPLC2 本身沒有每秒放電次數：只量過下游的巨纖維，LPLC2 只有鈣影像（Klapoetke 等 2017；Ache 等 2019）", short: "上方黑影逼近（LC4、LPLC2）", act: "跳起逃跑", what: "上方有黑影逼近（刺激兩側 LC4 與 LPLC2）", ro: "巨纖維 DNp01", parts: ["腳", "翅"]},
+ {n: "退", ref: "文獻：無（只有鈣影像）", refFull: "LC16 文獻只有鈣影像（Wu 等 2016）", short: "正前方物體逼近（LC16）", act: "倒退走", what: "正前方有物體逼近（刺激 LC16）", ro: "MDN", parts: ["腳"]},
+ {n: "吃", ref: "文獻：唇瓣 86 ± 9", refFull: "唇瓣糖味覺神經元在 100 mM 蔗糖時每秒 86 ± 9 次；咽部只有鈣影像（Dahanukar 等 2007；LeDue 等 2015）", short: "糖水，頭碰到才嚐到；要站定（PhG9、dorsal_tpGRN）", act: "站定伸出吻管吃糖", what: "場地裡放一滴糖水，果蠅的頭碰到糖才嚐得到（刺激咽部與唇瓣內側的糖味覺神經元 PhG9、dorsal_tpGRN）；吃的時候要站定", ro: "MN9", parts: ["吻", "腳"]},
+ {n: "梳", ref: "文獻：無單顆值（整條神經約 40）", refFull: "沒有單顆的數字；整條觸角神經多顆一起記錄，頭轉動的 0.5 秒內共約 20 次（約每秒 40 次，但是好幾顆加總，不能和單顆比）（Sun 等 2009；Kamikouchi 等 2009）", short: "觸角被吹動（JO-C、JO-E）", act: "前腳梳觸角", what: "觸角被吹動（刺激觸角機械感覺 JO-C、JO-E）", ro: "aDN1、aDN2", parts: ["腳"]},
+ {n: "唱", ref: "文獻：無（鈣與電壓影像）", refFull: "pC1／P1 文獻只有鈣影像與電壓影像（Kallman 等 2015；Hindmarsh Sten 等 2021）", short: "雌蠅，走到她面前才收到；直接活化 P1；要站定", act: "站在雌蠅前伸單翅唱求偶歌", what: "場地裡放一隻不動的雌蠅，雄蠅走到她面前、面向她時才算收到；模型裡用直接活化求偶神經元 P1 代表（以接到 pIP10 最多的五型 pC1 代表 P1；費洛蒙訊號在模型裡進不了腦，所以用這個代替）；唱的時候要站定", ro: "pIP10", parts: ["翅", "腳"]},
 ];
 const LEV = ["關", "弱", "中", "強"], THR = 0.5;
 let D, userLev = [0, 0, 0, 0, 0, 0];
@@ -137,7 +139,7 @@ function buildTasks() {
   const box = $("#tasks");
   TASK.forEach((t, i) => {
     const row = document.createElement("div"); row.className = "task";
-    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><div class="lv">${LEV.map((l, v) => `<button data-v="${v}">${l}${v && D.hz[i][v - 1] != null ? " " + D.hz[i][v - 1] : ""}</button>`).join("")}</div><span class="what" title="${t.what}">${t.short}</span>`;
+    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><div class="lv">${LEV.map((l, v) => `<button data-v="${v}">${l}${v && D.hz[i][v - 1] != null ? " " + D.hz[i][v - 1] : ""}</button>`).join("")}</div><span class="what" title="${t.what}">${t.short}</span><span class="ref" title="${t.refFull}">${t.ref}</span>`;
     row.querySelectorAll("button").forEach(b => b.onclick = () => { userLev[i] = +b.dataset.v; if (i === 3 && userLev[3] && !W.sugar) placeSugarDefault(); if (i === 5 && userLev[5] && !W.fem) placeFemDefault(); sync(); });
     box.appendChild(row);
   });
@@ -162,7 +164,7 @@ function sync() {
 /* ---------- 場地與動畫 ---------- */
 // 尺度：果蠅體長約 2.5 毫米＝50 單位；場地約 20 毫米寬。走路速度、步頻取真實果蠅的量級（放慢約一半方便看）。
 const arena = $("#arena"), ctx = arena.getContext("2d");
-const U = () => 1.6 * devicePixelRatio;              // 1 單位＝幾像素
+const U = () => devicePixelRatio * Math.max(0.7, Math.min(1.4, 1.05 * Math.min(arena.clientWidth, arena.clientHeight) / 420));   // 1 單位＝幾像素：隨場地大小縮放
 const F = {x: 0, y: 0, th: -Math.PI / 2, ph: 0, t: 0, jump: null, refr: 0, init: false, idle: {walk: true, left: 2, turn: 0}};
 function size() { const w = arena.clientWidth * devicePixelRatio, h = arena.clientHeight * devicePixelRatio; if (arena.width !== w || arena.height !== h) { arena.width = w; arena.height = h; } if (!F.init) { F.x = w / 2; F.y = h / 2; F.init = true; } }
 const W = {sugar: null, placing: false, seen: 0, onSugar: false, fem: null, placeFem: false, femSide: 1};
