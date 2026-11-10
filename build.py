@@ -6,7 +6,8 @@ entries/<id>/meta.json：
   {"title": "...", "date": "YYYY-MM-DD", "dataset": "MaleCNS v1.0", "tags": ["蕈狀體", ...],
    "summary": "首頁卡片上的一句話", "scene": "scene.json"（有 3D 才寫）,
    "figs": [{"src": "a.png", "caption": "..."}]（有平面圖才寫）,
-   "embed": {"src": "demo.html", "height": 1900}（互動 DEMO 頁，用 iframe 嵌入；選用）}
+   "embed": {"src": "demo.html", "height": 1900}（互動 DEMO 頁，用 iframe 嵌入；選用）,
+   "desc_wide": true（說明欄和上方同寬，不限 760px；選用）}
 entries/<id>/desc.html：說明文字（HTML 片段）。
 """
 import hashlib
@@ -39,10 +40,11 @@ def entry_page(eid, m):
     if m.get("embed"):
         em = m["embed"]
         out.append(f'<p class="hint"><a href="{html.escape(em["src"])}" target="_blank">在新分頁全螢幕開啟 DEMO</a></p>'
-                   f'<iframe src="{html.escape(em["src"])}" style="width:100%;height:{int(em.get("height", 1600))}px;border:0" loading="lazy"></iframe>')
+                   f'<iframe src="{html.escape(em["src"])}" style="width:100%;height:{int(em.get("height", 1600))}px;border:0" loading="lazy"></iframe>'
+                   + '<script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>')
     for fg in m.get("figs", []):
         out.append(f'<figure><img src="{html.escape(fg["src"])}" alt=""><figcaption>{html.escape(fg.get("caption", ""))}</figcaption></figure>')
-    out.append(f'<div class="desc">{desc}</div>')
+    out.append(f'<div class="desc{" wide" if m.get("desc_wide") else ""}">{desc}</div>')
     out.append(f'<p class="meta">條目編號 {eid}。產生這一頁的程式：<a href="make.py">make.py</a>。</p>')
     # 刪除按鈕：開一個預填好的 GitHub issue，站主送出後由 .github/workflows/delete-entry.yml 刪除
     del_url = (f"{REPO}/issues/new?title={quote('刪除條目 ' + eid)}"

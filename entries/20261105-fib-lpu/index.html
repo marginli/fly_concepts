@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../../lib/style.css"></head><body><div class="wrap">
 <p><a href="../../">← 回條目清單</a></p>
 <header><h1>只看纖維長度判出的局部處理單元：三份果蠅資料的 3D 成果</h1><p class="sub">2026-11-05　資料：MaleCNS v1.0（正式 80 區、密度模板 160 區、密度＋骨架＋走向 160 區，各加腹神經索 23 區）、FlyWire v783（Ito 75 區）、FlyCircuit（Ito 75 區；另跑 Chiang 2011 的 55 區，只對這套拿掉一條參與資格）；另有 MaleCNS 官方區的「RL 規則版」</p></header>
-<p class="hint"><a href="lpu/index.html?v=20261107z#p=view&amp;a=80&amp;t=20&amp;c=region" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="lpu/index.html?v=20261107z#p=view&amp;a=80&amp;t=20&amp;c=region" style="width:100%;height:950px;border:0" loading="lazy"></iframe>
+<p class="hint"><a href="lpu/index.html?v=20261107z#p=view&amp;a=80&amp;t=20&amp;c=region" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="lpu/index.html?v=20261107z#p=view&amp;a=80&amp;t=20&amp;c=region" style="width:100%;height:950px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
 <div class="desc"><h2>這是什麼</h2>
 <p>果蠅的腦分成幾十個腦區。有些腦區有一群「自己的」神經元，它們的分支幾乎全部留在這一區裡，只在區內處理訊號，叫<b>局部神經元</b>。一個腦區至少有 10 顆局部神經元，就算一個<b>局部處理單元</b>（LPU），可以想成腦裡一個相對獨立的處理站。實驗室用程式自動判定每個腦區是不是 LPU。</p>
 <p>這一頁是「纖維版」的結果。判定時完全不看突觸（神經元之間傳訊號的接點），只看神經元的<b>骨架</b>：把一顆神經元的形狀描成一棵從細胞本體長出來、一路分岔的樹，再量這棵樹的分支有多少比例落在每個腦區。神經元的細胞本體常常不在它工作的腦區裡，要先拉一條「電線」過去，到了才開始大量分岔；這段電線只是路過，先扣掉不算。一顆神經元扣掉這段後，分支總長度至少 80% 落在同一區、而且分支伸出這一區邊界不超過一個門檻距離（見下面「怎麼看」），就是那一區的局部神經元。只看骨架的好處是：沒有突觸資料的資料庫也能用。</p>

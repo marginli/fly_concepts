@@ -41,6 +41,8 @@ header h1 { font-size: 1.6rem; margin: 0 0 4px; }
   border-radius: 6px; cursor: pointer; font: inherit; }
 .hint { color: var(--muted); font-size: .85rem; margin-top: -10px; }
 .desc { max-width: 760px; }
+.desc.wide { max-width: none; }
+.desc.wide td:first-child { min-width: 8em; }
 .desc h2 { font-size: 1.15rem; margin-top: 1.4em; }
 figure { margin: 16px 0; } figure img { max-width: 100%; border-radius: 8px; border: 1px solid var(--line); }
 figcaption { color: var(--muted); font-size: .88rem; }
