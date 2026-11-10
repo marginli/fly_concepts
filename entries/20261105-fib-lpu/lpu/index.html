@@ -310,7 +310,7 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 </table>
 
 <h2 id="rlRules">RL 規則版的判定規則</h2>
-<p>這一節只適用「MaleCNS RL 規則版」、「MaleCNS RL 規則版 160 區」和「MaleCNS RL 規則版 不鏡射 160 區」A、B 兩版，其他分區照上面的規則；這幾套規則相同，只差腦區劃分（不鏡射 160 區的 B 版另外放寬一處，見結果總表最下方）。同事 RL 訂了一套用突觸判定 LPU 的規則，這一版改成只看骨架，判定時完全不用突觸。和上面相同的名詞（主幹、切點、reach）意思不變。</p>
+<p>這一節只適用「MaleCNS RL 規則版」、「MaleCNS RL 規則版 160 區」，以及「MaleCNS RL 規則版 不鏡射 160 區」「MaleCNS RL 規則版 不鏡射 h0.1 160 區」兩套各自的 A、B 版，其他分區照上面的規則；這幾套規則相同，只差腦區劃分（兩套不鏡射 160 區的 B 版另外放寬一處，見結果總表最下方）。同事 RL 訂了一套用突觸判定 LPU 的規則，這一版改成只看骨架，判定時完全不用突觸。和上面相同的名詞（主幹、切點、reach）意思不變。</p>
 <table><tr><th>步驟</th><th>這一版的做法</th><th>和上面的規則差在哪</th></tr>
 <tr><td>挑細胞</td><td>排除胞體在中樞外、上行、下行、運動、傳出、內分泌和沒有大類標籤的神經元。其餘都納入。</td><td>缺胞體註記的細胞也納入。主幹要從胞體算起，它們沒有胞體位置，所以不扣主幹，整顆都算分支；取消「分支 80% 落在分區內」這條參與資格。</td></tr>
 <tr><td>判 LN</td><td>主腦區是這顆細胞分支最長的區（合併後是它所在的單位）。主腦區的份額 ≥ 80%，而且 reach ≤ 門檻（10、20 µm）。合併或切分後，單位變了，LN 要對新的單位重新判定。</td><td>份額的分母包含落在 103 區以外的分支，上面的規則只算分區內。</td></tr>
@@ -528,12 +528,12 @@ code{background:var(--chip);padding:0 4px;border-radius:3px;font-size:13px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
-let KEYS = ["80","rl80","rls160","rln160a","rln160b","65","160","ds160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
+let KEYS = ["80","rl80","rls160","rln160a","rln160b","rlh160a","rlh160b","65","160","ds160","fw75","fc75","fc55"]; const TS = ["10","20"];   // KEYS 載入資料後只留有結果的分區
 // 分區的例外註記（J.atlases[k].note；目前只有 FlyCircuit Chiang 55 區：只對這套分區拿掉參與資格）。alab(k) 在名稱後加 ※，noteHTML 列出全文。
 const anote = k => (J && J.atlases[k] && J.atlases[k].note) || "";
 const alab = k => ALABEL[k] + (anote(k) ? "※" : "");
 const noteHTML = ks => { const L = (ks || KEYS).filter(k => anote(k)); return L.length ? `<p class="small"><b>※ 注意：</b>${L.map(k => `${ALABEL[k]}：${esc(anote(k))}`).join("；")}。</p>` : ""; };
-const ALABEL = {"80":"MaleCNS 正式 80 區","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則版 160 區","rln160a":"MaleCNS RL 規則版 不鏡射 160 區 A","rln160b":"MaleCNS RL 規則版 不鏡射 160 區 B","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","ds160":"MaleCNS 密度＋骨架＋走向 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
+const ALABEL = {"80":"MaleCNS 正式 80 區","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則版 160 區","rln160a":"MaleCNS RL 規則版 不鏡射 160 區 A","rln160b":"MaleCNS RL 規則版 不鏡射 160 區 B","rlh160a":"MaleCNS RL 規則版 不鏡射 h0.1 160 區 A","rlh160b":"MaleCNS RL 規則版 不鏡射 h0.1 160 區 B","65":"MaleCNS 密度模板 65 區","160":"MaleCNS 密度模板 160 區","ds160":"MaleCNS 密度＋骨架＋走向 160 區","fw75":"FlyWire Ito 75 區","fc75":"FlyCircuit Ito 75 區","fc55":"FlyCircuit Chiang 55 區"};
 const BUCKET = {single:"單一 LPU", multi:"多個候選（整區 1 個 LPU）", hub:"hub", neither:"兩者皆非"};
 let J = null, cur = {a:"80", t:"20", sel:null, multi:[], c:"region"};   // sel：卡片顯示的區（最後點的）；multi：所有選取的區（含 sel，Shift＋點加選）
 const meshBuf = {}, geoCache = {};
@@ -625,7 +625,7 @@ let raf = 0;
 function render(){ if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
 
 // ---------- 資料 ----------
-const DATA_VER = "20261110a";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
+const DATA_VER = "20261110b";   // 資料更新時改這個版本號，瀏覽器才會抓新檔（GitHub Pages 快取 10 分鐘）
 async function loadBin(url){ const r = await fetch(url + "?v=" + DATA_VER); if (!r.ok) throw new Error(url); return r.arrayBuffer(); }
 function meshGeo(a, idx){
   const key = a + ":" + idx; if (geoCache[key]) return geoCache[key];
@@ -957,6 +957,28 @@ function rlN160Section(tbl){
   h += `<h3>A 版細節</h3>` + rlDetails(A.rl, tbl) + `<h3>B 版細節</h3>` + rlDetails(B.rl, tbl);
   return h;
 }
+// 同一套 RL 規則用在同事 11-10 編號 4-2：和不鏡射 160 區相同，只把切小塊的盆地深度門檻 h 從 0.05 提高到 0.1（rlh160a、rlh160b）。
+function rlH160Section(tbl){
+  const A = J.atlases.rlh160a, B = J.atlases.rlh160b; if (!A || !A.rl || !B || !B.rl) return "";
+  const PA = J.atlases.rln160a && J.atlases.rln160a.rl, PB = J.atlases.rln160b && J.atlases.rln160b.rl;
+  const c = (X, t) => { const S = X[t].summary; return [`${S.單位_合併後}（LPU ${S.LPU_合併後}）`, `${S.單位_最終}（LPU ${S.LPU_最終}）`, `${S.腦LPU}／${S.腹LPU}`, `${X[t].steps.length}`]; };
+  const st = (X, t) => { const s = X[t].stability; return `${s.length} 塊，${s.filter(r => r.seen == 5).length} 塊 5 次都出現`; };
+  const col = [["A", A.rl], ["B", B.rl]].concat(PA && PB ? [["上一節 A", PA], ["上一節 B", PB]] : []);
+  const lab = ["合併後的單位", "分割後的單位", "分割後的 LPU：腦／腹神經索", "過關的組（組數）"];
+  const rows = t => lab.map((l, i) => [l].concat(col.map(([n, X]) => c(X, t)[i]))).concat([["切出的塊：共幾塊、換 5 個亂數種子重跑都出現的有幾塊"].concat(col.map(([n, X]) => st(X, t)))]);
+  let h = `<h2 id="rlH160Sec">RL 規則版用在不鏡射 h0.1 的 160 區</h2><p>同事同一天又給了一版 160 區（他的編號 4-2）。做法和上一節的「不鏡射 160 區」完全相同，只改一個參數。同事劃分腦區時，先依突觸密度與纖維走向算出每個位置「像不像邊界」，把它想成一張地形圖：邊界是山脊，區的內部是低窪的盆地。他先把每個盆地切成一個小塊，再把相鄰的小塊合併到剩 160 區。「盆地深度門檻 h」規定盆地要比周圍的山脊低多少，才能自成一塊；不夠深的就併進旁邊。這一版把 h 從 0.05 提高到 0.1，小塊因此較少、較大：同事拼成 160 區之前約有 6,500 個小塊，上一節約 9,700 個。（本節其他地方說的「合併」都是指 RL 規則的合併，不是這一步。）同事說 h＝0.1 是他拿現成的標準腦區（Ito 分區）對照後覺得較好的設定。左右腦一樣不鏡射，同事同樣註明不適合當需要左右對應的模板。規則與 A、B 兩版的差別都和上一節相同。在 3D 檢視選「MaleCNS RL 規則版 不鏡射 h0.1 160 區 A」或「…B」就能看。</p>`;
+  h += `<p class="small">這套分區有 11 個區跨中線，其餘 149 個在左側或右側，其中 87 個在對側找不到配對（上一節是 150 個裡 92 個）。</p><p class="small">讀下面的表時注意：「單位」是 RL 規則處理的對象，可能是單獨一區，也可能是合併成的一組區；括號裡是其中幾個判為 LPU。單位數包含腹神經索的 23 區，所以會超過 160。一個區不必合併也可以自己是 LPU，條件和其他各節相同（局部神經元與纖維束夠多，見「判定規則」分頁）；左右配對的條件只用在合併。所以 LPU 數會遠多於過關的組數。</p>`;
+  h += `<h3>數量（reach 20 µm）</h3>` + tbl([""].concat(col.map(x => x[0])), rows(20));
+  h += `<h3>數量（reach 10 µm）</h3>` + tbl([""].concat(col.map(x => x[0])), rows(10));
+  h += `<h3>要注意的地方</h3><ul class="small">`
+    + `<li><b>A 版的腦 LPU 比上一節少，主要少在視葉</b>：reach 20 µm 是 30 個對 37 個。視葉（處理視覺的外側部分，含 LA、ME、LO、LOP 四類區）的 LPU 從上一節的 18 個降到 12 個；其餘腦區本節 18 個、上一節 19 個，差不多。視葉為什麼少，本頁還沒有查。A 版有 26 組住戶夠 10 顆卻被擋下，其中 17 組含沒有配對的區（reach 10 µm 是 20 組裡 11 組）；其餘被擋的組則是左右互換的那一組住戶不到 10 顆。</li>`
+    + `<li><b>嗅葉</b>：這套分區裡，主要屬於右嗅葉的區有 5 個，主要屬於左嗅葉的有 2 個。兩版都沒有把嗅葉的區併起來：含嗅葉區的組沒有一組湊到 10 顆住戶，所以 B 放寬配對條件也沒用；每側各有一區（S052_AL_R、S100_AL_L）自己就有足夠的局部神經元，是 LPU，其餘都是 hub。上一節的 B 版則把左右嗅葉各併成一個 LPU。</li>`
+    + `<li><b>B 版把部分蕈狀體串進一個大聯集</b>：reach 20 µm 串出一個 19 區的聯集（LN 共 1,445 顆；這一版 LN 比它多的單位只有 4 個髓質區），裡面有左右蕈狀體的萼（CA）、左柄（PED）和 3 個 γ 葉（gL）區，也有 PLP、IB、SAD、ICL、SPS、SMP、PVLP、SCL、AOTU 等區。這些區分屬不同系統：PLP、PVLP、AOTU 主要接收視覺輸入，IB、SPS 一帶有很多通往運動的下行神經元，SAD 接收聽覺與機械感覺，蕈狀體則負責氣味學習。起點是兩組含蕈狀體的候選組：左側那組（gL＋PVLP＋CA＋PED）能過關，是因為其中 S098_PVLP_L 沒有配對，B 版只看本側；右側那組（ICL＋CA＋兩個 gL）則是因為 S062_gL_R 沒有配對。之後「過關就串」把共用 IB、ICL 等區的組一路接起來。蕈狀體其他的區（α 葉 aL、右柄、其餘 γ 葉）仍是 hub，所以蕈狀體被拆成一部分在聯集裡、一部分在外面，解剖上不合理。這個聯集最後切成 5 塊 LPU（換種子重跑時各塊出現 3–5 次）。reach 10 µm 則分成兩個聯集：左蕈狀體的一部分連同 IB、SAD、SPS、PVLP、ICL、AOTU 共 11 區（切成 4 塊，5 次都出現），以及右側 ICL＋CA＋兩個 gL 共 4 區（1 個 LPU）。A 版的蕈狀體各區都是 hub。</li>`
+    + `<li><b>B 的腦 LPU 為什麼比 A 多</b>：reach 20 µm 是 39 對 30，多 9 個。下面只列兩版不同的部分，都用塊數計：<br>B 這邊共 15 個：大聯集切成的 5 塊；三個兩區小聯集各 1 個（S057_GNG＋S082_GNG、S085_GNG＋S099_GNG、S095_LAL_L＋S097_LAL_L；這三組各含一個沒有配對的區，所以在 A 被擋下）；S068_GNG 沒切開，1 個；左 LH（S118_LH_L）切成 2 塊；右 SLP（S027_SLP_R）切成 4 塊。<br>A 這邊共 6 個：IB＋兩個 ICL 的聯集 1 個（在 B 被大聯集吞掉）；S068_GNG 切成 2 塊；左 LH 沒切開，1 個；右 SLP 切成 2 塊。<br>15 − 6 ＝ 9。其中左 LH、右 SLP、S068_GNG 都沒有參與合併，兩版裡的局部神經元也完全相同，切法卻不同。我們核對過，差別出在分割時的分群：即使用同一個亂數種子，兩次執行仍可能分出不同的群，所以這部分差異不是合併規則造成的。這幾區的切法本來就不穩：左 LH 在 B 的正式切法（種子 0）換 5 個種子重跑一次都沒出現，S068_GNG 在 A 的切法 5 次只出現 3 次。<br>reach 10 µm 是 35 對 27：A 的腦 LPU 在 B 都有，B 另外多了 11 區聯集的 4 塊、右蕈狀體那個聯集 1 個、兩個 GNG 兩區聯集（和 reach 20 µm 的那兩個相同）、一個左 SMP 兩區聯集（S089_SMP_L＋S091_SMP_L），共 8 個。</li>`
+    + `<li><b>其他限制</b>：和「RL 規則版（第一輪）」一節的「已知限制」相同。區名的寫法與左右的看法和上一節相同：取同事記錄的該區突觸最多的 Ito 分區，_L、_R 是那個 Ito 區的左右，不一定是該區的所在側。</li></ul>`;
+  h += `<h3>A 版細節</h3>` + rlDetails(A.rl, tbl) + `<h3>B 版細節</h3>` + rlDetails(B.rl, tbl);
+  return h;
+}
 function rlSection(){
   const A = J.atlases.rl80; if (!A || !A.rl) return "";
   const X = A.rl, S = t => X[t].summary, tbl = (head, rows) => `<div class="tblWrap"><table><tr>${head.map(c => `<th>${c}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</table></div>`;
@@ -975,6 +997,7 @@ function rlSection(){
   h += rlDetails(X, tbl);
   h += rl160Section(tbl);
   h += rlN160Section(tbl);
+  h += rlH160Section(tbl);
   return h;
 }
 let tblFilter = {a:"80", t:"20", b:"lpu", q:""};
@@ -1018,7 +1041,7 @@ function regTable(){
 // O[分區]：names（原腦區名）、part、mesh（每區在 orig_<分區>.bin 的網格序號）、meshes、ov[門檻][最終區名] = [[原腦區, 原腦區落在此最終區的比例, 此最終區由該原腦區構成的比例]]
 let O = null; const origBuf = {}, origGeoC = {};
 const SUB = 0.05;   // 低於 5% 的零星重疊不列
-const DSN = {"80":"MaleCNS","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則 160 區","rln160a":"MaleCNS RL 不鏡射 160 區 A","rln160b":"MaleCNS RL 不鏡射 160 區 B","160":"MaleCNS 160 區","ds160":"MaleCNS 密度＋骨架 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
+const DSN = {"80":"MaleCNS","rl80":"MaleCNS RL 規則版","rls160":"MaleCNS RL 規則 160 區","rln160a":"MaleCNS RL 不鏡射 160 區 A","rln160b":"MaleCNS RL 不鏡射 160 區 B","rlh160a":"MaleCNS RL 不鏡射 h0.1 160 區 A","rlh160b":"MaleCNS RL 不鏡射 h0.1 160 區 B","160":"MaleCNS 160 區","ds160":"MaleCNS 密度＋骨架 160 區","fw75":"FlyWire","fc75":"FlyCircuit","fc55":"FlyCircuit Chiang 55 區"};
 const REFLABEL = {"80":"官方 80 區","fc75":"Ito 75 區"};   // 有參考分區的（模板 160 區→官方 80 區、Chiang 55 區→Ito 75 區）
 function prepOrig(){
   for (const a of Object.keys(O)) {
