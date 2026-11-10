@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多工場地</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5d6670;--line:#dcd8cf;--card:#fff;--view:#f1efe9;
+ --olf:#2e9e5b;--trk:#d9821b;--lom:#8d5bd6;--exc:#c2552f;--inh:#2f6fbf;--off:#c8c4bb;--ghost:#2f6fbf}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45;--ghost:#6fa3e8}}
+:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45;--ghost:#6fa3e8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 16px 30px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+h2{font-size:1.02rem;margin:0 0 6px}
+button{font:inherit;padding:4px 12px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+button.on{border-color:var(--fg);font-weight:600}
+canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:1px solid var(--line)}
+#arena{height:480px;cursor:crosshair}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.tools .lab{color:var(--muted);font-size:.86rem;align-self:center;margin-left:6px}
+.sl{display:grid;grid-template-columns:7em minmax(120px,260px) 12em;gap:4px 10px;align-items:center;font-size:.9rem;margin:2px 0}
+.sl .v{font-variant-numeric:tabular-nums;color:var(--muted)}
+.legend{font-size:.84rem;color:var(--muted);margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2),th:last-child,td:last-child{text-align:left}
+td.bad{color:var(--exc);font-weight:600} td.good{color:var(--olf)}
+.ro{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:8px}
+.ro div{font-size:.86rem}
+.hud{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:.86rem;font-variant-numeric:tabular-nums;margin-top:6px}
+.hud .t{font-weight:600}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+@media (max-width:640px){.sl{grid-template-columns:6em 1fr}.sl .v{grid-column:1/-1}.hud{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+
+<div class="card">
+ <h2>1. 場地：兩隻果蠅收到同樣的刺激，差別只在三件事會不會互相影響</h2>
+ <div class="tools">
+  <button id="tOdor">放氣味源（再點場地）</button><button id="tOdorX">拿走氣味</button>
+  <button id="tTgt">小目標：關</button>
+  <button id="tLoomL">黑影從左逼近</button><button id="tLoomR">黑影從右逼近</button>
+  <button id="tReset">兩隻放回起點</button><button id="tGhost" class="on">影子果蠅：顯示</button>
+ </div>
+ <div class="tools"><span class="lab">示範情境：</span>
+  <button data-sc="1">追目標時黑影逼近</button><button data-sc="2">在氣味裡追目標</button><button data-sc="3">三種同時</button>
+ </div>
+ <canvas id="arena" height="480"></canvas>
+ <div class="hud" id="hud"></div>
+ <div class="legend"><span class="dot" style="background:#5e4426"></span><b>實心果蠅</b>：用全腦模型在「這幾種刺激同時給」時算出的讀出神經元（每件工作最後看的那幾顆神經元：追看轉向的 DNa02、閃看負責逃跑的巨纖維；嗅看 MBON11＋12，只顯示數字，不讓果蠅動）放電來動。
+ <span class="dot" style="background:var(--ghost);opacity:.5"></span><b>影子果蠅</b>：用「每種刺激單獨給時的效果直接相加」來動，也就是假設三件事互不影響。兩隻收到的刺激規則一樣、隨機閒逛也一樣；牠們走得不一樣，就是互相影響造成的。</div>
+</div>
+
+<div class="card">
+ <h2>2. 強度</h2>
+ <div class="sl"><span><span class="dot" style="background:var(--olf)"></span>氣味中心濃度</span><input id="sOdor" type="range" min="0" max="3" value="2"><span class="v" id="vOdor"></span></div>
+ <div class="sl"><span><span class="dot" style="background:var(--trk)"></span>小目標強度</span><input id="sTgt" type="range" min="0" max="2" value="0"><span class="v" id="vTgt"></span></div>
+ <div class="sl"><span><span class="dot" style="background:var(--lom)"></span>黑影強度</span><input id="sLoom" type="range" min="0" max="3" value="1"><span class="v" id="vLoom"></span></div>
+ <div class="legend">模型不畫影像或氣味煙流，而是直接刺激負責這種刺激的那群感覺或視覺神經元（稱為輸入神經元）：小目標刺激眼睛裡偵測小目標的 LC10a，黑影刺激偵測逼近物體的 LC4、LPLC2，氣味刺激觸角上的嗅覺受器。視覺的強度是「每顆輸入神經元每秒收到幾次訊號」；氣味是相對濃度，1 是實驗室另一個蕈狀體學習模擬平常用的濃度。小目標每秒 100 次那一檔是模型裡的低谷：100 次時的轉向反而比 50 次、25 次都弱（研究報告 fly_multiwork 第 8.3 節）。小目標在果蠅前方左右各 100 度內、距離不超過場地寬度六成時算看到；看到時強度只看拉桿，和遠近無關。</div>
+</div>
+
+<div class="card">
+ <h2>3. 現在這個刺激組合的互相影響（看實心果蠅）</h2>
+ <table id="tbl"></table>
+ <div class="legend">「同時給」「只給這一件」兩欄都是讀出神經元比什麼都不給時多出來的放電（整段 1 秒刺激期的平均，每秒次數），不隨動畫跳動。「保持比例」＝同時給時的效果 ÷ 只給這一件時的效果（效果都是減掉什麼都不給時的值）。1 表示沒被影響，低於 0.5（紅字）算被壓掉，大於 1 表示被加強；只給這一件時效果太小（每秒不到 1 次）就無法相除，顯示「—」。0.5 是研究報告訂的判準，不是實驗測得的門檻。嗅的讀出不讓果蠅動，它的保持比例只表示氣味訊號在腦裡被改變了多少。</div>
+ <div class="ro" id="ro"></div>
+ <div class="legend">曲線：實線是同時給，虛線是各自單獨相加的預測；灰底是刺激開始前的 0.5 秒。直線游標是此刻讀到模擬的哪個時間點（模擬每 0.05 秒記一次）。各圖的縱軸各自縮放。</div>
+</div>
+
+<div class="card">
+ <h2>4. 放電傳遞圖：訊號從輸入走到讀出（跟著實心果蠅）</h2>
+ <canvas id="net" height="640"></canvas>
+ <div class="legend">圓圈是一群同類型的神經元（括號內是顆數），越亮代表這群此刻放電越快（各群以自己在所有組合裡最快的時候為最亮，不同群之間不能比亮度）。線上移動的小點是放電沿連結往下游傳：
+ <span style="color:var(--exc)">紅點＝興奮</span>（讓下游更容易放電），<span style="color:var(--inh)">藍點＝抑制</span>（讓下游更難放電）；線越粗，突觸越多。虛線框的圓圈是抑制型的中繼神經元（夾在輸入與讀出之間、會壓低下游的神經元）。追的路徑左右各畫一條：上面一條從右眼的 LC10a 到右側 DNa02，下面一條從左眼到左側。</div>
+</div>
+
+</div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let D;
+const kidx = (o, v, l) => (o + 1) * 35 + (v + 1) * 5 + (l + 1);   // v：-1 關、0–2 右眼三級、3–5 左眼三級
+const JUMP = 75, GAIN = 3 * Math.PI / 180, MAXT = 300 * Math.PI / 180;   // 手寫規則（說明見最下方）
+let odorLev = 2, loomLev = 1, tgtLev = 0, showGhost = true;
+
+/* ---------- 讀出 ---------- */
+function rawRO(k, b) { const R = D.ro; return {mbon: R.mbon[k][b], steer: R.dnR[k][b] - R.dnL[k][b], gf: R.gf[k][b], dnR: R.dnR[k][b], dnL: R.dnL[k][b]}; }
+let OFF0 = 0;                                       // 什麼都不給時右減左的平均（扣掉，避免背景的左右差讓果蠅一直繞圈）
+function singles(L) { return [0, 1, 2].filter(i => L[i] >= 0).map(i => { const s = [-1, -1, -1]; s[i] = L[i]; return kidx(...s); }); }
+function readAt(L, b, additive) {
+  const k = kidx(...L), r = rawRO(k, b);
+  if (!additive) return {...r, steer: r.steer - OFF0};
+  const off = rawRO(kidx(-1, -1, -1), b), p = {...off};
+  for (const s of singles(L)) { const q = rawRO(s, b); for (const key in p) p[key] += q[key] - off[key]; }
+  p.steer -= OFF0; return p;
+}
+
+/* ---------- 場地 ---------- */
+const arena = $("#arena"), ctx = arena.getContext("2d");
+const S = {t: 0, odor: null, tgt: false, loom: null, placing: false, flies: []};
+function newFly(ghost) { const w = arena.width, h = arena.height; return {x: w * 0.5, y: h * 0.62, th: -Math.PI / 2, legs: 0, ghost, k: -1, tOn: 0, L: [-1, -1, -1], jump: null, refr: 0, r: null, b: 0, side: 1, trail: []}; }
+function resetFlies() { S.flies = [newFly(false), newFly(true)]; S.wander = 0; }
+function tgtPos() { const w = arena.width, h = arena.height; return [w / 2 + 0.38 * w * Math.sin(0.23 * S.t), h / 2 + 0.34 * h * Math.sin(0.37 * S.t + 1.2)]; }
+function levels(f) {
+  const w = arena.width, h = arena.height, L = [-1, -1, -1];
+  if (S.odor) {
+    const d2 = (f.x - S.odor.x) ** 2 + (f.y - S.odor.y) ** 2, sg = 0.28 * Math.min(w, h);
+    const c = D.conc[odorLev] * Math.exp(-d2 / (2 * sg * sg));
+    for (let i = 0; i < 4; i++) if (c >= D.conc[i] * 0.85) L[0] = i;
+  }
+  f.seen = false;
+  if (S.tgt) {
+    const p = tgtPos(), rx = p[0] - f.x, ry = p[1] - f.y, hx = Math.cos(f.th), hy = Math.sin(f.th);
+    const ang = Math.atan2(hx * ry - hy * rx, hx * rx + hy * ry), dist = Math.hypot(rx, ry) / Math.max(w, h);
+    if (Math.abs(ang) < 100 * Math.PI / 180 && dist < 0.6) {
+      f.side = ang >= 0 ? 1 : -1; f.seen = true;
+      L[1] = f.side > 0 ? tgtLev : 3 + tgtLev;
+    }
+  }
+  if (S.loom && S.t - S.loom.t0 < 1.0) L[2] = loomLev;
+  return L;
+}
+function stepFly(f, dt, wn) {
+  const w = arena.width, h = arena.height, d = devicePixelRatio;
+  const L = levels(f), k = kidx(...L);
+  if (k !== f.k) { f.k = k; f.tOn = S.t; f.L = L; }
+  const b0 = D.warm_ms / D.bin_ms; let b = b0 + Math.floor((S.t - f.tOn) * 1000 / D.bin_ms);
+  if (b > D.nbin - 1) b = D.nbin - 10 + ((b - (D.nbin - 10)) % 10);      // 1 秒後：重複最後 0.5 秒
+  f.b = b; f.r = readAt(L, b, f.ghost);
+  f.refr -= dt;
+  if (S.loom && f.r.gf > JUMP && f.refr <= 0 && !f.jump) {
+    const dir = f.th + (S.loom.side > 0 ? -Math.PI / 2 : Math.PI / 2);
+    let dx = Math.cos(dir), dy = Math.sin(dir); const L2 = 110 * d;
+    if (f.x + dx * L2 < 10 || f.x + dx * L2 > w - 10) dx = -dx;
+    if (f.y + dy * L2 < 10 || f.y + dy * L2 > h - 10) dy = -dy;
+    f.jump = {t: 0, dx, dy}; f.refr = 2;
+  }
+  if (f.jump) {
+    f.jump.t += dt; const v = 520 * d * Math.max(0, 1 - f.jump.t / 0.3);
+    f.x += f.jump.dx * v * dt; f.y += f.jump.dy * v * dt;
+    if (f.jump.t > 0.3) f.jump = null;
+  } else {
+    let turn = wn + Math.max(-MAXT, Math.min(MAXT, f.r.steer * GAIN));
+    const m = 30 * d;
+    if (f.x < m || f.y < m || f.x > w - m || f.y > h - m) { const want = Math.atan2(h / 2 - f.y, w / 2 - f.x); let e = want - f.th; e = Math.atan2(Math.sin(e), Math.cos(e)); turn += 3 * e; }
+    f.th += turn * dt; const sp = 55 * d; f.x += Math.cos(f.th) * sp * dt; f.y += Math.sin(f.th) * sp * dt; f.legs += dt * 14;
+  }
+  f.x = Math.max(4, Math.min(w - 4, f.x)); f.y = Math.max(4, Math.min(h - 4, f.y));
+  f.trail.push([f.x, f.y]); if (f.trail.length > 240) f.trail.shift();
+}
+function drawFly(f) {
+  const c = ctx, d = devicePixelRatio, s = 2.0 * d;
+  c.save(); c.translate(f.x, f.y); c.rotate(f.th + Math.PI / 2); c.scale(s, s);
+  if (f.ghost) c.globalAlpha = 0.45;
+  const body = f.ghost ? css("--ghost") : null;
+  c.strokeStyle = body || "#3a2c1c"; c.lineWidth = 1.2;
+  for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) { const ph = Math.sin(f.legs + i * 2.1 + (sd > 0 ? Math.PI : 0)) * 3; c.beginPath(); c.moveTo(sd * 3, -2 + i * 4); c.lineTo(sd * 10, -6 + i * 7 + ph); c.stroke(); }
+  c.fillStyle = "rgba(190,215,235,.7)"; c.strokeStyle = "rgba(90,110,130,.6)";
+  for (const sd of [-1, 1]) { c.beginPath(); c.ellipse(sd * 5, 6, 4, 10, sd * 0.35, 0, 7); c.fill(); c.stroke(); }
+  c.fillStyle = body || "#7a5a32"; c.beginPath(); c.ellipse(0, 7, 4, 8, 0, 0, 7); c.fill();
+  c.fillStyle = body || "#5e4426"; c.beginPath(); c.ellipse(0, -2, 4.5, 4.5, 0, 0, 7); c.fill();
+  c.fillStyle = body || "#4a3520"; c.beginPath(); c.arc(0, -8, 3.3, 0, 7); c.fill();
+  if (!f.ghost) { c.fillStyle = "#c0301e"; c.beginPath(); c.arc(-2.6, -9, 1.8, 0, 7); c.arc(2.6, -9, 1.8, 0, 7); c.fill(); }
+  c.restore();
+}
+function drawArena() {
+  const c = ctx, w = arena.width, h = arena.height, d = devicePixelRatio;
+  c.clearRect(0, 0, w, h);
+  if (S.odor) {
+    const sg = 0.28 * Math.min(w, h), g = c.createRadialGradient(S.odor.x, S.odor.y, 0, S.odor.x, S.odor.y, 2.4 * sg);
+    g.addColorStop(0, "rgba(46,158,91,.5)"); g.addColorStop(1, "rgba(46,158,91,0)"); c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = css("--olf"); c.beginPath(); c.arc(S.odor.x, S.odor.y, 6 * d, 0, 7); c.fill();
+    c.font = `${12 * d}px system-ui`; c.textAlign = "center"; c.fillText("3-octanol", S.odor.x, S.odor.y - 10 * d);
+  }
+  const flies = S.flies.filter(f => !f.ghost || showGhost);
+  for (const f of flies) {
+    c.strokeStyle = f.ghost ? css("--ghost") : css("--fg"); c.globalAlpha = f.ghost ? 0.35 : 0.25; c.lineWidth = 1.5 * d;
+    c.beginPath(); f.trail.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); c.globalAlpha = 1;
+  }
+  if (S.tgt) {
+    const p = tgtPos(); c.fillStyle = css("--fg"); c.beginPath(); c.arc(p[0], p[1], 5 * d, 0, 7); c.fill();
+    const f = S.flies[0];
+    if (f.seen) { c.strokeStyle = css("--trk"); c.setLineDash([4 * d, 4 * d]); c.lineWidth = 1.5 * d; c.beginPath(); c.moveTo(f.x, f.y); c.lineTo(p[0], p[1]); c.stroke(); c.setLineDash([]); }
+  }
+  if (S.loom) {
+    const u = Math.min(1, (S.t - S.loom.t0) / 1.0);
+    for (const f of flies) {
+      if (!f.loomXY) { const dir = f.th + (S.loom.side > 0 ? Math.PI / 2 : -Math.PI / 2); f.loomXY = [f.x + Math.cos(dir) * 70 * d, f.y + Math.sin(dir) * 70 * d]; }
+      c.fillStyle = `rgba(20,10,30,${(0.2 + 0.5 * u) * (f.ghost ? 0.5 : 1)})`; c.beginPath(); c.arc(f.loomXY[0], f.loomXY[1], (6 + 50 * u * u) * d, 0, 7); c.fill();
+    }
+  }
+  for (const f of flies) {
+    drawFly(f);
+    if (f.jump) { c.fillStyle = f.ghost ? css("--ghost") : css("--lom"); c.font = `bold ${15 * d}px system-ui`; c.textAlign = "center"; c.fillText(f.ghost ? "影子跳開" : "跳開！", f.x, f.y - 26 * d); }
+  }
+  if (S.placing) { c.fillStyle = css("--olf"); c.font = `${14 * d}px system-ui`; c.textAlign = "left"; c.fillText("點場地放氣味源", 10 * d, 20 * d); }
+}
+const LAB = ["嗅", "追", "閃"];
+function stimText(f) {
+  const L = f.L, out = [];
+  if (L[0] >= 0) out.push(`嗅（濃度 ${D.conc[L[0]]}）`);
+  if (L[1] >= 0) out.push(`追（${L[1] < 3 ? "右眼" : "左眼"}，每顆 ${D.tgt_hz[L[1] % 3]} 次/秒）`);
+  if (L[2] >= 0) out.push(`閃（每顆 ${D.loom_hz[L[2]]} 次/秒）`);
+  return out.length ? out.join("＋") : "沒有";
+}
+function hudFly(f, name) {
+  const turn = Math.max(-MAXT, Math.min(MAXT, f.r.steer * GAIN)) * 180 / Math.PI;
+  return `<div><div class="t">${name}</div>收到：${stimText(f)}<br>轉向 DNa02 右減左 ${f.r.steer.toFixed(1)} 次/秒 → ${Math.abs(turn) < 1 ? "不轉" : (turn > 0 ? "右轉 " : "左轉 ") + Math.abs(turn).toFixed(0) + " 度/秒"}<br>巨纖維 ${f.r.gf.toFixed(0)} 次/秒${f.r.gf > JUMP ? "（超過 " + JUMP + "：跳）" : ""}　MBON ${f.r.mbon.toFixed(0)} 次/秒</div>`;
+}
+
+/* ---------- 互相影響表與曲線 ---------- */
+let lastK = -1;
+function avgRO(L) {                                   // 整段刺激期（1 秒）平均
+  const b0 = D.warm_ms / D.bin_ms, k = kidx(...L), o = {mbon: 0, steer: 0, gf: 0};
+  for (let b = b0; b < D.nbin; b++) { const r = rawRO(k, b); for (const key in o) o[key] += r[key] / (D.nbin - b0); }
+  return o;
+}
+function table() {
+  const f = S.flies[0], L = f.L, off = avgRO([-1, -1, -1]), offSteer = off.steer;
+  const items = [["嗅", "MBON11＋12 總放電", "mbon", 0], ["追", "DNa02 右減左（目標在左時取負號，正值＝往目標轉）", "steer", 1], ["閃", "巨纖維 DNp01", "gf", 2]];
+  let html = "<tr><th>工作</th><th>讀出</th><th>同時給</th><th>只給這一件</th><th>保持比例</th><th>被誰影響</th></tr>";
+  for (const [nm, lab, key, i] of items) {
+    if (L[i] < 0) { html += `<tr><td>${nm}</td><td>${lab}</td><td colspan="4" style="text-align:left;color:var(--muted)">沒有這種刺激</td></tr>`; continue; }
+    const s = [-1, -1, -1]; s[i] = L[i];
+    const sg = key === "steer" && L[1] >= 3 ? -1 : 1, base = off[key];
+    const all = sg * (avgRO(L)[key] - base), one = sg * (avgRO(s)[key] - base);
+    const others = [0, 1, 2].filter(j => j !== i && L[j] >= 0).map(j => LAB[j]);
+    const kp = Math.abs(one) > 1 ? all / one : NaN;
+    const cl = isNaN(kp) ? "" : kp < 0.5 ? "bad" : "good";
+    html += `<tr><td>${nm}</td><td>${lab}</td><td>${all.toFixed(1)}</td><td>${one.toFixed(1)}</td><td class="${cl}">${isNaN(kp) ? "—" : kp.toFixed(2)}</td><td>${others.length ? others.join("、") : "（只有它自己）"}</td></tr>`;
+  }
+  $("#tbl").innerHTML = html;
+}
+function curves() {
+  const f = S.flies[0], L = f.L, k = kidx(...L), box = $("#ro");
+  const defs = [["嗅：MBON11＋12", "mbon", "--olf"], ["追：DNa02 右減左", "steer", "--trk"], ["閃：巨纖維 DNp01", "gf", "--lom"]];
+  if (!box.children.length) defs.forEach(dd => { const e = document.createElement("div"); e.innerHTML = `<div>${dd[0]}</div><canvas height="140"></canvas>`; box.appendChild(e); });
+  defs.forEach(([lab, key, col], j) => {
+    const cv = box.children[j].querySelector("canvas"), g = cv.getContext("2d");
+    cv.width = cv.clientWidth * devicePixelRatio; cv.height = 140 * devicePixelRatio;
+    const W = cv.width, H = cv.height, nb = D.nbin;
+    const y = [...Array(nb).keys()].map(b => readAt(L, b, false)[key]), p = [...Array(nb).keys()].map(b => readAt(L, b, true)[key]);
+    const lo = Math.min(0, ...y, ...p), hi = Math.max(10, ...y, ...p) * 1.08, X = b => 6 + b * (W - 12) / (nb - 1), Y = v => H - 14 - (v - lo) / (hi - lo) * (H - 24);
+    g.clearRect(0, 0, W, H); g.fillStyle = css("--off"); g.globalAlpha = .35; g.fillRect(0, 0, X(D.warm_ms / D.bin_ms), H); g.globalAlpha = 1;
+    g.strokeStyle = css("--muted"); g.lineWidth = 1; g.beginPath(); g.moveTo(0, Y(0)); g.lineTo(W, Y(0)); g.stroke();
+    const line = (a, dash, c) => { g.setLineDash(dash); g.strokeStyle = c; g.lineWidth = 2 * devicePixelRatio; g.beginPath(); a.forEach((v, b) => b ? g.lineTo(X(b), Y(v)) : g.moveTo(X(b), Y(v))); g.stroke(); g.setLineDash([]); };
+    line(p, [5 * devicePixelRatio, 4 * devicePixelRatio], css("--muted")); line(y, [], css(col));
+    g.strokeStyle = css("--fg"); g.globalAlpha = .5; g.beginPath(); g.moveTo(X(f.b), 0); g.lineTo(X(f.b), H); g.stroke(); g.globalAlpha = 1;
+    g.fillStyle = css("--muted"); g.font = `${11 * devicePixelRatio}px system-ui`; g.fillText(`${Math.round(hi)}`, 4, 12 * devicePixelRatio);
+  });
+}
+
+/* ---------- 傳遞圖 ---------- */
+const net = $("#net"), nctx = net.getContext("2d"); let pulses = [];
+function nodeXY(n) { const w = net.width, h = net.height, d = devicePixelRatio; return [D.nodes[n].x * (w - 170 * d) + 85 * d, D.nodes[n].y * (h - 95 * d) + 45 * d]; }
+function edgePath(e) { const [x1, y1] = nodeXY(e.s), [x2, y2] = nodeXY(e.t), d = devicePixelRatio, same = Math.abs(x2 - x1) < 5 * d;
+  const mx = (x1 + x2) / 2 + (same ? 70 * d * (y2 > y1 ? 1 : -1) : 0), my = (y1 + y2) / 2 + (!same && x2 < x1 ? 40 * d : 0); return [x1, y1, mx, my, x2, y2]; }
+function qpt(p, t) { const u = 1 - t; return [u * u * p[0] + 2 * u * t * p[2] + t * t * p[4], u * u * p[1] + 2 * u * t * p[3] + t * t * p[5]]; }
+function drawNet(dt) {
+  const w = net.width, h = net.height, f = S.flies[0], k = f.k < 0 ? kidx(-1, -1, -1) : f.k, b = f.b, d = devicePixelRatio;
+  const col = [css("--olf"), css("--trk"), css("--lom")], fg = css("--fg"), off = css("--off"), exc = css("--exc"), inh = css("--inh");
+  nctx.clearRect(0, 0, w, h); nctx.font = `${12 * d}px system-ui`; nctx.textAlign = "center"; nctx.fillStyle = css("--muted");
+  D.columns.forEach(c => nctx.fillText(c.label, c.x * (w - 170 * d) + 85 * d, 16 * d));
+  const rate = n => D.node_rate[k][n][b];
+  for (const e of D.edges) {
+    const p = edgePath(e); nctx.strokeStyle = e.sign > 0 ? exc : inh; nctx.globalAlpha = 0.22; nctx.lineWidth = Math.max(1, Math.log10(e.w) * 1.6) * d;
+    nctx.beginPath(); nctx.moveTo(p[0], p[1]); nctx.quadraticCurveTo(p[2], p[3], p[4], p[5]); nctx.stroke();
+    e._acc = (e._acc || 0) + rate(e.s) * (12 / D.node_max[e.s]) * dt * 1.1;
+    while (e._acc > 1 && pulses.length < 2500) { e._acc -= 1; pulses.push({e, t: Math.random() * 0.15}); }
+    if (e._acc > 3) e._acc = 3;
+  }
+  nctx.globalAlpha = 1; pulses = pulses.filter(pl => (pl.t += dt * 0.7) < 1);
+  for (const pl of pulses) { const [x, y] = qpt(edgePath(pl.e), pl.t); nctx.fillStyle = pl.e.sign > 0 ? exc : inh; nctx.beginPath(); nctx.arc(x, y, 2.6 * d, 0, 7); nctx.fill(); }
+  D.nodes.forEach((nd, n) => {
+    const [x, y] = nodeXY(n), r = rate(n), a = Math.min(1, Math.log1p(r) / Math.log1p(D.node_max[n])), R = (11 + 5 * Math.min(1, Math.log10(nd.n + 1) / 3)) * d;
+    nctx.fillStyle = off; nctx.beginPath(); nctx.arc(x, y, R, 0, 7); nctx.fill();
+    nctx.fillStyle = col[nd.task]; nctx.globalAlpha = 0.12 + 0.88 * a; nctx.beginPath(); nctx.arc(x, y, R, 0, 7); nctx.fill(); nctx.globalAlpha = 1;
+    if (nd.inh) { nctx.setLineDash([3 * d, 3 * d]); nctx.strokeStyle = inh; nctx.lineWidth = 1.5 * d; nctx.beginPath(); nctx.arc(x, y, R + 3 * d, 0, 7); nctx.stroke(); nctx.setLineDash([]); }
+    nctx.fillStyle = fg; nctx.fillText(nd.label, x, y + R + 13 * d); nctx.fillStyle = css("--muted"); nctx.fillText(`${Math.round(r)} 次/秒`, x, y + R + 26 * d);
+  });
+}
+
+/* ---------- 控制 ---------- */
+function sizeCanvases() { for (const cv of [arena, net]) { const w = cv.clientWidth * devicePixelRatio, h = (cv === arena ? 480 : 640) * devicePixelRatio; if (cv.width !== w) { cv.width = w; cv.height = h; } } }
+function scenario(n) {
+  resetFlies(); S.t = 0; S.odor = null; S.tgt = false; S.loom = null;
+  const w = arena.width, h = arena.height;
+  if (n === 1) { S.tgt = true; setTimeout(() => { S.loom = {t0: S.t, side: 1}; S.flies.forEach(f => f.loomXY = null); }, 3000); }
+  if (n === 2) { S.tgt = true; S.odor = {x: w * 0.5, y: h * 0.45}; }
+  if (n === 3) { S.tgt = true; S.odor = {x: w * 0.5, y: h * 0.45}; setTimeout(() => { S.loom = {t0: S.t, side: -1}; S.flies.forEach(f => f.loomXY = null); }, 3000); }
+  $("#tTgt").textContent = "小目標：" + (S.tgt ? "開" : "關"); $("#tTgt").classList.toggle("on", S.tgt);
+}
+function setup() {
+  arena.addEventListener("click", e => { if (!S.placing) return; const r = arena.getBoundingClientRect(); S.odor = {x: (e.clientX - r.left) * devicePixelRatio, y: (e.clientY - r.top) * devicePixelRatio}; S.placing = false; });
+  $("#tOdor").onclick = () => S.placing = true; $("#tOdorX").onclick = () => S.odor = null;
+  $("#tTgt").onclick = () => { S.tgt = !S.tgt; $("#tTgt").textContent = "小目標：" + (S.tgt ? "開" : "關"); $("#tTgt").classList.toggle("on", S.tgt); };
+  const loom = side => { S.loom = {t0: S.t, side}; S.flies.forEach(f => f.loomXY = null); };
+  $("#tLoomL").onclick = () => loom(-1); $("#tLoomR").onclick = () => loom(1);
+  $("#tReset").onclick = resetFlies;
+  $("#tGhost").onclick = () => { showGhost = !showGhost; $("#tGhost").textContent = "影子果蠅：" + (showGhost ? "顯示" : "隱藏"); $("#tGhost").classList.toggle("on", showGhost); };
+  $$("[data-sc]").forEach(b => b.onclick = () => scenario(+b.dataset.sc));
+  const upd = () => { odorLev = +$("#sOdor").value; loomLev = +$("#sLoom").value; tgtLev = +$("#sTgt").value; $("#vOdor").textContent = `濃度 ${D.conc[odorLev]}`; $("#vLoom").textContent = `每顆 ${D.loom_hz[loomLev]} 次/秒`; $("#vTgt").textContent = `每顆 ${D.tgt_hz[tgtLev]} 次/秒${tgtLev === 2 ? "（低谷）" : ""}`; };
+  $("#sOdor").oninput = upd; $("#sLoom").oninput = upd; $("#sTgt").oninput = upd; upd();
+}
+let lastT = performance.now(), tick = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; sizeCanvases();
+  S.t += dt;
+  if (S.loom && S.t - S.loom.t0 > 1.0) { S.loom = null; S.flies.forEach(f => f.loomXY = null); }
+  S.wander += (-S.wander * 1.5 + (Math.random() - 0.5) * 9) * dt;          // 手寫閒逛：兩隻共用同一串隨機轉彎
+  for (const f of S.flies) stepFly(f, dt, S.wander);
+  drawArena();
+  $("#hud").innerHTML = hudFly(S.flies[0], "實心果蠅（同時給，模型算的）") + (showGhost ? hudFly(S.flies[1], "影子果蠅（各自單獨相加）") : "");
+  if (++tick % 6 === 0 || S.flies[0].k !== lastK) { lastK = S.flies[0].k; table(); curves(); }
+  drawNet(dt);
+  requestAnimationFrame(frame);
+}
+fetch("data.json").then(r => r.json()).then(d => {
+  D = d; const off = kidx(-1, -1, -1), b0 = D.warm_ms / D.bin_ms;
+  let s = 0; for (let b = b0; b < D.nbin; b++) s += D.ro.dnR[off][b] - D.ro.dnL[off][b]; OFF0 = s / (D.nbin - b0);
+  sizeCanvases(); resetFlies(); setup(); requestAnimationFrame(frame);
+});
+</script>
+</body></html>
