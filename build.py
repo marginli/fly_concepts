@@ -32,7 +32,7 @@ def _ver(path):
 def head(title, css, full=False):
     return f"""<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>{html.escape(title)}</title>
-<link rel="stylesheet" href="{css}"></head><body><div class="wrap{' full' if full else ''}">"""
+<link rel="stylesheet" href="{css}?v={_ver(os.path.join(HERE, "lib", "style.css"))}"></head><body><div class="wrap{' full' if full else ''}">"""
 
 
 def entry_page(eid, m):
