@@ -4,9 +4,9 @@
 <title>六件動作平台</title>
 <style>
 :root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5d6670;--line:#dcd8cf;--card:#fff;--view:#f1efe9;--bad:#c2552f;--good:#2e9e5b;--busy:#b08900;
- --c0:#d9821b;--c1:#8d5bd6;--c2:#c2552f;--c3:#2e9e5b;--c4:#2f6fbf;--c5:#c23b8a}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114}}
-:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114}
+ --c0:#d9821b;--c1:#8d5bd6;--c2:#c2552f;--c3:#2e9e5b;--c4:#2f6fbf;--c5:#c23b8a;--lit:#8a5a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--lit:#e3b45a}}
+:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--lit:#e3b45a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
 .wrap{max-width:1400px;margin:0 auto;padding:8px 10px 16px}
@@ -22,6 +22,7 @@ canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:
 .task label{font-weight:600;cursor:pointer;white-space:nowrap}
 .task .what{color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task .lv{display:flex;gap:3px}
+.litc{font-size:.74rem;color:var(--lit);text-align:right;line-height:1.25}
 .task .ref{font-size:.78rem;white-space:nowrap;color:var(--fg);margin-left:6px}
 .task .lv button{padding:1px 6px;font-size:.8rem}
 button{font:inherit;font-size:.86rem;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
@@ -79,12 +80,12 @@ details.help{font-size:.84rem;color:var(--muted)}details.help summary{cursor:poi
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TASK = [
- {n: "追", ref: "文獻：無（只有鈣影像）", refFull: "LC10a 文獻只有鈣影像，沒有每秒放電次數（Ribeiro 等 2018；Hindmarsh Sten 等 2021）", short: "會動的小目標，進到前方視野才看到（LC10a）", act: "轉向追小目標", what: "場地裡有一個會動的小目標，進到果蠅前方視野才算看到（刺激 LC10a 視覺神經元）", ro: "DNa02 右減左", parts: ["腳"]},
- {n: "閃", ref: "文獻：無（只有鈣影像）", refFull: "LC4 與 LPLC2 本身沒有每秒放電次數：只量過下游的巨纖維，LPLC2 只有鈣影像（Klapoetke 等 2017；Ache 等 2019）", short: "上方黑影逼近（LC4、LPLC2）", act: "跳起逃跑", what: "上方有黑影逼近（刺激兩側 LC4 與 LPLC2）", ro: "巨纖維 DNp01", parts: ["腳", "翅"]},
- {n: "退", ref: "文獻：無（只有鈣影像）", refFull: "LC16 文獻只有鈣影像（Wu 等 2016）", short: "正前方物體逼近（LC16）", act: "倒退走", what: "正前方有物體逼近（刺激 LC16）", ro: "MDN", parts: ["腳"]},
- {n: "吃", ref: "文獻：唇瓣 86 ± 9", refFull: "唇瓣糖味覺神經元在 100 mM 蔗糖時每秒 86 ± 9 次；咽部只有鈣影像（Dahanukar 等 2007；LeDue 等 2015）", short: "糖水，頭碰到才嚐到；要站定（PhG9、dorsal_tpGRN）", act: "站定伸出吻管吃糖", what: "場地裡放一滴糖水，果蠅的頭碰到糖才嚐得到（刺激咽部與唇瓣內側的糖味覺神經元 PhG9、dorsal_tpGRN）；吃的時候要站定", ro: "MN9", parts: ["吻", "腳"]},
- {n: "梳", ref: "文獻：無單顆值（整條神經約 40）", refFull: "沒有單顆的數字；整條觸角神經多顆一起記錄，頭轉動的 0.5 秒內共約 20 次（約每秒 40 次，但是好幾顆加總，不能和單顆比）（Sun 等 2009；Kamikouchi 等 2009）", short: "觸角被吹動（JO-C、JO-E）", act: "前腳梳觸角", what: "觸角被吹動（刺激觸角機械感覺 JO-C、JO-E）", ro: "aDN1、aDN2", parts: ["腳"]},
- {n: "唱", ref: "文獻：無（鈣與電壓影像）", refFull: "pC1／P1 文獻只有鈣影像與電壓影像（Kallman 等 2015；Hindmarsh Sten 等 2021）", short: "雌蠅，走到她面前才收到；直接活化 P1；要站定", act: "站在雌蠅前伸單翅唱求偶歌", what: "場地裡放一隻不動的雌蠅，雄蠅走到她面前、面向她時才算收到；模型裡用直接活化求偶神經元 P1 代表（以接到 pIP10 最多的五型 pC1 代表 P1；費洛蒙訊號在模型裡進不了腦，所以用這個代替）；唱的時候要站定", ro: "pIP10", parts: ["翅", "腳"]},
+ {n: "追", lit: "走路時單顆 25–30；左右差可到約 ±100", litFull: "DNa02 全細胞記錄（清醒、在球上走路）：走路時每顆約每秒 25–30 次，停下時約 5；左右兩顆相減最大約 ±100（Rayshubskiy 等 2025 eLife，從圖讀出）；動態範圍約每秒 150 次（Yang 等 2024 Cell）", ref: "文獻：無（只有鈣影像）", refFull: "LC10a 文獻只有鈣影像，沒有每秒放電次數（Ribeiro 等 2018；Hindmarsh Sten 等 2021）", short: "會動的小目標，進到前方視野才看到（LC10a）", act: "轉向追小目標", what: "場地裡有一個會動的小目標，進到果蠅前方視野才算看到（刺激 LC10a 視覺神經元）", ro: "DNa02 右減左", parts: ["腳"]},
+ {n: "閃", lit: "通常只放 1 次", litFull: "巨纖維對逼近的黑影通常只放 1 個動作電位就引發起跳，沒有每秒放電率（von Reyn 等 2014；Dombrovski 等 2023）", ref: "文獻：無（只有鈣影像）", refFull: "LC4 與 LPLC2 本身沒有每秒放電次數：只量過下游的巨纖維，LPLC2 只有鈣影像（Klapoetke 等 2017；Ache 等 2019）", short: "上方黑影逼近（LC4、LPLC2）", act: "跳起逃跑", what: "上方有黑影逼近（刺激兩側 LC4 與 LPLC2）", ro: "巨纖維 DNp01", parts: ["腳", "翅"]},
+ {n: "退", lit: "基線 8.5；碰觸角 12–16", litFull: "MDN 全細胞記錄（清醒、在球上）：基線每秒 8.5 次；碰觸角時從約 7 升到 12–16；自發行走的單一例子最高約 75，後退時最高（Dahlhoff、Liessem 等 2025 預印本）", ref: "文獻：無（只有鈣影像）", refFull: "LC16 文獻只有鈣影像（Wu 等 2016）", short: "正前方物體逼近（LC16）", act: "倒退走", what: "正前方有物體逼近（刺激 LC16）", ro: "MDN", parts: ["腳"]},
+ {n: "吃", lit: "只有鈣影像", litFull: "MN9 只有鈣影像（Gordon & Scott 2009），查不到電生理放電率", ref: "文獻：唇瓣 86 ± 9", refFull: "唇瓣糖味覺神經元在 100 mM 蔗糖時每秒 86 ± 9 次；咽部只有鈣影像（Dahanukar 等 2007；LeDue 等 2015）", short: "糖水，頭碰到才嚐到；要站定（PhG9、dorsal_tpGRN）", act: "站定伸出吻管吃糖", what: "場地裡放一滴糖水，果蠅的頭碰到糖才嚐得到（刺激咽部與唇瓣內側的糖味覺神經元 PhG9、dorsal_tpGRN）；吃的時候要站定", ro: "MN9", parts: ["吻", "腳"]},
+ {n: "梳", lit: "只有鈣影像", litFull: "aDN1、aDN2 只有鈣影像（Hampel 等 2015），查不到電生理放電率", ref: "文獻：無單顆值（整條神經約 40）", refFull: "沒有單顆的數字；整條觸角神經多顆一起記錄，頭轉動的 0.5 秒內共約 20 次（約每秒 40 次，但是好幾顆加總，不能和單顆比）（Sun 等 2009；Kamikouchi 等 2009）", short: "觸角被吹動（JO-C、JO-E）", act: "前腳梳觸角", what: "觸角被吹動（刺激觸角機械感覺 JO-C、JO-E）", ro: "aDN1、aDN2", parts: ["腳"]},
+ {n: "唱", lit: "只在注入電流時量過：6–52", litFull: "pIP10 只在直接注入電流時量過：注入 13–74 pA 時每秒約 6–52 次，靜止時幾乎不放電；沒有在求偶行為中量過（Roemschied 等 2023 Nature 延伸資料圖 8，從圖讀出）", ref: "文獻：無（鈣與電壓影像）", refFull: "pC1／P1 文獻只有鈣影像與電壓影像（Kallman 等 2015；Hindmarsh Sten 等 2021）", short: "雌蠅，走到她面前才收到；直接活化 P1；要站定", act: "站在雌蠅前伸單翅唱求偶歌", what: "場地裡放一隻不動的雌蠅，雄蠅走到她面前、面向她時才算收到；模型裡用直接活化求偶神經元 P1 代表（以接到 pIP10 最多的五型 pC1 代表 P1；費洛蒙訊號在模型裡進不了腦，所以用這個代替）；唱的時候要站定", ro: "pIP10", parts: ["翅", "腳"]},
 ];
 const LEV = ["關", "弱", "中", "強"], THR = 0.5;
 let D, userLev = [0, 0, 0, 0, 0, 0];
@@ -120,10 +121,10 @@ function update() {
   for (let i = 0; i < 6; i++) {
     const r = DEC.res[i], t = TASK[i];
     if (!r) { const why = i === 0 && userLev[0] ? "目標現在不在視野內" : i === 3 && userLev[3] ? "現在沒碰到糖" : "沒有給這種刺激";
-      h += `<tr><td><span class="dot" style="background:${col(i)}"></span>${t.n}：${t.act}</td><td>${t.ro}</td><td colspan="4" style="text-align:left;color:var(--muted)">${why}</td></tr>`; continue; }
+      h += `<tr><td><span class="dot" style="background:${col(i)}"></span>${t.n}：${t.act}</td><td>${t.ro}<div class="litc" title="${t.litFull}">文獻：${t.lit}</div></td><td colspan="4" style="text-align:left;color:var(--muted)">${why}</td></tr>`; continue; }
     const w = isNaN(r.kp) ? 0 : Math.max(0, Math.min(1.5, r.kp)) / 1.5 * 100;
     const st = isNaN(r.kp) ? "單獨時幾乎不放電，無法判定" : r.fallback ? `<span class="busy">做（備用規則）</span>：全部低於 0.5，取最高的這個` : r.doing ? `<span class="do">做</span>` : !r.ok ? `<span class="sup">被壓掉</span>` + (r.by.length ? `：單和 ${r.by.map(([j, v]) => TASK[j].n + "（" + v.toFixed(2) + "）").join("、")} 配對就低於 0.5` : "：單和任一種配對都還在 0.5 以上，是好幾種疊起來才壓下去") : `<span class="busy">保住但沒做</span>：${t.parts.join("、")}被「${r.busy.join("、")}」占用`;
-    h += `<tr><td><span class="dot" style="background:${col(i)}"></span>${t.n}：${t.act}</td><td>${t.ro}</td><td>${r.one.toFixed(0)}</td><td>${r.all.toFixed(0)}</td>
+    h += `<tr><td><span class="dot" style="background:${col(i)}"></span>${t.n}：${t.act}</td><td>${t.ro}<div class="litc" title="${t.litFull}">文獻：${t.lit}</div></td><td>${r.one.toFixed(0)}</td><td>${r.all.toFixed(0)}</td>
       <td><div style="display:flex;gap:6px;align-items:center"><div class="bar" style="flex:1"><i style="width:${w}%;background:${r.ok ? css("--good") : css("--bad")}"></i><b style="left:${0.5 / 1.5 * 100}%"></b></div><span>${isNaN(r.kp) ? "—" : r.kp.toFixed(2)}</span></div></td><td class="st">${st}</td></tr>`;
   }
   box.innerHTML = h;

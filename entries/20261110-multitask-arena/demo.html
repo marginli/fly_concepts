@@ -4,9 +4,9 @@
 <title>多工場地</title>
 <style>
 :root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5d6670;--line:#dcd8cf;--card:#fff;--view:#f1efe9;
- --olf:#2e9e5b;--trk:#d9821b;--lom:#8d5bd6;--exc:#c2552f;--inh:#2f6fbf;--off:#c8c4bb;--ghost:#2f6fbf}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45;--ghost:#6fa3e8}}
-:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45;--ghost:#6fa3e8}
+ --olf:#2e9e5b;--trk:#d9821b;--lom:#8d5bd6;--exc:#c2552f;--inh:#2f6fbf;--off:#c8c4bb;--ghost:#2f6fbf;--lit:#8a5a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45;--ghost:#6fa3e8;--lit:#e3b45a}}
+:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--off:#3b3f45;--ghost:#6fa3e8;--lit:#e3b45a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
 .wrap{max-width:1100px;margin:0 auto;padding:12px 16px 30px}
@@ -73,7 +73,7 @@ td.bad{color:var(--exc);font-weight:600} td.good{color:var(--olf)}
  <h2>4. 放電傳遞圖：訊號從輸入走到讀出（跟著實心果蠅）</h2>
  <canvas id="net" height="640"></canvas>
  <div class="legend">圓圈是一群同類型的神經元（括號內是顆數），越亮代表這群此刻放電越快（各群以自己在所有組合裡最快的時候為最亮，不同群之間不能比亮度）。線上移動的小點是放電沿連結往下游傳：
- <span style="color:var(--exc)">紅點＝興奮</span>（讓下游更容易放電），<span style="color:var(--inh)">藍點＝抑制</span>（讓下游更難放電）；線越粗，突觸越多。虛線框的圓圈是抑制型的中繼神經元（夾在輸入與讀出之間、會壓低下游的神經元）。追的路徑左右各畫一條：上面一條從右眼的 LC10a 到右側 DNa02，下面一條從左眼到左側。</div>
+ <span style="color:var(--exc)">紅點＝興奮</span>（讓下游更容易放電），<span style="color:var(--inh)">藍點＝抑制</span>（讓下游更難放電）；線越粗，突觸越多。虛線框的圓圈是抑制型的中繼神經元（夾在輸入與讀出之間、會壓低下游的神經元）。追的路徑左右各畫一條：上面一條從右眼的 LC10a 到右側 DNa02，下面一條從左眼到左側。<br><span style="color:var(--lit)">「｜文獻」後面</span>是真果蠅同一型神經元用電極量到的每秒放電次數，當參考值：嗅覺受器自發 1–30、氣味時最高約 250（Hallem 等 2004）；投射神經元自發 1–5、強氣味 >150（Kazama & Wilson 2009）；Kenyon 細胞自發約 0.1、一次氣味只放 2–5 個動作電位（Turner 等 2008）；MBON11 氣味 1.4 秒內約多放 110–118 個，約每秒多 80（Hige 等 2015，每秒值是換算）；AOTU019 自發約 15–20（Collie 等 2026，從圖讀出）；DNa02 走路時約 25–30、可到約 150（Rayshubskiy 等 2025，從圖讀出；Yang 等 2024）；巨纖維對逼近的黑影通常只放 1 個動作電位就引發起跳，沒有每秒放電率（von Reyn 等 2014；Dombrovski 等 2023）。LC10a、LPLC2 只有鈣影像；LC4、PS049、PS059、PVLP122、PVLP010、LHAD1g1、DNp70、DNp103 查不到電生理數字；MBON12 的數字只在論文圖中，沒有列。</div>
 </div>
 
 </div>
@@ -255,6 +255,10 @@ function curves() {
 
 /* ---------- 傳遞圖 ---------- */
 const net = $("#net"), nctx = net.getContext("2d"); let pulses = [];
+const LIT = {   // 文獻電生理放電率（每秒次數）；只列查得到數字或明確「只有鈣影像」的；出處見圖說
+  "嗅覺受器": "自發 1–30，氣味最高約 250", "投射神經元": "自發 1–5，強氣味 >150", "Kenyon": "自發約 0.1，氣味時只放 2–5 個",
+  "MBON11": "氣味時多約 80", "LC10a": "只有鈣影像", "LPLC2": "只有鈣影像", "AOTU019": "自發 15–20", "DNa02": "走路時 25–30", "巨纖維": "通常只放 1 次"};
+function litOf(label) { for (const k in LIT) if (label.startsWith(k)) return LIT[k]; return ""; }
 function nodeXY(n) { const w = net.width, h = net.height, d = devicePixelRatio; return [D.nodes[n].x * (w - 170 * d) + 85 * d, D.nodes[n].y * (h - 95 * d) + 45 * d]; }
 function edgePath(e) { const [x1, y1] = nodeXY(e.s), [x2, y2] = nodeXY(e.t), d = devicePixelRatio, same = Math.abs(x2 - x1) < 5 * d;
   const mx = (x1 + x2) / 2 + (same ? 70 * d * (y2 > y1 ? 1 : -1) : 0), my = (y1 + y2) / 2 + (!same && x2 < x1 ? 40 * d : 0); return [x1, y1, mx, my, x2, y2]; }
@@ -279,7 +283,9 @@ function drawNet(dt) {
     nctx.fillStyle = off; nctx.beginPath(); nctx.arc(x, y, R, 0, 7); nctx.fill();
     nctx.fillStyle = col[nd.task]; nctx.globalAlpha = 0.12 + 0.88 * a; nctx.beginPath(); nctx.arc(x, y, R, 0, 7); nctx.fill(); nctx.globalAlpha = 1;
     if (nd.inh) { nctx.setLineDash([3 * d, 3 * d]); nctx.strokeStyle = inh; nctx.lineWidth = 1.5 * d; nctx.beginPath(); nctx.arc(x, y, R + 3 * d, 0, 7); nctx.stroke(); nctx.setLineDash([]); }
-    nctx.fillStyle = fg; nctx.fillText(nd.label, x, y + R + 13 * d); nctx.fillStyle = css("--muted"); nctx.fillText(`${Math.round(r)} 次/秒`, x, y + R + 26 * d);
+    nctx.fillStyle = fg; nctx.fillText(nd.label, x, y + R + 13 * d);
+    const t1 = `${Math.round(r)} 次/秒`, lit = litOf(nd.label), t2 = lit ? `｜文獻 ${lit}` : "", w1 = nctx.measureText(t1).width, w2 = nctx.measureText(t2).width, x0 = Math.max(4 * d, Math.min(w - w1 - w2 - 4 * d, x - (w1 + w2) / 2));
+    nctx.textAlign = "left"; nctx.fillStyle = css("--muted"); nctx.fillText(t1, x0, y + R + 26 * d); if (lit) { nctx.fillStyle = css("--lit"); nctx.fillText(t2, x0 + w1, y + R + 26 * d); } nctx.textAlign = "center";
   });
 }
 
