@@ -22,6 +22,13 @@ REPO = "https://github.com/marginli/fly_concepts"
 IMPORTMAP = """<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>"""
 
 
+def _ver(path):
+    """檔案內容的短雜湊，加在 iframe 網址後面，改了 demo 瀏覽器就會抓新版。"""
+    import hashlib
+    try: return hashlib.md5(open(path, "rb").read()).hexdigest()[:8]
+    except OSError: return "0"
+
+
 def head(title, css, full=False):
     return f"""<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>{html.escape(title)}</title>
@@ -40,7 +47,7 @@ def entry_page(eid, m):
     if m.get("embed"):
         em = m["embed"]
         out.append(f'<p class="hint"><a href="{html.escape(em["src"])}" target="_blank">在新分頁全螢幕開啟 DEMO</a></p>'
-                   f'<iframe src="{html.escape(em["src"])}" style="width:100%;height:{int(em.get("height", 1600))}px;border:0" loading="lazy"></iframe>'
+                   f'<iframe src="{html.escape(em["src"])}?v={_ver(os.path.join(d, em["src"]))}" style="width:100%;height:{int(em.get("height", 1600))}px;border:0" loading="lazy"></iframe>'
                    + '<script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>')
     for fg in m.get("figs", []):
         out.append(f'<figure><img src="{html.escape(fg["src"])}" alt=""><figcaption>{html.escape(fg.get("caption", ""))}</figcaption></figure>')
