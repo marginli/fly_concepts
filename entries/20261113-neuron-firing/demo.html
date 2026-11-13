@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>神經元放電動畫</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3}}
+:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3}
+body{margin:0;background:var(--bg);color:var(--fg)}
+video{display:block;width:100%;height:auto;background:#000;border-radius:6px}
+</style></head><body>
+<video controls preload="metadata" poster="poster.jpg" playsinline>
+  <source src="neuron_firing.mp4" type="video/mp4">
+  你的瀏覽器無法播放影片，可以<a href="neuron_firing.mp4">直接下載</a>。
+</video>
+<script>
+function send(){ if (parent !== window) parent.postMessage({demoH: document.body.scrollHeight}, "*"); }
+window.addEventListener("load", send); window.addEventListener("resize", send);
+document.querySelector("video").addEventListener("loadedmetadata", send);
+</script>
+</body></html>
