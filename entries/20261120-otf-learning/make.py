@@ -3,7 +3,8 @@
 # 原始檔在 otf_port 移植包（實驗室工作站上）：fly_multiwork/onthefly/anim/
 #   1. run_sq.py（ARENA=corner SHOCK_MODE=rand TURN=S SINGLE=1，野生型 20＋關掉學習 20）→ out/sq1_main_S_corner8c5_rand.npz/.json
 #   2. export_anim.py sq1_main_S_corner8c5_rand 18 23 anim_data.json
-#      取兩組各自最接近組平均的那一隻（第 19、24 隻），輸出每 0.05 秒的位置、電擊、S、權重等
+#      取兩組各自最接近組平均的那一隻（第 19、24 隻），輸出每 0.05 秒的位置、電擊、S 等，
+#      以及連接強度在每段結束時的記錄值（w_end；段內沒有記錄，不推估）
 #   3. 本程式：把 anim_data.json 包進 flyanim.html 成單檔（不必另外載入資料），
 #      再加上「告訴條目頁自己多高」的 script，iframe 會自動調整高度。
 # 同一份網頁也放在 https://marginli.github.io/fly-otf-animation/
