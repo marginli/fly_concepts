@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>果蠅邊走邊學：被電幾次後就避開那個氣味角落｜果蠅概念圖庫</title>
+<link rel="stylesheet" href="../../lib/style.css?v=f052484e"></head><body><div class="wrap">
+<p><a href="../../">← 回條目清單</a></p>
+<header><h1>果蠅邊走邊學：被電幾次後就避開那個氣味角落</h1><p class="sub">2026-11-20　資料：MaleCNS v1.0（全腦模擬）</p></header>
+<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=f4ef5c29" style="width:100%;height:1400px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
+<div class="desc wide"><h2>這是什麼</h2>
+<p>這是電腦模擬，不是真的果蠅。模型照著 MaleCNS（一份公開的雄果蠅中樞神經系統接線圖，約 16 萬顆神經元）建成，算出每顆神經元什麼時候放電（神經元送出一次短暫的電訊號，叫做一次「放電」；放得越頻繁，表示越活躍）。我們讓模擬果蠅做一個「邊走邊學」的實驗：在 15×15 mm 的場地裡自由走 480 秒（8 分鐘），右上角 8×8 mm 有 MCH 氣味（果蠅學習實驗常用的一種氣味），其他地方沒有氣味。</p>
+<p>8 分鐘分成 6 段：訓練前 2 分鐘 → 訓練 4 段，每段 1 分鐘 → 訓練後 2 分鐘。訓練時，果蠅走進氣味區，就會在進去後 0–5 秒內的某個隨機時點被電 1.25 秒；留在裡面每 5 秒再電一下，走出去就停。訓練前後都不電，用來比較學習前後。</p>
+<p>畫面左邊是「野生型」，學習功能打開：被電時，腦裡某些連接會變弱（下面「腦裡發生了什麼」會說明）。右邊是「關掉學習」，被電時連接不變，其他都一樣。按「播放」看兩隻怎麼走：左邊那隻被電幾次後，進到角落很快就掉頭出來；右邊那隻照樣進去。</p>
+
+<details class="sec"><summary>結果（兩組各 20 隻）</summary>
+<p>計分區是同一個右上角的 5×5 mm，包在 8×8 mm 的氣味區裡面。只算這塊比較深的地方，所以只在氣味區邊緣擦過的時間不會算進去。計分區占場地面積的 11%，所以果蠅如果完全隨意亂走，大約有 11% 的時間會在裡面。</p>
+<table>
+<tr><th></th><th>訓練前</th><th>訓練後</th></tr>
+<tr><td>野生型（學習打開）</td><td>12.5%</td><td>2.4%</td></tr>
+<tr><td>關掉學習</td><td>13.0%</td><td>14.2%</td></tr>
+</table>
+<p>野生型 20 隻全部在訓練後待得比較少。兩組走進氣味區（整個 8×8 mm）的次數差不多，差別在每次進去待多久（取中位數）：野生型從訓練前約 1.2 秒，縮短到訓練後約 0.35 秒；關掉學習的那組前後都約 1.25 秒。畫面上的兩隻，是各組 20 隻裡「訓練前減訓練後的計分區時間 %」最接近組平均的。</p>
+
+</details><details class="sec"><summary>腦裡發生了什麼</summary>
+<p>氣味會讓蕈狀體（果蠅腦中負責氣味學習與記憶的構造）裡的一小群 Kenyon 細胞（KC）放電。KC 再把訊號傳給蕈狀體的輸出神經元（MBON）：有些 MBON 放電會讓果蠅靠近，有些會讓牠遠離。</p>
+<p>被電的時候，一群傳遞「懲罰」訊號的多巴胺神經元會放電。這時剛剛（約 2 秒內）放電過的 KC，通往「靠近型」MBON 的連接就會變弱，例如 MBON11、MBON12。在 MCH 區裡被電時，放電的 KC 主要是被 MCH 叫醒的那些，所以下次再聞到 MCH，「靠近」的訊號就變小。</p>
+<p>畫面上的 S 是「靠近型 MBON 每秒放電次數，減去遠離型的」，可以想成果蠅此刻對這個氣味的喜好。野生型在 MCH 區裡的 S，訓練前約 +2，訓練後約 −7。模型裡，掉頭看的是 S 掉得多快：S 在 0.5 秒內掉超過 1.5，果蠅就有機會掉頭離開。訓練前走進 MCH 區，S 是往上升，不會觸發掉頭；訓練後一走進去，S 很快掉到負的，就容易觸發掉頭。</p>
+
+</details><details class="sec"><summary>畫面上各部分</summary>
+<ul>
+<li><b>場地</b>：紅底＝MCH 區，虛線框＝計分區，灰線＝最近 3 秒走過的路。被電時果蠅變黃、冒出閃電。</li>
+<li><b>S 曲線</b>：最近 15 秒的 S；紅底＝在 MCH 區內，黃底＝被電。</li>
+<li><b>連接強度</b>：KC→MBON11/12 的連接強度，訓練前是 1，野生型每被電一下就往下降一點。</li>
+<li><b>各段時間 %</b>：6 段各自待在計分區的時間比例，一段一根長條；虛線是隨意亂走時的 11%。</li>
+</ul>
+
+</details><details class="sec"><summary>看的時候要注意</summary>
+<ul>
+<li>這是模擬，不是果蠅實驗的紀錄。腦裡的接線來自 MaleCNS v1.0。果蠅怎麼走（隨機走動、S 掉太快就有機會掉頭），是另外寫的簡單規則，不是從接線圖算出來的。</li>
+<li>連接強度只在 6 段各自結束的時刻有實際記錄。訓練段裡面的曲線是推估的：把該段的總降幅，平均分給該段的每次電擊。所以同一段裡每次降得一樣多，不同段降的量可以不同。</li>
+<li>模型怎麼建、參數怎麼校準，見頁尾的產生程式。</li>
+</ul>
+</details></div>
+<p class="meta">條目編號 20261120-otf-learning。產生這一頁的程式：<a href="make.py">make.py</a>。</p>
+<p class="meta"><a class="del" href="https://github.com/marginli/fly_concepts/issues/new?title=%E5%88%AA%E9%99%A4%E6%A2%9D%E7%9B%AE%2020261120-otf-learning&body=%E9%80%81%E5%87%BA%E5%BE%8C%E6%9C%83%E8%87%AA%E5%8B%95%E5%88%AA%E9%99%A4%E9%80%99%E5%80%8B%E6%A2%9D%E7%9B%AE%E4%B8%A6%E6%9B%B4%E6%96%B0%E7%B6%B2%E7%AB%99%EF%BC%88%E7%B4%84%E4%B8%80%E5%85%A9%E5%88%86%E9%90%98%EF%BC%89%E3%80%82%E4%B8%8D%E6%83%B3%E5%88%AA%E5%B0%B1%E7%9B%B4%E6%8E%A5%E9%97%9C%E6%8E%89%E9%80%99%E4%B8%80%E9%A0%81%E3%80%82%E5%8F%AA%E6%9C%89%E7%AB%99%E4%B8%BB%E5%B8%B3%E8%99%9F%E9%80%81%E5%87%BA%E6%89%8D%E6%9C%89%E6%95%88%E3%80%82" target="_blank" rel="noopener">刪除這個條目</a>　會開一個 GitHub 頁面，按綠色的送出鈕（Create）就會刪除，約一兩分鐘後網站更新。</p></div>
+</body></html>
