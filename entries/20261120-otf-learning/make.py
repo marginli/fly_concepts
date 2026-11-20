@@ -29,8 +29,16 @@ script = script.replace('fetch("anim_data.json").then(r => r.json())',
                         'Promise.resolve(JSON.parse(document.getElementById("anim-data").textContent))')
 assert "anim-data" in script, "flyanim.html 的資料載入寫法變了，要更新本程式"
 height = """<script>
-// 在條目頁的 iframe 裡時，告訴外層自己的高度，iframe 會自動調整
-function sendH(){ if (parent !== window) parent.postMessage({demoH: document.documentElement.scrollHeight}, "*"); }
+// 在條目頁的 iframe 裡時，告訴外層內容的高度，iframe 會自動調整。
+// 量 .wrap 的底（加上 body 的上下邊距），不可用 documentElement.scrollHeight：它至少等於 iframe 高度，
+// 外層又會再加 4 px，兩邊互相觸發 resize，框就會一直變長。高度沒變就不送。
+let lastH = 0;
+function sendH(){
+  if (parent === window) return;
+  const w = document.querySelector(".wrap"), cs = getComputedStyle(document.body);
+  const h = Math.ceil(w.getBoundingClientRect().bottom + scrollY + parseFloat(cs.paddingBottom) + parseFloat(cs.marginBottom));
+  if (Math.abs(h - lastH) > 1) { lastH = h; parent.postMessage({demoH: h}, "*"); }
+}
 addEventListener("load", sendH); addEventListener("resize", sendH); setTimeout(sendH, 500);
 </script>
 """

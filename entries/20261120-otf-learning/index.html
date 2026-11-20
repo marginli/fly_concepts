@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../../lib/style.css?v=f052484e"></head><body><div class="wrap">
 <p><a href="../../">← 回條目清單</a></p>
 <header><h1>果蠅邊走邊學：被電幾次後就避開那個氣味角落</h1><p class="sub">2026-11-20　資料：MaleCNS v1.0（全腦模擬）</p></header>
-<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=f4ef5c29" style="width:100%;height:1400px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
+<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=3e0c5914" style="width:100%;height:1400px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
 <div class="desc wide"><h2>這是什麼</h2>
 <p>這是電腦模擬，不是真的果蠅。模型照著 MaleCNS（一份公開的雄果蠅中樞神經系統接線圖，約 16 萬顆神經元）建成，算出每顆神經元什麼時候放電（神經元送出一次短暫的電訊號，叫做一次「放電」；放得越頻繁，表示越活躍）。我們讓模擬果蠅做一個「邊走邊學」的實驗：在 15×15 mm 的場地裡自由走 480 秒（8 分鐘），右上角 8×8 mm 有 MCH 氣味（果蠅學習實驗常用的一種氣味），其他地方沒有氣味。</p>
 <p>8 分鐘分成 6 段：訓練前 2 分鐘 → 訓練 4 段，每段 1 分鐘 → 訓練後 2 分鐘。訓練時，果蠅走進氣味區，就會在進去後 0–5 秒內的某個隨機時點被電 1.25 秒；留在裡面每 5 秒再電一下，走出去就停。訓練前後都不電，用來比較學習前後。</p>

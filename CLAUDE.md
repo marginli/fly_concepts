@@ -30,6 +30,7 @@
 
 ## 互動 DEMO 條目（meta.json 的 embed）
 - `"embed": {"src": "demo.html", "height": N}` 用 iframe 嵌入；demo 若在 iframe 內 `parent.postMessage({demoH: 高度}, "*")`，條目頁會自動把 iframe 調成那個高度（範例見 `entries/20261110-six-actions/demo.html` 開頭的 script）。
+- 回報高度**不可用 `document.documentElement.scrollHeight`**：它至少等於 iframe 目前高度，外層又加 4 px，兩邊互相觸發 resize，框會一直變長（2026-11-20 otf-learning 踩過）。要量內容容器的底（例：`.wrap.getBoundingClientRect().bottom`＋body 邊距），且高度沒變就不送。
 - `"desc_wide": true`：下方說明欄和上方同寬（預設限 760px）。
 - `"full_width": true`：整頁不限寬（預設 1100px），欄寬隨視窗大小變，DEMO 在 iframe 內也不限寬。
 - `"desc_collapse": true`：說明欄除第一節外，每節包成可收合的 details（預設收合）。
