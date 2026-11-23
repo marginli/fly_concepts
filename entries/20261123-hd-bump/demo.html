@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>指南針小團</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 版面：上方是概念圖；中間控制列；下方三欄（只有背景／推左 2 格／推左 6 格），每欄兩個圈＋熱圖 */
+:root {
+  --bg: #f5f6f4; --panel: #ffffff; --ink: #22261f; --muted: #686d63; --line: #d9dcd5; --band: rgba(34,38,31,.05);
+  --kick: rgba(240,180,0,.22); --kick-ink: #8a6500; --accent: #2a78d6; --off: #b9bdb4;
+  --f-body: "Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#161814; --panel:#1f221d; --ink:#e8eae4; --muted:#9ba095; --line:#353930; --band:rgba(232,234,228,.05);
+  --kick: rgba(255,210,63,.18); --kick-ink:#ffd23f; --accent:#5598e7; --off:#4a4e45; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg:#161814; --panel:#1f221d; --ink:#e8eae4; --muted:#9ba095; --line:#353930; --band:rgba(232,234,228,.05);
+  --kick: rgba(255,210,63,.18); --kick-ink:#ffd23f; --accent:#5598e7; --off:#4a4e45; color-scheme: dark }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:15px; line-height:1.55;
+  padding: 18px max(16px, env(safe-area-inset-right,0px)) 30px max(16px, env(safe-area-inset-left,0px)); }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 16px; }
+h2 { font-size: 1.05rem; margin: 0 0 6px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.concept { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; align-items: start; }
+.concept figure { margin: 0; display: grid; gap: 6px; }
+.concept figcaption { font-size: .88rem; color: var(--muted); }
+.concept svg { width: 100%; height: auto; max-width: 300px; }
+.controls { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; }
+button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 4px 12px; cursor: pointer; }
+button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 500; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#play { min-width: 76px; }
+.clock { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.phase { font-weight: 700; padding: 2px 10px; border-radius: 99px; background: var(--band); }
+.phase.kick { background: var(--kick); }
+.scrub { flex: 1 1 220px; min-width: 0; accent-color: var(--accent); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.col h3 { margin: 0; font-size: 1rem; }
+.col .sub { margin: 0 0 8px; color: var(--muted); font-size: .85rem; min-height: 2.6em; }
+.rings { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.rings svg { width: 100%; height: auto; }
+.conc { font-size: .82rem; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+.heat { width: 100%; height: auto; display: block; margin-top: 6px; }
+.legend { display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); flex-wrap: wrap; }
+.legend .bar { width: 160px; height: 10px; border-radius: 3px; }
+.tip { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 4px 8px; font-size: .82rem; box-shadow: 0 2px 8px rgba(0,0,0,.15); display: none; z-index: 5; font-variant-numeric: tabular-nums; }
+.note { font-size: .85rem; color: var(--muted); margin: 0; }
+table.tv { border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+table.tv td, table.tv th { border: 1px solid var(--line); padding: 2px 5px; text-align: right; }
+details summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="card">
+  <h2>先看概念：指南針小團是什麼</h2>
+  <div class="concept">
+    <figure>
+      <svg id="c1" viewBox="0 0 220 200" role="img" aria-label="一圈 8 格，其中相鄰 3 格亮起，代表頭朝的方向"></svg>
+      <figcaption><b>EPG 神經元＝羅盤。</b>果蠅腦中央的 EPG 神經元分成 8 格，每格代表一個方向。任何時候只有相鄰 2–3 格在放電，聚成一「團」；這團在哪裡，果蠅就認為自己頭朝哪裡。這個羅盤在腦裡左右各有一份。</figcaption>
+    </figure>
+    <figure>
+      <svg id="c2" viewBox="0 0 220 200" role="img" aria-label="真果蠅：小團停住；這個模型：只剩互相興奮"></svg>
+      <figcaption><b>小團靠兩股力量撐住。</b>EPG 和另一種神經元 P-EN 互相興奮，讓亮著的那幾格繼續亮；Delta7 把其他格壓暗，讓活動只留在一團。在這個模型（0.50 倍 MaleCNS）裡，Delta7 相關的連結約 95% 被拿掉了。</figcaption>
+    </figure>
+    <figure>
+      <svg id="c3" viewBox="0 0 220 200" role="img" aria-label="實驗流程：背景 0.5 秒，推 0.3 秒，放開 1.5 秒"></svg>
+      <figcaption><b>這次怎麼測。</b>先只給背景輸入 0.5 秒，再對某一格的 EPG「推一下」（外加輸入 0.3 秒，黃色），然後放開，看 1.5 秒內那團還在不在。真果蠅在黑暗中，小團能停在原位好幾秒。下面「推左6號格」＝推左邊那份羅盤的第 6 格。</figcaption>
+    </figure>
+  </div>
+</div>
+
+<div class="card">
+  <div class="controls">
+    <button id="play" type="button">▶ 播放</button>
+    <span class="clock" id="clock">0.00 秒</span>
+    <span class="phase" id="phase">背景</span>
+    <input class="scrub" id="scrub" type="range" min="0" max="22" step="1" value="0" aria-label="時間">
+    <span>推的力道（外加輸入，不是放電）：</span>
+    <button type="button" class="str" data-s="100" aria-pressed="true">每秒 100 次</button>
+    <button type="button" class="str" data-s="200" aria-pressed="false">每秒 200 次</button>
+  </div>
+</div>
+
+<div class="cols" id="cols"></div>
+
+<div class="card">
+  <div class="legend"><span>EPG 放電（每秒次數，同一格各顆、10 隻平均）</span><span>0</span><span class="bar" id="lgbar"></span><span>120 以上</span></div>
+  <p class="note" style="margin-top:6px">圈：外圈是左邊那份羅盤的 8 格，內圈是右邊那份的 8 格（第 n 格畫在 (n−1)×45° 的位置），黃圈標出被推的那一格。左右兩份的方向怎麼對應，我們沒有核對，所以兩圈分開看。熱圖：每列一格、每行 0.1 秒，黃色底線是「推」的 0.3 秒，直線是目前播放到的時間。滑鼠移到格子上看數字。</p>
+  <details style="margin-top:8px"><summary>表格（放開後最後 0.5 秒，各格 EPG 平均放電）</summary><div id="tbl"></div></details>
+</div>
+
+</div>
+<div class="tip" id="tip"></div>
+<script src="data.js"></script>
+<script>
+const D = window.HD, NB = 23, DT = 0.1;
+const RAMP_DARK = ["#22282f","#1b3148","#184f95","#1c5cab","#256abf","#2a78d6","#3987e5","#5598e7","#6da7ec","#86b6ef","#9ec5f4","#b7d3f6","#cde2fb"]; // 深色模式：0 接近底色，越亮越淺
+const RAMP = ["#cde2fb","#b7d3f6","#9ec5f4","#86b6ef","#6da7ec","#5598e7","#3987e5","#2a78d6","#256abf","#1c5cab","#184f95","#104281","#0d366b"];
+const dark = () => (document.documentElement.dataset.theme === "dark") ||
+  (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+function hex2rgb(h){return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));}
+function col(v){ // 0 → 120 以上；淺色模式淺→深，深色模式反過來（0 接近底色）
+  let t = Math.max(0, Math.min(1, v/120)); const r = dark() ? RAMP_DARK : RAMP;
+  const x = t*(r.length-1), i = Math.min(r.length-2, Math.floor(x)), f = x-i;
+  const a = hex2rgb(r[i]), b = hex2rgb(r[i+1]); return `rgb(${a.map((c,k)=>Math.round(c+(b[k]-c)*f)).join(",")})`;
+}
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function wedge(cx, cy, r0, r1, a0, a1){ // 角度：0 在上方、順時針
+  const p = (r,a)=>[cx + r*Math.sin(a), cy - r*Math.cos(a)];
+  const [x0,y0]=p(r1,a0),[x1,y1]=p(r1,a1),[x2,y2]=p(r0,a1),[x3,y3]=p(r0,a0);
+  return `M${x0},${y0} A${r1},${r1} 0 0 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 0 0 ${x3},${y3} Z`;
+}
+</script>
+<script>
+(function(){
+const ink = () => css("--ink"), mu = () => css("--muted"), off = () => css("--off");
+function drawConcept(){
+  const c1 = document.getElementById("c1"); c1.innerHTML = "";
+  const lit = {1:60, 2:110, 3:60};  // 第 2–4 格亮，中間第 3 格最亮
+  for (let n=0;n<8;n++){
+    const a0=(n*45-21)*Math.PI/180, a1=(n*45+21)*Math.PI/180;
+    el("path",{d:wedge(110,100,40,80,a0,a1), fill: lit[n]!==undefined ? col(lit[n]) : col(3), stroke: css("--panel"), "stroke-width":2}, c1);
+    const p=[110+92*Math.sin(n*Math.PI/4), 100-92*Math.cos(n*Math.PI/4)+4];
+    const t=el("text",{x:p[0],y:p[1],"text-anchor":"middle","font-size":11,fill:mu()},c1); t.textContent = (n+1);
+  }
+  const ar = el("text",{x:110,y:104,"text-anchor":"middle","font-size":12,fill:ink()},c1); ar.textContent="小團在第 3 格";
+  // c2：兩半
+  const c2 = document.getElementById("c2"); c2.innerHTML = "";
+  const box=(x,y,w,label,fill)=>{ el("rect",{x,y,width:w,height:30,rx:6,fill:"none",stroke:fill,"stroke-width":1.5},c2);
+    const t=el("text",{x:x+w/2,y:y+20,"text-anchor":"middle","font-size":13,fill:ink()},c2); t.textContent=label; };
+  box(20,30,70,"EPG",ink()); box(130,30,70,"P-EN",ink());
+  el("path",{d:"M92,40 L128,40",stroke:css("--accent"),"stroke-width":2,"marker-end":"url(#ah)"},c2);
+  el("path",{d:"M128,52 L92,52",stroke:css("--accent"),"stroke-width":2,"marker-end":"url(#ah)"},c2);
+  const defs=el("defs",{},c2); const m=el("marker",{id:"ah",viewBox:"0 0 10 10",refX:9,refY:5,markerWidth:6,markerHeight:6,orient:"auto"},defs);
+  el("path",{d:"M0,0 L10,5 L0,10 z",fill:css("--accent")},m);
+  let t=el("text",{x:110,y:85,"text-anchor":"middle","font-size":12,fill:mu()},c2); t.textContent="互相興奮：保留";
+  box(75,115,70,"Delta7",off());
+  el("path",{d:"M68,110 L152,150",stroke:css("--kick-ink"),"stroke-width":2,opacity:.55},c2);
+  el("path",{d:"M152,110 L68,150",stroke:css("--kick-ink"),"stroke-width":2,opacity:.55},c2);
+  t=el("text",{x:110,y:172,"text-anchor":"middle","font-size":12,fill:mu()},c2); t.textContent="把其他格壓暗：約 95% 被拿掉";
+  // c3：時間軸
+  const c3 = document.getElementById("c3"); c3.innerHTML = "";
+  const x0=15, W=190, sc=W/2.3, y=80;
+  el("rect",{x:x0,y:y,width:0.5*sc,height:26,fill:css("--band")},c3);
+  el("rect",{x:x0+0.5*sc,y:y,width:0.3*sc,height:26,fill:css("--kick")},c3);
+  el("rect",{x:x0+0.8*sc,y:y,width:1.5*sc,height:26,fill:css("--band")},c3);
+  const lab=(x,yy,s,c)=>{const q=el("text",{x,y:yy,"text-anchor":"middle","font-size":12,fill:c||ink()},c3); q.textContent=s;};
+  lab(x0+0.25*sc,y-8,"背景"); lab(x0+0.65*sc,y-30,"推一下",css("--kick-ink")); lab(x0+0.65*sc,y-14,"0.3 秒",css("--kick-ink")); lab(x0+1.55*sc,y-8,"放開");
+  lab(x0+1.55*sc,y+62,"看小團還在不在",mu());
+  lab(x0,y+44,"0",mu()); lab(x0+0.5*sc,y+44,"0.5",mu()); lab(x0+0.8*sc,y+44,"0.8",mu()); lab(x0+2.3*sc,y+44,"2.3 秒",mu());
+  t=el("text",{x:110,y:186,"text-anchor":"middle","font-size":12,fill:mu()},c3); t.textContent="「推」＝只對某一格的 EPG 外加輸入";
+}
+// ---- 三欄 ----
+const COLS = [
+  {k:"bg", title:"只有背景（沒有推）", sub:"看小團會不會自己出現。", kick:null},
+  {k:"L2", title:"推左2號格", sub:"推的時候亮起來，放開後 0.1–0.2 秒就暗回去。", kick:2},
+  {k:"L6", title:"推左6號格", sub:"推的時候亮起來，放開後 1.5 秒仍集中在左5–左7（但慢慢變暗）。", kick:6},
+];
+let S = "100", T = 15, timer = null;   // 一開始停在「放開後 0.7 秒」，不用按播放就看得到差別
+const tip = document.getElementById("tip");
+function key(c){ return c.k === "bg" ? "bg" : `${c.k}_${S}`; }
+function showTip(e, s){ tip.style.display="block"; tip.textContent=s; tip.style.left=(e.clientX+12)+"px"; tip.style.top=(e.clientY+12)+"px"; }
+function hideTip(){ tip.style.display="none"; }
+function build(){
+  const host = document.getElementById("cols"); host.innerHTML = "";
+  for (const c of COLS){
+    const d = document.createElement("div"); d.className = "card col";
+    d.innerHTML = `<h3>${c.title}</h3><p class="sub">${c.sub}</p><div class="rings"></div><div class="conc"></div>`;
+    host.appendChild(d); c.node = d;
+    const rings = d.querySelector(".rings");
+    const svg = el("svg",{viewBox:"0 0 240 230",role:"img","aria-label":`${c.title}：左右兩半各 8 格的 EPG 放電`}); rings.appendChild(svg); c.ring = svg;
+    rings.style.gridTemplateColumns = "1fr";
+    c.wedges = {L:[],R:[]};
+    for (const side of ["L","R"]){
+      const [r0,r1] = side==="L" ? [62,96] : [26,58];
+      for (let n=0;n<8;n++){
+        const a0=(n*45-21)*Math.PI/180, a1=(n*45+21)*Math.PI/180;
+        const p = el("path",{d:wedge(120,112,r0,r1,a0,a1), stroke:css("--panel"), "stroke-width":2}, svg);
+        p.addEventListener("mousemove", e=>{ const v=D[key(c)][side][n][T]; showTip(e, `${side==="L"?"左":"右"} ${n+1} 格，${(T*DT).toFixed(1)} 秒：每秒 ${v.toFixed(1)} 次`); });
+        p.addEventListener("mouseleave", hideTip);
+        c.wedges[side].push(p);
+        if (side==="L"){ const q=[120+106*Math.sin(n*Math.PI/4), 112-106*Math.cos(n*Math.PI/4)+4];
+          const t=el("text",{x:q[0],y:q[1],"text-anchor":"middle","font-size":11,fill:css("--muted")},svg); t.textContent=`左${n+1}`; }
+      }
+    }
+    const lt=el("text",{x:120,y:116,"text-anchor":"middle","font-size":10,fill:css("--muted")},svg); lt.textContent="內圈＝右邊那份";
+    if (c.kick){ const n=c.kick-1, q=[120+82*Math.sin(n*Math.PI/4), 112-82*Math.cos(n*Math.PI/4)];
+      c.kmark = el("circle",{cx:q[0],cy:q[1],r:7,fill:"none",stroke:css("--kick-ink"),"stroke-width":2.5},svg); }
+    // 熱圖：16 列（左 1–8、右 1–8）× 23 段
+    const cw=10, ch=11, lx=30, ty=14, H=ty+16*ch+8+20, Wd=lx+NB*cw+6;
+    const hs = el("svg",{viewBox:`0 0 ${Wd} ${H}`, class:"heat", role:"img","aria-label":`${c.title}的熱圖`}); d.appendChild(hs); c.heat = hs; c.cells = [];
+    if (c.kick) el("rect",{x:lx+5*cw,y:ty+16*ch+2,width:3*cw,height:4,fill:css("--kick-ink")},hs);
+    for (let r=0;r<16;r++){
+      const side = r<8?"L":"R", n=r%8;
+      const yy = ty + r*ch + (r>=8?0:0);
+      const t=el("text",{x:lx-4,y:yy+ch-2,"text-anchor":"end","font-size":9.5,fill:css("--muted")},hs); t.textContent=`${side==="L"?"左":"右"}${n+1}`;
+      for (let b=0;b<NB;b++){
+        const rc = el("rect",{x:lx+b*cw, y:yy, width:cw-1, height:ch-1, rx:1}, hs);
+        rc.addEventListener("mousemove", e=>{ const v=D[key(c)][side][n][b]; showTip(e, `${side==="L"?"左":"右"} ${n+1} 格，${(b*DT).toFixed(1)}–${((b+1)*DT).toFixed(1)} 秒：每秒 ${v.toFixed(1)} 次`); });
+        rc.addEventListener("mouseleave", hideTip);
+        c.cells.push([rc, side, n, b]);
+      }
+    }
+    el("line",{x1:lx-2,x2:lx+NB*cw,y1:ty+8*ch-0.5,y2:ty+8*ch-0.5,stroke:css("--line"),"stroke-width":1},hs);
+    for (const [s,lab] of [[0,"0"],[5,"0.5"],[8,"0.8"],[23,"2.3 秒"]]){
+      const t=el("text",{x:lx+s*cw,y:ty+16*ch+20,"text-anchor":s===23?"end":"middle","font-size":9.5,fill:css("--muted")},hs); t.textContent=lab; }
+    c.cursor = el("line",{y1:ty-4,y2:ty+16*ch,stroke:css("--ink"),"stroke-width":1.2},hs); c.lx=lx; c.cw=cw;
+  }
+  paintStatic(); draw();
+}
+function paintStatic(){ for (const c of COLS) for (const [rc,side,n,b] of c.cells) rc.setAttribute("fill", col(D[key(c)][side][n][b])); }
+function draw(){
+  for (const c of COLS){
+    const d = D[key(c)];
+    for (const side of ["L","R"]) for (let n=0;n<8;n++) c.wedges[side][n].setAttribute("fill", col(d[side][n][T]));
+    c.cursor.setAttribute("x1", c.lx + (T+0.5)*c.cw); c.cursor.setAttribute("x2", c.lx + (T+0.5)*c.cw);
+    if (c.kmark) c.kmark.setAttribute("opacity", (T>=5 && T<8) ? 1 : 0.25);
+    const cl = d.cL[T], cr = d.cR[T];
+    c.node.querySelector(".conc").textContent = `集中度：左 ${cl==null?"—":cl.toFixed(2)}、右 ${cr==null?"—":cr.toFixed(2)}（0.6 以上才算明顯集中）`;
+  }
+  document.getElementById("clock").textContent = `${(T*DT).toFixed(2)} 秒`;
+  const ph = document.getElementById("phase");
+  if (T<5){ ph.textContent="背景"; ph.className="phase"; } else if (T<8){ ph.textContent="推一下（只有後兩欄）"; ph.className="phase kick"; } else { ph.textContent="放開"; ph.className="phase"; }
+  document.getElementById("scrub").value = T;
+}
+function table(){
+  let h = `<table class="tv"><tr><th></th>${[...Array(8)].map((_,i)=>`<th>左${i+1}</th>`).join("")}${[...Array(8)].map((_,i)=>`<th>右${i+1}</th>`).join("")}</tr>`;
+  for (const [k,lab] of [["bg","只有背景"],["L2_100","推左2 每秒100"],["L2_200","推左2 每秒200"],["L6_100","推左6 每秒100"],["L6_200","推左6 每秒200"]]){
+    const m = a => (a.slice(18,23).reduce((s,x)=>s+x,0)/5).toFixed(1);
+    h += `<tr><th>${lab}</th>${D[k].L.map(m).map(x=>`<td>${x}</td>`).join("")}${D[k].R.map(m).map(x=>`<td>${x}</td>`).join("")}</tr>`;
+  }
+  document.getElementById("tbl").innerHTML = h + "</table>";
+}
+function legend(){ const b=document.getElementById("lgbar"); const r = dark()? RAMP_DARK:RAMP; b.style.background=`linear-gradient(90deg, ${r.join(",")})`; }
+document.getElementById("play").addEventListener("click", ()=>{
+  if (timer){ clearInterval(timer); timer=null; document.getElementById("play").textContent="▶ 播放"; return; }
+  if (T>=NB-1) T=0;
+  document.getElementById("play").textContent="❚❚ 暫停";
+  timer = setInterval(()=>{ T++; if (T>=NB){ T=NB-1; clearInterval(timer); timer=null; document.getElementById("play").textContent="▶ 重播"; } draw(); }, 350);
+});
+document.getElementById("scrub").addEventListener("input", e=>{ T=+e.target.value; draw(); });
+for (const b of document.querySelectorAll(".str")) b.addEventListener("click", ()=>{
+  S=b.dataset.s; for (const x of document.querySelectorAll(".str")) x.setAttribute("aria-pressed", x===b ? "true":"false"); paintStatic(); draw(); });
+function all(){ drawConcept(); build(); table(); legend(); report(); }
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", all);
+let lastH = 0;
+function report(){ const w=document.querySelector(".wrap"); const h=Math.ceil(w.getBoundingClientRect().bottom + 30);
+  if (Math.abs(h-lastH) > 2){ lastH=h; parent.postMessage({demoH:h}, "*"); } }
+addEventListener("resize", report);
+for (const d of document.querySelectorAll("details")) d.addEventListener("toggle", report);
+all(); setTimeout(report, 300);
+})();
+</script>
+</body>
+</html>

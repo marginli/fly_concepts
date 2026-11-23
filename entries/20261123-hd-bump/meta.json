@@ -1,0 +1,4 @@
+{"title": "指南針小團：推一下，它停得住嗎？", "date": "2026-11-23", "dataset": "MaleCNS v1.0（全腦模擬，0.50 倍模型）",
+ "tags": ["方向感", "中央複合體", "EPG", "P-EN", "Delta7", "模擬", "動畫", "互動"],
+ "summary": "果蠅腦中央有一圈 EPG 神經元，活動聚成一「團」代表頭朝的方向。在拿掉大部分 Delta7 抑制連結的模型裡，從左 6 格推一下，小團放開後還停得住一陣子；從左 2 格推，放開就散掉。",
+ "embed": {"src": "demo.html", "height": 1500}, "desc_wide": true, "desc_collapse": true}
