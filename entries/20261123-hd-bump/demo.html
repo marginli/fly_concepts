@@ -92,7 +92,7 @@ details summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
 
 <div class="card">
   <div class="legend"><span>EPG 放電（每秒次數，同一格各顆、10 隻平均）</span><span>0</span><span class="bar" id="lgbar"></span><span>120 以上</span></div>
-  <p class="note" style="margin-top:6px">圈：外圈是左邊那份羅盤的 8 格，內圈是右邊那份的 8 格（第 n 格畫在 (n−1)×45° 的位置），黃圈標出被推的那一格。左右兩份的方向怎麼對應，我們沒有核對，所以兩圈分開看。熱圖：每列一格、每行 0.1 秒，黃色底線是「推」的 0.3 秒，直線是目前播放到的時間。滑鼠移到格子上看數字。</p>
+  <p class="note" style="margin-top:6px">圈：外圈是左邊那份羅盤的 8 格，內圈是右邊那份的 8 格，黃圈標出被推的那一格。兩份的編號方向相反：右 m 號格和左 (10−m) 號格代表同一個方向（右1 例外，對左1），所以內圈照這個對應擺，同一個方向的格子上下對齊。熱圖：每列一格、每行 0.1 秒，右邊各列也照這個對應排（右1、右8、右7…右2），黃色底線是「推」的 0.3 秒，直線是目前播放到的時間。滑鼠移到格子上看數字。</p>
   <details style="margin-top:8px"><summary>表格（放開後最後 0.5 秒，各格 EPG 平均放電）</summary><div id="tbl"></div></details>
 </div>
 
@@ -183,24 +183,29 @@ function build(){
     for (const side of ["L","R"]){
       const [r0,r1] = side==="L" ? [62,96] : [26,58];
       for (let n=0;n<8;n++){
-        const a0=(n*45-21)*Math.PI/180, a1=(n*45+21)*Math.PI/180;
+        // 右邊的編號方向和左邊相反：依 MaleCNS 接線（EPG 從 P-EN、PEG 收到的輸入相似度），右 m 號格對應左 (10−m) 號格，右 1 對左 1
+        const pos = side==="L" ? n : (8-n)%8;
+        const a0=(pos*45-21)*Math.PI/180, a1=(pos*45+21)*Math.PI/180;
         const p = el("path",{d:wedge(120,112,r0,r1,a0,a1), stroke:css("--panel"), "stroke-width":2}, svg);
         p.addEventListener("mousemove", e=>{ const v=D[key(c)][side][n][T]; showTip(e, `${side==="L"?"左":"右"} ${n+1} 格，${(T*DT).toFixed(1)} 秒：每秒 ${v.toFixed(1)} 次`); });
         p.addEventListener("mouseleave", hideTip);
         c.wedges[side].push(p);
         if (side==="L"){ const q=[120+106*Math.sin(n*Math.PI/4), 112-106*Math.cos(n*Math.PI/4)+4];
           const t=el("text",{x:q[0],y:q[1],"text-anchor":"middle","font-size":11,fill:css("--muted")},svg); t.textContent=`左${n+1}`; }
+        else { const q=[120+42*Math.sin(pos*Math.PI/4), 112-42*Math.cos(pos*Math.PI/4)+3];
+          const t=el("text",{x:q[0],y:q[1],"text-anchor":"middle","font-size":8,fill:css("--muted"),"pointer-events":"none"},svg); t.textContent=`右${n+1}`; }
       }
     }
-    const lt=el("text",{x:120,y:116,"text-anchor":"middle","font-size":10,fill:css("--muted")},svg); lt.textContent="內圈＝右邊那份";
+    const lt=el("text",{x:120,y:116,"text-anchor":"middle","font-size":10,fill:css("--muted")},svg); lt.textContent=""; 
     if (c.kick){ const n=c.kick-1, q=[120+82*Math.sin(n*Math.PI/4), 112-82*Math.cos(n*Math.PI/4)];
       c.kmark = el("circle",{cx:q[0],cy:q[1],r:7,fill:"none",stroke:css("--kick-ink"),"stroke-width":2.5},svg); }
     // 熱圖：16 列（左 1–8、右 1–8）× 23 段
     const cw=10, ch=11, lx=30, ty=14, H=ty+16*ch+8+20, Wd=lx+NB*cw+6;
     const hs = el("svg",{viewBox:`0 0 ${Wd} ${H}`, class:"heat", role:"img","aria-label":`${c.title}的熱圖`}); d.appendChild(hs); c.heat = hs; c.cells = [];
     if (c.kick) el("rect",{x:lx+5*cw,y:ty+16*ch+2,width:3*cw,height:4,fill:css("--kick-ink")},hs);
+    const RORD = [0,7,6,5,4,3,2,1];   // 右邊各列照「對應左 1…左 8」的順序排：右1、右8、右7…右2
     for (let r=0;r<16;r++){
-      const side = r<8?"L":"R", n=r%8;
+      const side = r<8?"L":"R", n = r<8 ? r : RORD[r-8];
       const yy = ty + r*ch + (r>=8?0:0);
       const t=el("text",{x:lx-4,y:yy+ch-2,"text-anchor":"end","font-size":9.5,fill:css("--muted")},hs); t.textContent=`${side==="L"?"左":"右"}${n+1}`;
       for (let b=0;b<NB;b++){

@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../../lib/style.css?v=f052484e"></head><body><div class="wrap">
 <p><a href="../../">← 回條目清單</a></p>
 <header><h1>指南針小團：推一下，它停得住嗎？</h1><p class="sub">2026-11-23　資料：MaleCNS v1.0（全腦模擬，0.50 倍模型）</p></header>
-<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=fcce4191" style="width:100%;height:1500px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
+<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=0ab17b54" style="width:100%;height:1500px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
 <div class="desc wide"><h2>這是什麼</h2>
 <p>這是電腦模擬，不是真的果蠅。模型照著 MaleCNS（一份公開的雄果蠅中樞神經系統接線圖）建成，算出每顆神經元什麼時候放電。放電是神經元送出一次短暫的電訊號；放得越頻繁，表示越活躍。</p>
 <p>果蠅腦中央有一個負責方向感的區域（中央複合體）。裡面有一群 EPG 神經元，像羅盤一樣分成 8 格，每格代表一個方向。任何時候只有相鄰 2–3 格在放電，聚成一「團」。這團的位置，就是果蠅認為自己頭朝的方向。真果蠅轉身時，這團會跟著沿圈移動；在黑暗中，它能停在原位好幾秒。</p>
@@ -18,7 +18,8 @@
 <li><b>只有背景，不推：</b>EPG 每秒只放約 2 次，散在整圈，沒有自己聚成一團。</li>
 <li><b>推左2號格：</b>推的時候亮起來，但放開後 0.1–0.2 秒就暗回去，回到和只有背景時一樣的樣子。推的力道加倍（每秒 200 次輸入）也一樣。</li>
 <li><b>推左6號格：</b>推的 0.3 秒裡，左6號格和兩旁的左5、左7 都亮起來。放開後 1.5 秒，這三格仍然最亮，活動沒有散開。但亮度一直在降，最後能撐多久還不知道。</li>
-<li>只推了左邊，右邊那份也跟著亮，主要是右3、右4，兩旁的右2、右5 較暗。這是因為左右兩份羅盤代表同一個頭的方向，會經過 P-EN 等神經元互相帶動，所以一邊有團，另一邊也會在對應的方向出現一團。不過左6 對應右邊哪一格，我們沒有核對。</li>
+<li>只推了左邊，右邊那份也跟著亮，主要是右3、右4，兩旁的右2、右5 較暗。這是因為左右兩份羅盤代表同一個頭的方向，會經過 P-EN 等神經元互相帶動，所以一邊有團，另一邊也會在對應的方向出現一團。</li>
+<li>兩份羅盤的編號方向相反：右 m 號格和左 (10−m) 號格代表同一個方向，例如左6 對右4、左5 對右5、左7 對右3（右1 例外，對左1）。所以左5–左7 亮，對應的就是右3–右5，兩邊其實亮在同一個方向。這個對應是用 MaleCNS 接線圖查的：同一個方向的 EPG，會從同一批 P-EN、PEG 神經元收到輸入。圖上的內圈已照這個對應擺好。</li>
 </ul>
 <p>推一格，兩旁的格也亮，是因為 EPG 會興奮另一種神經元 P-EN，P-EN 再回頭興奮相鄰位置的 EPG。真果蠅的小團本來就有 2–3 格寬，原因相同。</p>
 <p>「集中度」是一個 0 到 1 的數字，量活動有多集中。1 表示活動全在一格；整圈平均時接近 0。一個典型的小團（相鄰 3 格亮、中間那格最亮）大約是 0.8。放電很少時，隨機也會算出 0.1–0.4，所以 0.6 以上才算明顯集中。</p>
@@ -37,7 +38,7 @@
 <ul>
 <li>這是模擬，不是果蠅實驗的紀錄。每個條件模擬 10 隻（同一張接線圖，每隻的隨機輸入不同），畫面是 10 隻的平均。</li>
 <li>「推」是只對某一格的 EPG 外加輸入（每顆每秒 100 或 200 次），不是真果蠅會遇到的刺激，只是用來「放一團上去」，看它停不停得住。</li>
-<li>左右兩份羅盤的方向怎麼對應，我們沒有核對，所以畫成兩圈分開看。</li>
+<li>左右兩份羅盤的對應是從接線推出來的（各對的相似度 0.80–0.94），不是從文獻抄的。</li>
 <li>只試了 2 個位置，放開後只看 1.5 秒。同樣的設定重跑一次，數字會有小差異：例如推左6號格（每秒 100）時，放開後最後 0.5 秒的 EPG 平均，兩次分別約 19 和 23。結論相同。</li>
 <li>資料：多行為數位果蠅計畫第 8.26 節，模擬程式 <code>hd_test.py</code>。</li>
 </ul>
