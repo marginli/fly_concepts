@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlyWire 交互作用平台</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5d6670;--line:#dcd8cf;--card:#fff;--view:#f1efe9;--bad:#c2552f;--good:#2e9e5b;--neu:#7a7f86;
+ --c0:#c2552f;--c1:#8d5bd6;--c2:#2f6fbf;--c3:#d9821b;--lit:#8a5a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--lit:#e3b45a}}
+:root[data-theme="dark"]{--bg:#16181c;--fg:#e6e6e3;--muted:#9aa1a9;--line:#33373d;--card:#1e2126;--view:#0f1114;--lit:#e3b45a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+.wrap{max-width:1400px;margin:0 auto;padding:8px 10px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+h2{font-size:.98rem;margin:0 0 4px}
+.grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:8px;align-items:stretch}
+.left{display:flex;flex-direction:column;margin-bottom:8px}.left canvas{flex:1 1 auto;height:0;min-height:340px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}.left canvas{flex:none;height:400px}}
+canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:1px solid var(--line)}
+.task{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:2px 8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task label{font-weight:600;white-space:nowrap}
+.task .what{color:var(--muted);font-size:.8rem;line-height:1.35}
+.task .what .lit{color:var(--lit)}
+.lv{display:flex;gap:3px}
+button{font:inherit;font-size:.84rem;padding:1px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+button.on{border-color:var(--fg);font-weight:600}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+table{border-collapse:collapse;width:100%;font-size:.8rem;line-height:1.4;font-variant-numeric:tabular-nums}
+th,td{border:1px solid color-mix(in srgb,var(--fg) 22%,transparent);padding:3px 5px;text-align:right;vertical-align:top}
+th:first-child,td:first-child{text-align:left}
+td.st{text-align:left}
+.up{color:var(--good);font-weight:600}.down{color:var(--bad);font-weight:600}.ns{color:var(--neu)}
+.legend{font-size:.8rem;color:var(--muted);margin-top:4px;line-height:1.45}
+.ctl{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;align-items:center}.ctl button{font-size:.78rem;padding:1px 7px}
+#now{font-size:.88rem;margin:4px 0 0;line-height:1.45}
+.embedded .wrap{padding-left:0;padding-right:0;max-width:none}
+</style><script>if (window.self !== window.top) { document.documentElement.classList.add("embedded"); addEventListener("load", () => { let lastH = 0; const post = () => { const h = Math.ceil(document.querySelector(".wrap").getBoundingClientRect().bottom + 8); if (h !== lastH) { lastH = h; parent.postMessage({demoH: h}, "*"); } }; new ResizeObserver(post).observe(document.querySelector(".wrap")); post(); }); }</script></head><body><div class="wrap">
+<div class="grid">
+ <div class="card left">
+  <h2>場地</h2>
+  <canvas id="arena" height="460"></canvas>
+  <div id="now"></div>
+ </div>
+ <div class="right">
+  <div class="card">
+   <h2>刺激（可任意組合）</h2>
+   <div id="tasks"></div>
+   <div class="ctl"><span style="font-size:.8rem;color:var(--muted)">背景輸入：</span><span class="lv" id="bgsel"></span>
+    <button id="allOff">全部關掉</button><button id="allOn">四種全開</button></div>
+  </div>
+  <div class="card">
+   <h2>指令神經元：一起給時是「相加」還是「互相影響」</h2>
+   <table id="tbl"></table>
+   <div class="legend">單位都是每秒放電次數。「相加的預期」＝只有背景時的放電，加上每種刺激單獨給時各自造成的變化。「交互作用」＝實際 − 相加的預期；超過隨機誤差 2 倍才標「加強」或「削弱」（轉向那列標「更偏右／更偏左」），否則標「約等於相加」。<b>交互作用是模型的預測，真果蠅還沒有人量過。</b></div>
+  </div>
+ </div>
+</div>
+</div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const TASK = [
+ {n: "退", short: "正前方物體逼近（活化 LC16 視覺神經元，每顆每秒 200 次）", lit: "文獻：活化 LC16 → 倒退走，部分經過 MDN（Wu 等 2016；Sen 等 2017）"},
+ {n: "閃", short: "上方黑影逼近（活化 LC4 視覺神經元，每秒 200 次）", lit: "文獻：LC4 → 巨纖維 DNp01 → 起飛逃跑（von Reyn 等 2014；Ache 等 2019）"},
+ {n: "轉", short: "想去的方向偏在一側（活化那一側的 PFL3，每秒 25 次）", lit: "文獻：軸突送到右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024；只有相關性，沒有直接活化）"},
+ {n: "背", short: "背對想去的方向（活化兩側 PFL2，每秒 100 次）", lit: "文獻：活化 PFL2 → 減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024）"},
+];
+const BGS = [["原背景", "原背景"], ["背景A", "只給嗅覺受器"], ["背景B", "另一組調出的背景"]];
+let D, bg = "原背景", L = [0, 0, 0, 0];      // L[2]：0 關、1 右、-1 左
+const idx = b => b[0] * 8 + b[1] * 4 + (b[2] ? 1 : 0) * 2 + b[3];
+// 讀出：轉向用 DNa02 右減左；目標在左時把左右對調（模型只模擬了軸突送到右側的 PFL3，假設左右對稱）
+function ro(b, side) {
+  const m = D.bg[bg].mean, s = D.bg[bg].sem, k = idx(b);
+  let R = m.DNa02R[k], Lf = m.DNa02L[k], sR = s.DNa02R[k], sL = s.DNa02L[k];
+  if (side < 0) [R, Lf] = [Lf, R];
+  return {MDN: [m.MDN[k], s.MDN[k]], DNp01: [m.DNp01[k], s.DNp01[k]], TURN: [R - Lf, Math.hypot(sR, sL)]};
+}
+const ROWS = [["MDN", "MDN（倒退走）"], ["DNp01", "DNp01 巨纖維（起飛逃跑）"], ["TURN", "DNa02 右減左（正＝往右轉）"]];
+let OUT = null;
+function compute() {
+  const on = L.map(v => v ? 1 : 0), side = L[2] || 1, base = ro([0, 0, 0, 0], side), all = ro(on, side), res = {};
+  for (const [k] of ROWS) {
+    let exp = base[k][0], v2 = 0; const solo = [];
+    on.forEach((b, i) => { if (!b) return; const s = [0, 0, 0, 0]; s[i] = 1; const r = ro(s, side)[k]; solo.push([i, r[0] - base[k][0]]); exp += r[0] - base[k][0]; v2 += r[1] ** 2; });
+    const nOn = solo.length; v2 += all[k][1] ** 2 + ((nOn - 1) * base[k][1]) ** 2;
+    const I = all[k][0] - exp, se = Math.sqrt(v2);
+    res[k] = {base: base[k][0], act: all[k][0], exp, I, se, solo, sig: nOn >= 2 && Math.abs(I) > 2 * se};
+  }
+  return {res, nOn: on.reduce((a, b) => a + b, 0)};
+}
+const fx = v => (Math.round(v) || 0).toFixed(0);   // 避免顯示 -0
+function update() {
+  OUT = compute(); const {res, nOn} = OUT;
+  let h = "<tr><th>指令神經元</th><th>只有背景</th><th>各刺激單獨的變化</th><th>相加的預期</th><th>實際</th><th>交互作用</th></tr>";
+  for (const [k, nm] of ROWS) {
+    const r = res[k];
+    const solo = r.solo.length ? r.solo.map(([i, d]) => `${TASK[i].n} ${d >= 0 ? "+" : ""}${d.toFixed(0)}`).join("，") : "—";
+    let st = "—";
+    const lab = k === "TURN" ? (r.I > 0 ? "比相加更偏右" : "比相加更偏左") : (r.I > 0 ? "加強" : "削弱");   // 轉向是有正負的量，交互作用的正負代表偏右或偏左，不是強弱
+    if (nOn >= 2) st = r.sig ? `<span class="${r.I > 0 ? "up" : "down"}">${lab} ${r.I > 0 ? "+" : ""}${r.I.toFixed(0)}</span>` : `<span class="ns">約等於相加（${r.I >= 0 ? "+" : ""}${r.I.toFixed(0)}）</span>`;
+    else if (nOn === 1) st = `<span class="ns">只給一種，沒有交互作用</span>`;
+    h += `<tr><td>${nm}</td><td>${fx(r.base)}</td><td>${solo}</td><td>${nOn ? fx(r.exp) : "—"}</td><td><b>${fx(r.act)}</b></td><td class="st">${st}</td></tr>`;
+  }
+  $("#tbl").innerHTML = h;
+  const ex = D.bg[bg].excluded[idx(L.map(v => v ? 1 : 0))];
+  $("#tbl").insertAdjacentHTML("beforeend", `<tr><td colspan="6" class="st" style="color:var(--muted)">這個組合共 ${D.bg[bg].n_flies} 隻模擬果蠅；撤掉輸入後仍持續放電、不列入平均的有 ${ex} 隻。</td></tr>`);
+  const a = act();
+  $("#now").innerHTML = nOn ? `果蠅此刻：<b>${a.text}</b>` : "沒有給刺激：果蠅隨機走動（手寫規則）。";
+}
+// 換算成動作（手寫規則，見說明）
+function act() {
+  const r = OUT.res, dM = r.MDN.act - r.MDN.base, dP = r.DNp01.act - r.DNp01.base, dT = r.TURN.act - r.TURN.base, t = [];
+  const jump = dP >= 20, back = dM >= 10, turn = Math.abs(dT) >= 10;
+  if (jump) t.push("起飛逃跑");
+  if (back) t.push("倒退走");
+  if (turn) t.push(dT > 0 ? "往右轉" : "往左轉");
+  if (!t.length) t.push("指令神經元變化不大，照常走");
+  return {jump, back, turn, dM, dT, text: t.join("＋")};
+}
+function buildTasks() {
+  const box = $("#tasks");
+  TASK.forEach((t, i) => {
+    const row = document.createElement("div"); row.className = "task";
+    const opts = i === 2 ? [["關", 0], ["左", -1], ["右", 1]] : [["關", 0], ["開", 1]];
+    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><div class="lv">${opts.map(([l, v]) => `<button data-v="${v}">${l}</button>`).join("")}</div><div class="what">${t.short}<br><span class="lit">${t.lit}</span></div>`;
+    row.querySelectorAll("button").forEach(b => b.onclick = () => { L[i] = +b.dataset.v; sync(); });
+    box.appendChild(row);
+  });
+  $("#bgsel").innerHTML = BGS.map(([k, l]) => `<button data-k="${k}">${l}</button>`).join("");
+  $$("#bgsel button").forEach(b => b.onclick = () => { bg = b.dataset.k; sync(); });
+  $("#allOff").onclick = () => { L = [0, 0, 0, 0]; sync(); };
+  $("#allOn").onclick = () => { L = [1, 1, L[2] || 1, 1]; sync(); };
+}
+function sync() {
+  $$("#tasks .task").forEach((row, i) => row.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.v === L[i])));
+  $$("#bgsel button").forEach(b => b.classList.toggle("on", b.dataset.k === bg));
+  update();
+}
+/* ---------- 場地與動畫 ---------- */
+const arena = $("#arena"), ctx = arena.getContext("2d");
+const U = () => devicePixelRatio * Math.max(0.7, Math.min(1.4, 1.05 * Math.min(arena.clientWidth, arena.clientHeight) / 420));
+const F = {x: 0, y: 0, th: -Math.PI / 2, ph: 0, t: 0, jump: null, refr: 0, init: false, idle: {walk: true, left: 2, turn: 0}, speed: 0};
+function size() { const w = arena.clientWidth * devicePixelRatio, h = arena.clientHeight * devicePixelRatio; if (arena.width !== w || arena.height !== h) { arena.width = w; arena.height = h; } if (!F.init) { F.x = w / 2; F.y = h / 2; F.init = true; } }
+function step(dt) {
+  const w = arena.width, h = arena.height, u = U(); F.t += dt;
+  let speed = 0, turn = 0;
+  if (!OUT.nOn) {
+    const I = F.idle; I.left -= dt;
+    if (I.left <= 0) { I.walk = !I.walk; I.left = I.walk ? 1 + 3 * Math.random() : 0.6 + 2 * Math.random(); I.turn = (Math.random() - 0.5) * 2.2; }
+    if (I.walk) { speed = 110; turn = I.turn + Math.sin(F.t * 2.3) * 0.6; }
+  } else {
+    const a = act();
+    speed = a.back ? -Math.min(90, 30 + a.dM * 0.5) : 100;
+    if (a.turn) turn = Math.max(-4, Math.min(4, a.dT * 2 * Math.PI / 180));    // 每秒 2 度 × DNa02 右減左的變化（手訂換算）
+    F.refr -= dt;
+    if (a.jump && !F.jump && F.refr <= 0) { const g = F.th + Math.PI + (Math.random() - 0.5); F.jump = {t: 0, dx: Math.cos(g), dy: Math.sin(g)}; F.refr = 1.6; }
+  }
+  if (F.jump) { F.jump.t += dt; const v = 700 * u * Math.max(0, 1 - F.jump.t / 0.35); F.x += F.jump.dx * v * dt; F.y += F.jump.dy * v * dt; if (F.jump.t > 0.35) F.jump = null; }
+  else {
+    const m = 45 * u, out = F.x < m || F.y < m || F.x > w - m || F.y > h - m;
+    if (out && speed !== 0) { const want = speed > 0 ? Math.atan2(h / 2 - F.y, w / 2 - F.x) : Math.atan2(F.y - h / 2, F.x - w / 2); let e = want - F.th; e = Math.atan2(Math.sin(e), Math.cos(e)); turn += 3 * e; }
+    F.th += turn * dt; F.x += Math.cos(F.th) * speed * u * dt; F.y += Math.sin(F.th) * speed * u * dt;
+    F.ph += dt * Math.abs(speed) / 14 * Math.sign(speed || 1);
+  }
+  F.speed = speed; F.x = Math.max(6, Math.min(w - 6, F.x)); F.y = Math.max(6, Math.min(h - 6, F.y));
+}
+const LEGS = [[-1, -11, -15, -26, 0], [1, -11, 15, -26, 1], [-1, -6, -21, -4, 1], [1, -6, 21, -4, 0], [-1, -1, -17, 17, 0], [1, -1, 17, 17, 1]];
+function leg(c, ax, ay, fx, fy) {
+  const mx = (ax + fx) / 2, my = (ay + fy) / 2, len = Math.hypot(fx - ax, fy - ay), nx = (fy - ay) / len, ny = -(fx - ax) / len, sd = ax < 0 ? -1 : 1;
+  const bend = Math.max(2, 11 - len * 0.28), kx = mx + nx * bend * -sd * (ay > -4 ? -1 : 1), ky = my + ny * bend * -sd * (ay > -4 ? -1 : 1);
+  c.beginPath(); c.moveTo(ax, ay); c.lineTo(kx, ky); c.lineTo(fx, fy); c.stroke();
+}
+function drawFly() {
+  const c = ctx, s = U(), jumping = !!F.jump, moving = Math.abs(F.speed) > 1 && !jumping;
+  c.save(); c.translate(F.x, F.y); c.rotate(F.th + Math.PI / 2); c.scale(s, s);
+  if (jumping) { c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 12; c.shadowOffsetY = 8; }
+  c.strokeStyle = "#2b2016"; c.lineWidth = 1.3; c.lineJoin = "round"; c.lineCap = "round";
+  LEGS.forEach(([sd, ay, fx, fy, grp], i) => {
+    const ax = sd * (i < 2 ? 4 : i < 4 ? 5.5 : 4.5);
+    if (jumping) { leg(c, ax, ay, fx * 0.7, fy + (i > 3 ? 10 : 4)); return; }
+    let dy = 0; if (moving) { const p = ((F.ph / (2 * Math.PI)) + (grp ? 0.5 : 0)) % 1; dy = p < 0.5 ? 6 - 24 * p : -6 + 24 * (p - 0.5); }
+    leg(c, ax, ay, fx, fy + dy);
+  });
+  const gA = c.createLinearGradient(-7, 0, 7, 0); gA.addColorStop(0, "#8a6a3a"); gA.addColorStop(0.5, "#d0aa70"); gA.addColorStop(1, "#8a6a3a");
+  c.fillStyle = gA; c.beginPath(); c.ellipse(0, 17, 8.5, 15, 0, 0, 7); c.fill();
+  c.fillStyle = "rgba(40,25,10,.55)"; for (let k = 0; k < 4; k++) { c.beginPath(); c.ellipse(0, 10 + k * 5, 7.6 - k * 1, 1.3, 0, 0, 7); c.fill(); }
+  for (const sd of [-1, 1]) { const ang = jumping ? sd * 1.2 : sd * 0.12, len = jumping ? 16 : 15;
+    c.save(); c.translate(sd * 3, -3); c.rotate(ang); c.fillStyle = "rgba(205,225,240,.55)"; c.strokeStyle = "rgba(80,95,110,.55)"; c.lineWidth = 0.5;
+    c.beginPath(); c.ellipse(sd * 1.5, len, 4.8, len, 0, 0, 7); c.fill(); c.stroke(); c.restore(); }
+  const gT = c.createRadialGradient(-2, -9, 1, 0, -6, 10); gT.addColorStop(0, "#a07a48"); gT.addColorStop(1, "#5a3f20");
+  c.fillStyle = gT; c.beginPath(); c.ellipse(0, -6, 7.2, 9.5, 0, 0, 7); c.fill();
+  c.fillStyle = "#6a4a28"; c.beginPath(); c.ellipse(0, -18.5, 7.2, 4.8, 0, 0, 7); c.fill();
+  c.fillStyle = "#b3261e"; for (const sd of [-1, 1]) { c.beginPath(); c.ellipse(sd * 5.3, -18.8, 3.4, 4.6, sd * 0.25, 0, 7); c.fill(); }
+  c.restore();
+}
+function drawStim() {
+  const c = ctx, d = devicePixelRatio, t = F.t, u = U();
+  if (L[1]) { const v = (t % 1.6) / 1.6; c.fillStyle = `rgba(30,15,45,${0.15 + 0.3 * v})`; c.beginPath(); c.arc(F.x - 40 * d, F.y - 40 * d, (15 + 70 * v * v) * d, 0, 7); c.fill(); }
+  if (L[0]) { const v = (t % 1.4) / 1.4, ax = F.x + Math.cos(F.th) * (110 - 70 * v) * u, ay = F.y + Math.sin(F.th) * (110 - 70 * v) * u; c.fillStyle = css("--c0"); c.globalAlpha = 0.55; c.beginPath(); c.arc(ax, ay, (6 + 16 * v) * u, 0, 7); c.fill(); c.globalAlpha = 1; }
+  if (L[2] || L[3]) {                     // 想去的方向：只開轉＝斜前方 60 度；只開背＝正後方；兩者都開＝斜後方 135 度（照 Westeinde 2024：背對目標時 PFL2 最活躍）
+    const sd = L[2] || 0, ang = L[3] ? (sd ? sd * 135 : 180) : sd * 60, g = F.th + ang * Math.PI / 180, r = 70 * u;
+    const x1 = F.x + Math.cos(g) * r * 0.45, y1 = F.y + Math.sin(g) * r * 0.45, x2 = F.x + Math.cos(g) * r, y2 = F.y + Math.sin(g) * r;
+    c.strokeStyle = css("--c2"); c.fillStyle = css("--c2"); c.lineWidth = 2.5 * d; c.setLineDash([5 * d, 4 * d]); c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.setLineDash([]);
+    c.beginPath(); c.moveTo(x2 + Math.cos(g) * 9 * d, y2 + Math.sin(g) * 9 * d); c.lineTo(x2 + Math.cos(g + 2.5) * 9 * d, y2 + Math.sin(g + 2.5) * 9 * d); c.lineTo(x2 + Math.cos(g - 2.5) * 9 * d, y2 + Math.sin(g - 2.5) * 9 * d); c.fill();
+    c.font = `${12 * d}px system-ui`; c.textAlign = "center"; c.fillText("想去的方向", x2 + Math.cos(g) * 24 * d, y2 + Math.sin(g) * 24 * d);
+  }
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; size();
+  step(dt); ctx.clearRect(0, 0, arena.width, arena.height); drawStim(); drawFly();
+  requestAnimationFrame(frame);
+}
+fetch("data.json").then(r => r.json()).then(d => { D = d; const h = location.hash.slice(1).split(",").map(Number); if (h.length === 4 && h.every(x => [-1, 0, 1].includes(x))) L = h; buildTasks(); sync(); requestAnimationFrame(frame); });
+</script>
+</body></html>
