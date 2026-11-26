@@ -21,7 +21,7 @@ canvas{display:block;width:100%;background:var(--view);border-radius:8px;border:
 .task label{font-weight:600;white-space:nowrap}
 .task .what{color:var(--muted);font-size:.8rem;line-height:1.35}
 .task .what .lit{color:var(--lit)}
-.lv{display:flex;gap:3px}
+.lv{display:flex;gap:3px}.lv.sl{margin-top:3px}.lv.sl button{font-size:.74rem;padding:0 6px}button:disabled{opacity:.4;cursor:default}
 button{font:inherit;font-size:.84rem;padding:1px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
 button.on{border-color:var(--fg);font-weight:600}
 .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
@@ -48,9 +48,10 @@ td.st{text-align:left}
    <div id="tasks"></div>
    <div class="ctl"><span style="font-size:.8rem;color:var(--muted)">背景輸入：</span><span class="lv" id="bgsel"></span>
     <button id="allOff">全部關掉</button><button id="allOn">四種全開</button></div>
+   <div class="legend" id="slnote"></div>
   </div>
   <div class="card">
-   <h2>總覽：每兩種一起給，是增益、抑制，還是只是相加</h2>
+   <h2>總覽：每兩種一起給，是增益、抑制，還是只是相加（照上面設定的強度）</h2>
    <table id="ov"></table>
    <div class="legend">▲ 增益＝一起給時比兩者單獨效果相加還多；▼ 抑制＝比相加還少；≈ 相加＝差異在隨機誤差 2 倍以內。轉向那欄看的是「轉得比相加更用力（增益）、更少（抑制），還是轉向反過來」；◆＝兩種單獨給時都幾乎不轉，一起給卻轉了。數字是實際減相加的預期（每秒放電次數），隨上方背景切換。點一列就會把刺激設成那一對；「轉」用右側。</div>
   </div>
@@ -67,33 +68,42 @@ td.st{text-align:left}
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TASK = [
- {n: "退", short: "正前方物體逼近（活化 LC16 視覺神經元，每顆每秒 200 次）", lit: "文獻：活化 LC16 → 倒退走，部分經過 MDN（Wu 等 2016；Sen 等 2017）"},
- {n: "閃", short: "上方黑影逼近（活化 LC4 視覺神經元，每秒 200 次）", lit: "文獻：LC4 → 巨纖維 DNp01 → 起飛逃跑（von Reyn 等 2014；Ache 等 2019）"},
- {n: "轉", short: "想去的方向偏在一側（活化那一側的 PFL3，每秒 25 次）", lit: "文獻：軸突送到右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024；只有相關性，沒有直接活化）"},
- {n: "背", short: "背對想去的方向（活化兩側 PFL2，每秒 100 次）", lit: "文獻：活化 PFL2 → 減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024）"},
+ {n: "退", short: "正前方物體逼近（活化 LC16 視覺神經元，每顆每秒 {r} 次）", r: 200, lit: "文獻：活化 LC16 → 倒退走，部分經過 MDN（Wu 等 2016；Sen 等 2017）"},
+ {n: "閃", short: "上方黑影逼近（活化 LC4 視覺神經元，每秒 {r} 次）", r: 200, lit: "文獻：LC4 → 巨纖維 DNp01 → 起飛逃跑（von Reyn 等 2014；Ache 等 2019）"},
+ {n: "轉", short: "想去的方向偏在一側（活化那一側的 PFL3，每秒 {r} 次）", r: 25, lit: "文獻：軸突送到右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024；只有相關性，沒有直接活化）"},
+ {n: "背", short: "背對想去的方向（活化兩側 PFL2，每秒 {r} 次）", r: 100, lit: "文獻：活化 PFL2 → 減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024）"},
 ];
 const BGS = [["原背景", "原背景"], ["背景A", "只給嗅覺受器"], ["背景B", "另一組調出的背景"]];
-let D, bg = "原背景", L = [0, 0, 0, 0];      // L[2]：0 關、1 右、-1 左
+let D, bg = "原背景", L = [0, 0, 0, 0], S = [1, 1, 1, 1];      // L[2]：0 關、1 右、-1 左；S：強度倍數 0.5／1／1.5
 const idx = b => b[0] * 8 + b[1] * 4 + (b[2] ? 1 : 0) * 2 + b[3];
+const LV = [["弱", 0.5], ["中", 1], ["強", 1.5]];
+// 強度只有在原背景、最多兩種刺激開著時能調（強度三檔只模擬了單獨與兩兩組合）；其他情況一律用中（原強度）
+const canDose = on => bg === "原背景" && on.reduce((a, b) => a + b, 0) <= 2;
+const mult = on => on.map((b, i) => b ? (canDose(on) ? S[i] : 1) : 0);
+const RK = ["MDN", "DNa02L", "DNa02R", "DNp01"];
+// 查表：倍數全是 1 → 16 種組合的資料（原背景 60 隻）；有其他倍數 → 強度三檔的資料（30 隻）。useDose 決定整組（背景、單獨、一起）都從同一份資料取
+function look(m, useDose) {
+  if (!useDose) { const B = D.bg[bg], k = idx(m.map(v => v ? 1 : 0)); return {m: RK.map(r => B.mean[r][k]), s: RK.map(r => B.sem[r][k]), ex: B.excluded[k], n: B.n_flies}; }
+  const e = D.dose.data[m.map(v => +v.toFixed(1)).join(",")]; return {m: e.m, s: e.s, ex: e.ex, n: D.dose.n_flies};
+}
 // 讀出：轉向用 DNa02 右減左；目標在左時把左右對調（模型只模擬了軸突送到右側的 PFL3，假設左右對稱）
-function ro(b, side) {
-  const m = D.bg[bg].mean, s = D.bg[bg].sem, k = idx(b);
-  let R = m.DNa02R[k], Lf = m.DNa02L[k], sR = s.DNa02R[k], sL = s.DNa02L[k];
-  if (side < 0) [R, Lf] = [Lf, R];
-  return {MDN: [m.MDN[k], s.MDN[k]], DNp01: [m.DNp01[k], s.DNp01[k]], TURN: [R - Lf, Math.hypot(sR, sL)]};
+function ro(mv, side, useDose) {
+  const {m, s} = look(mv, useDose);
+  let R = m[2], Lf = m[1]; if (side < 0) [R, Lf] = [Lf, R];
+  return {MDN: [m[0], s[0]], DNp01: [m[3], s[3]], TURN: [R - Lf, Math.hypot(s[1], s[2])]};
 }
 const ROWS = [["MDN", "MDN（倒退走）"], ["DNp01", "DNp01 巨纖維（起飛逃跑）"], ["TURN", "DNa02 右減左（正＝往右轉）"]];
 let OUT = null;
 function compute(on = L.map(v => v ? 1 : 0), side = L[2] || 1) {
-  const base = ro([0, 0, 0, 0], side), all = ro(on, side), res = {};
+  const mv = mult(on), uD = mv.some(v => v && v !== 1), base = ro([0, 0, 0, 0], side, uD), all = ro(mv, side, uD), res = {};
   for (const [k] of ROWS) {
     let exp = base[k][0], v2 = 0; const solo = [];
-    on.forEach((b, i) => { if (!b) return; const s = [0, 0, 0, 0]; s[i] = 1; const r = ro(s, side)[k]; solo.push([i, r[0] - base[k][0]]); exp += r[0] - base[k][0]; v2 += r[1] ** 2; });
+    on.forEach((b, i) => { if (!b) return; const s = [0, 0, 0, 0]; s[i] = mv[i]; const r = ro(s, side, uD)[k]; solo.push([i, r[0] - base[k][0]]); exp += r[0] - base[k][0]; v2 += r[1] ** 2; });
     const nOn = solo.length; v2 += all[k][1] ** 2 + ((nOn - 1) * base[k][1]) ** 2;
     const I = all[k][0] - exp, se = Math.sqrt(v2);
     res[k] = {base: base[k][0], act: all[k][0], exp, I, se, solo, sig: nOn >= 2 && Math.abs(I) > 2 * se};
   }
-  return {res, nOn: on.reduce((a, b) => a + b, 0)};
+  return {res, nOn: on.reduce((a, b) => a + b, 0), uD, src: look(mv, uD)};
 }
 // 交互作用的白話標籤：放電量的列＝增益／抑制；轉向那列看「實際轉得比相加更用力，還是更少」
 function label(k, r) {
@@ -133,8 +143,8 @@ function update() {
     h += `<tr><td>${nm}</td><td>${fx(r.base)}</td><td>${solo}</td><td>${nOn ? fx(r.exp) : "—"}</td><td><b>${fx(r.act)}</b></td><td class="st">${st}</td></tr>`;
   }
   $("#tbl").innerHTML = h;
-  const ex = D.bg[bg].excluded[idx(L.map(v => v ? 1 : 0))];
-  $("#tbl").insertAdjacentHTML("beforeend", `<tr><td colspan="6" class="st" style="color:var(--muted)">這個組合共 ${D.bg[bg].n_flies} 隻模擬果蠅；撤掉輸入後仍持續放電、不列入平均的有 ${ex} 隻。</td></tr>`);
+  const ex = OUT.src.ex;
+  $("#tbl").insertAdjacentHTML("beforeend", `<tr><td colspan="6" class="st" style="color:var(--muted)">${OUT.uD ? "（有刺激不是「中」強度，這一組改用強度三檔的模擬）" : ""}這個組合共 ${OUT.src.n} 隻模擬果蠅；撤掉輸入後仍持續放電、不列入平均的有 ${ex} 隻。</td></tr>`);
   const a = act();
   $("#now").innerHTML = nOn ? `果蠅此刻：<b>${a.text}</b>` : "沒有給刺激：果蠅隨機走動（手寫規則）。";
 }
@@ -153,8 +163,9 @@ function buildTasks() {
   TASK.forEach((t, i) => {
     const row = document.createElement("div"); row.className = "task";
     const opts = i === 2 ? [["關", 0], ["左", -1], ["右", 1]] : [["關", 0], ["開", 1]];
-    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><div class="lv">${opts.map(([l, v]) => `<button data-v="${v}">${l}</button>`).join("")}</div><div class="what">${t.short}<br><span class="lit">${t.lit}</span></div>`;
-    row.querySelectorAll("button").forEach(b => b.onclick = () => { L[i] = +b.dataset.v; sync(); });
+    row.innerHTML = `<label><span class="dot" style="background:${css("--c" + i)}"></span>${t.n}</label><div><div class="lv">${opts.map(([l, v]) => `<button data-v="${v}">${l}</button>`).join("")}</div><div class="lv sl">${LV.map(([l, v]) => `<button data-s="${v}">${l}</button>`).join("")}</div></div><div class="what"><span class="sh"></span><br><span class="lit">${t.lit}</span></div>`;
+    row.querySelectorAll("button[data-v]").forEach(b => b.onclick = () => { L[i] = +b.dataset.v; sync(); });
+    row.querySelectorAll("button[data-s]").forEach(b => b.onclick = () => { S[i] = +b.dataset.s; sync(); });
     box.appendChild(row);
   });
   $("#bgsel").innerHTML = BGS.map(([k, l]) => `<button data-k="${k}">${l}</button>`).join("");
@@ -163,7 +174,14 @@ function buildTasks() {
   $("#allOn").onclick = () => { L = [1, 1, L[2] || 1, 1]; sync(); };
 }
 function sync() {
-  $$("#tasks .task").forEach((row, i) => row.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.v === L[i])));
+  const on = L.map(v => v ? 1 : 0), ok = canDose(on);
+  $$("#tasks .task").forEach((row, i) => {
+    row.querySelectorAll("button[data-v]").forEach(b => b.classList.toggle("on", +b.dataset.v === L[i]));
+    row.querySelectorAll("button[data-s]").forEach(b => { b.classList.toggle("on", +b.dataset.s === (ok ? S[i] : 1)); b.disabled = !ok; });
+    row.querySelector(".sh").textContent = TASK[i].short.replace("{r}", Math.round(TASK[i].r * (ok ? S[i] : 1)));
+  });
+  $("#slnote").textContent = ok ? "下排按鈕是強度：弱＝原強度的 0.5 倍、中＝原強度、強＝1.5 倍。" : (bg !== "原背景" ? "強度只在原背景下能調（其他背景只模擬了原強度），目前固定為中。" : "強度只在最多兩種刺激開著時能調（三種以上只模擬了原強度），目前固定為中。");
+  try { history.replaceState(null, "", "#" + L.join(",") + "," + S.join(",")); } catch (e) {}
   $$("#bgsel button").forEach(b => b.classList.toggle("on", b.dataset.k === bg));
   update(); overview();
 }
@@ -242,6 +260,6 @@ function frame(now) {
   step(dt); ctx.clearRect(0, 0, arena.width, arena.height); drawStim(); drawFly();
   requestAnimationFrame(frame);
 }
-fetch("data.json").then(r => r.json()).then(d => { D = d; const h = location.hash.slice(1).split(",").map(Number); if (h.length === 4 && h.every(x => [-1, 0, 1].includes(x))) L = h; buildTasks(); sync(); requestAnimationFrame(frame); });
+fetch("data.json").then(r => r.json()).then(d => { D = d; const h = location.hash.slice(1).split(",").map(Number); if (h.length >= 4 && h.slice(0, 4).every(x => [-1, 0, 1].includes(x))) L = h.slice(0, 4); if (h.length === 8 && h.slice(4).every(x => [0.5, 1, 1.5].includes(x))) S = h.slice(4); buildTasks(); sync(); requestAnimationFrame(frame); });
 </script>
 </body></html>

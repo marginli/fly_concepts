@@ -8,6 +8,7 @@
 每種組合每輪 10 隻；原背景 6 輪（種子 8101–8106）、背景 A（只有嗅覺受器）1 輪、背景 B（18 型搜尋第 41 批）1 輪。
 每批撤掉輸入後仍持續放電的果蠅（persist_mask）不列入平均。
 讀出：刺激那 1 秒的每秒放電：MDN（4 顆平均）、DNa02 左、右、DNp01（左右平均）。
+強度三檔：MODE=dose（×0.5/1/1.5，只有背景＋單獨＋兩兩，67 批），原背景種子 8101–8103 各 10 隻。
 用法：python3 make.py → data.json"""
 import os, json, glob, itertools
 import numpy as np
@@ -33,5 +34,21 @@ for bg, files in ORDER.items():
             v = np.array(vals[k]); mean[k].append(round(float(v.mean()), 1)); sem[k].append(round(float(v.std(ddof=1) / np.sqrt(len(v))), 1))
         nex.append(ex)
     out["bg"][bg] = {"mean": mean, "sem": sem, "n_flies": 10 * len(runs), "excluded": nex}
+# 11-25 加：強度三檔（MODE=dose，COMBO 強度 ×0.5/1/1.5；只有背景、單獨、兩兩；原背景，種子 8101–8103）
+# 鍵＝四種刺激的倍數，例 "0,1.5,0,0.5"；0＝關
+DOSE = [{r["stim"]: r for r in json.load(open(os.path.join(SRC, f"mdn_dose_s{s}_fw.json")))["runs"]} for s in (8101, 8102, 8103)]
+dose = {}
+for name in DOSE[0]:
+    m = [0.0] * 4
+    if name != "只有背景":
+        for part in name.split("＋"):
+            st, x = part.rsplit("×", 1); m[STIM.index(st)] = float(x)
+    vals = {k: [] for k in RO}; ex = 0
+    for R in DOSE:
+        r = R[name]; keep = np.array(r["persist_mask"]) == 0; ex += int((~keep).sum())
+        for k, cs in RO.items(): vals[k] += list(np.mean([np.array(r["cells"][c]["刺激"]) for c in cs], 0)[keep])
+    dose[",".join(f"{v:g}" for v in m)] = {"m": [round(float(np.mean(vals[k])), 1) for k in RO],
+                                          "s": [round(float(np.std(vals[k], ddof=1) / np.sqrt(len(vals[k]))), 1) for k in RO], "ex": ex}
+out["dose"] = {"keys": list(RO), "n_flies": 10 * len(DOSE), "data": dose}
 json.dump(out, open(os.path.join(HERE, "data.json"), "w"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize(os.path.join(HERE, "data.json")), "bytes；排除隻數（原背景）", out["bg"]["原背景"]["excluded"])
