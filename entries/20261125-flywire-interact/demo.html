@@ -49,6 +49,7 @@ td.st{text-align:left}
    <div class="ctl"><span style="font-size:.8rem;color:var(--muted)">背景輸入：</span><span class="lv" id="bgsel"></span>
     <button id="allOff">全部關掉</button><button id="allOn">四種全開</button></div>
    <div class="legend" id="slnote"></div>
+   <div class="legend">文獻後的方括號編號，對應頁面下方說明欄「文獻」一節的編號。</div>
   </div>
   <div class="card">
    <h2>總覽：每兩種一起給，是增益、抑制，還是只是相加（照上面設定的強度）</h2>
@@ -68,10 +69,10 @@ td.st{text-align:left}
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TASK = [
- {n: "退", short: "正前方物體逼近（活化 LC16 視覺神經元，每顆每秒 {r} 次）", r: 200, lit: "文獻：活化 LC16 → 倒退走，部分經過 MDN（Wu 等 2016；Sen 等 2017）"},
- {n: "閃", short: "上方黑影逼近（活化 LC4 視覺神經元，每秒 {r} 次）", r: 200, lit: "文獻：LC4 → 巨纖維 DNp01 → 起飛逃跑（von Reyn 等 2014；Ache 等 2019）"},
- {n: "轉", short: "想去的方向偏在一側（活化那一側的 PFL3，每秒 {r} 次）", r: 25, lit: "文獻：軸突送到右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024；只有相關性，沒有直接活化）"},
- {n: "背", short: "背對想去的方向（活化兩側 PFL2，每秒 {r} 次）", r: 100, lit: "文獻：活化 PFL2 → 減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024）"},
+ {n: "退", short: "正前方物體逼近（活化 LC16 視覺神經元，每顆每秒 {r} 次）", r: 200, lit: "文獻：活化 LC16 → 倒退走，部分經過 MDN（Wu 等 2016 [1]；Sen 等 2017 [2]）"},
+ {n: "閃", short: "上方黑影逼近（活化 LC4 視覺神經元，每秒 {r} 次）", r: 200, lit: "文獻：LC4 → 巨纖維 DNp01 → 起飛逃跑（von Reyn 等 2014 [3]；Ache 等 2019 [4]）"},
+ {n: "轉", short: "想去的方向偏在一側（活化那一側的 PFL3，每秒 {r} 次）", r: 25, lit: "文獻：軸突送到右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024 [5]；只有相關性，沒有直接活化）"},
+ {n: "背", short: "背對想去的方向（活化兩側 PFL2，每秒 {r} 次）", r: 100, lit: "文獻：活化 PFL2 → 減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024 [5]）"},
 ];
 const BGS = [["原背景", "原背景"], ["背景A", "只給嗅覺受器"], ["背景B", "另一組調出的背景"]];
 let D, bg = "原背景", L = [0, 0, 0, 0], S = [1, 1, 1, 1];      // L[2]：0 關、1 右、-1 左；S：強度倍數 0.5／1／1.5

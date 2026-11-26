@@ -3,16 +3,16 @@
 <link rel="stylesheet" href="../../lib/style.css?v=f052484e"></head><body><div class="wrap full">
 <p><a href="../../">← 回條目清單</a></p>
 <header><h1>FlyWire：倒退、逃跑、轉向一起觸發時會互相影響嗎</h1><p class="sub">2026-11-25　資料：FlyWire 783（Shiu 2024 全腦 LIF 模擬；嗅葉內部與 2 群細胞的群內連結歸零，共 1.68% 突觸）</p></header>
-<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=5fb7e7ad" style="width:100%;height:760px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
+<p class="hint"><a href="demo.html" target="_blank">在新分頁全螢幕開啟 DEMO</a></p><iframe src="demo.html?v=2d18be39" style="width:100%;height:760px;border:0" loading="lazy"></iframe><script>addEventListener("message",e=>{if(e.data&&e.data.demoH)for(const f of document.querySelectorAll("iframe"))if(f.contentWindow===e.source)f.style.height=(e.data.demoH+4)+"px"})</script>
 <div class="desc wide"><h2>這是什麼</h2>
-<p>這是一個電腦模擬的果蠅腦，照 FlyWire 連結體搭成。FlyWire 是一隻雌果蠅的腦的完整接線圖，記錄每顆神經元和哪些神經元之間有多少個突觸；不含腹神經索（相當於脊髓、控制腳的那一段）。模擬裡共 139,255 顆神經元，每顆都只做一件簡單的事：收到的輸入夠多就放電，放電再傳給下游（Shiu 等 2024 的全腦模型規則）。</p>
+<p>這是一個電腦模擬的果蠅腦，照 FlyWire 連結體搭成<a class="cite" href="#ref-8">[8]</a><a class="cite" href="#ref-9">[9]</a>。FlyWire 是一隻雌果蠅的腦的完整接線圖，記錄每顆神經元和哪些神經元之間有多少個突觸；不含腹神經索（相當於脊髓、控制腳的那一段）。模擬裡共 139,255 顆神經元，每顆都只做一件簡單的事：收到的輸入夠多就放電，放電再傳給下游（Shiu 等 2024 <a class="cite" href="#ref-7">[7]</a> 的全腦模型規則）。</p>
 <p>這一頁只放四種「有實驗支持」的刺激：真果蠅實驗已經看到，活化這些神經元會引發特定動作。你可以任意組合這些刺激。兩種以上刺激一起給時，看模型裡負責動作的三組<b>指令神經元</b>怎麼反應：是兩種效果單純相加，還是互相增益（比相加還多）、互相抑制（比相加還少）。指令神經元屬於下行神經元，負責把腦的指令送到腹神經索。</p>
 <table>
 <tr><th>刺激</th><th>模型裡活化的神經元</th><th>文獻上真果蠅的結果</th><th>看哪個指令神經元</th></tr>
-<tr><td>退：正前方物體逼近</td><td>LC16 視覺神經元（兩側），每顆每秒 200 次輸入</td><td>活化後倒退走，部分經過 MDN（Wu 等 2016；Sen 等 2017）</td><td>MDN（讓果蠅倒退走）</td></tr>
-<tr><td>閃：上方黑影逼近</td><td>LC4 視覺神經元（兩側），每秒 200 次</td><td>主要引起起飛逃跑，經過巨纖維 DNp01（von Reyn 等 2014；Ache 等 2019）</td><td>DNp01（讓果蠅起飛逃跑）</td></tr>
-<tr><td>轉：想去的方向偏在左或右</td><td>PFL3（方向感迴路的輸出細胞），只開送往那一側的 12 顆，每秒 25 次</td><td>送往右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024；這是記錄活動得到的相關性，沒有直接活化）</td><td>DNa02（左右各一顆）：右減左，正值＝往右轉</td></tr>
-<tr><td>背：背對想去的方向</td><td>PFL2（和 PFL3 相近的細胞），兩側，每秒 100 次</td><td>活化後減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024）</td><td>同上三組都看</td></tr>
+<tr><td>退：正前方物體逼近</td><td>LC16 視覺神經元（兩側），每顆每秒 200 次輸入</td><td>活化後倒退走，部分經過 MDN（Wu 等 2016 <a class="cite" href="#ref-1">[1]</a>；Sen 等 2017 <a class="cite" href="#ref-2">[2]</a>）</td><td>MDN（讓果蠅倒退走）</td></tr>
+<tr><td>閃：上方黑影逼近</td><td>LC4 視覺神經元（兩側），每秒 200 次</td><td>主要引起起飛逃跑，經過巨纖維 DNp01（von Reyn 等 2014 <a class="cite" href="#ref-3">[3]</a>；Ache 等 2019 <a class="cite" href="#ref-4">[4]</a>）</td><td>DNp01（讓果蠅起飛逃跑）</td></tr>
+<tr><td>轉：想去的方向偏在左或右</td><td>PFL3（方向感迴路的輸出細胞），只開送往那一側的 12 顆，每秒 25 次</td><td>送往右側的 PFL3 越活躍，果蠅越往右轉（Westeinde 等 2024 <a class="cite" href="#ref-5">[5]</a>；這是記錄活動得到的相關性，沒有直接活化）</td><td>DNa02（左右各一顆）：右減左，正值＝往右轉</td></tr>
+<tr><td>背：背對想去的方向</td><td>PFL2（和 PFL3 相近的細胞），兩側，每秒 100 次</td><td>活化後減速、轉速增加，往前走的果蠅改成倒退（Westeinde 等 2024 <a class="cite" href="#ref-5">[5]</a>）</td><td>同上三組都看</td></tr>
 </table>
 <p><b>要先知道：</b>文獻支持的是「每一種刺激單獨引發哪個動作」。<b>兩種一起給時會怎樣，真果蠅還沒有人量過</b>，所以展示頁右邊那張指令神經元表格裡的「交互作用」，全都是模型的預測。</p>
 
@@ -26,7 +26,7 @@
  <li>四種刺激都選「中」時，用的是上一條原背景 60 隻的模擬。只要有一種不是「中」，算「相加的預期」要用的三樣數字（只有背景、各刺激單獨、一起給）就全部改用這批 30 隻的模擬：兩批的隨機輸入不同，三樣數字取自同一批，相減時隨機差異才不會混進交互作用。</li>
  </ul></li>
 <li><b>每一隻怎麼跑：</b>先給 0.5 秒背景輸入暖身，背景 1 秒，再加上刺激 1 秒，取刺激那 1 秒指令神經元的平均放電（每秒次數）。</li>
-<li><b>背景輸入：</b>模擬時一直給全身感覺神經元固定的隨機輸入，代表果蠅沒有特別刺激時的狀態。只有嗅覺受器的強度照文獻；其他感覺神經元的強度是用電腦搜尋挑的，讓最多種腦內神經元的放電，落在真果蠅實驗量到的範圍內；這組叫「原背景」。兩組替代背景用來看結果會不會隨背景改變：「只給嗅覺受器」是其他感覺神經元全關；「另一組調出的背景」是同一次搜尋裡成績差不多的另一組強度，但 MDN 平常的放電低很多（每秒約 3.5 次，原背景約 16 次）。</li>
+<li><b>背景輸入：</b>模擬時一直給全身感覺神經元固定的隨機輸入，代表果蠅沒有特別刺激時的狀態。只有嗅覺受器的強度照文獻<a class="cite" href="#ref-10">[10]</a><a class="cite" href="#ref-11">[11]</a><a class="cite" href="#ref-12">[12]</a>；其他感覺神經元的強度是用電腦搜尋挑的，讓最多種腦內神經元的放電，落在真果蠅實驗量到的範圍內；這組叫「原背景」。兩組替代背景用來看結果會不會隨背景改變：「只給嗅覺受器」是其他感覺神經元全關；「另一組調出的背景」是同一次搜尋裡成績差不多的另一組強度，但 MDN 平常的放電低很多（每秒約 3.5 次，原背景約 16 次）。</li>
 <li><b>相加的預期與交互作用：</b>「相加的預期」＝只有背景時的放電，加上每種刺激單獨給時各自造成的變化。「交互作用」＝實際 − 相加的預期。誤差用各隻模擬果蠅之間的差異算；交互作用超過誤差的 2 倍才標「增益」或「抑制」。轉向那一列的值有正負（正＝往右），所以看的是實際轉得比相加的預期更用力（轉向增益）、更少（轉向抑制），還是方向反過來；相加的預期本來就幾乎不轉時，改標「實際多出往右轉或往左轉」。展示頁右上的總覽表列出每兩種一起給的結果。</li>
 <li><b>持續放電的果蠅不算：</b>這個模型偶爾會有一隻在撤掉輸入後仍停不下來地放電（真果蠅不會這樣）。每次模擬最後撤掉所有輸入看 2 秒，有這種情形的那幾隻不列入平均；表格最後一列寫出每個組合拿掉了幾隻。</li>
 </ul>
@@ -44,21 +44,21 @@
  這些門檻和換算都是手訂的，不是實驗值。</li>
 <li>沒有刺激時的走走停停，以及果蠅的外形與步態。</li>
 <li>「轉」選左邊時，把右邊的結果左右對調來用：模型只模擬了送往右側的 PFL3，這裡假設左右對稱。</li>
-<li>場地裡「想去的方向」的箭頭只是示意。模型裡的刺激是固定開著的，不會因為果蠅轉了身就改變；所以箭頭也跟著果蠅一起轉，永遠停在同一個相對位置，而不是固定在場地上：只開「轉」畫在斜前方，只開「背」畫在正後方，兩個都開畫在斜後方。這是照 Westeinde 等 2024 的發現：背對目標時 PFL2 最活躍。</li>
+<li>場地裡「想去的方向」的箭頭只是示意。模型裡的刺激是固定開著的，不會因為果蠅轉了身就改變；所以箭頭也跟著果蠅一起轉，永遠停在同一個相對位置，而不是固定在場地上：只開「轉」畫在斜前方，只開「背」畫在正後方，兩個都開畫在斜後方。這是照 Westeinde 等 2024 <a class="cite" href="#ref-5">[5]</a> 的發現：背對目標時 PFL2 最活躍。</li>
 </ul>
 
 </details><details class="sec"><summary>看的時候要注意</summary>
 <ul>
-<li><b>數值不一定對，只看方向：</b>刺激強度是「模型要多少才推得動」，不是真實感覺神經元的放電。指令神經元的放電量也大多沒有和實驗對過：MDN 平常的放電在實驗範圍內，DNa02 平常的放電剛好在實驗範圍下限；DNp01 沒有比過，真果蠅的巨纖維通常只放一次電就引發起跳。</li>
-<li><b>看不到腹神經索：</b>FlyWire 只有腦。真正哪個動作勝出，有一部分在腹神經索決定，例如 MDN 會在那裡壓住往前走的迴路；這一段模型裡看不到，這一頁只顯示腦送出的指令。</li>
+<li><b>數值不一定對，只看方向：</b>刺激強度是「模型要多少才推得動」，不是真實感覺神經元的放電。指令神經元的放電量也大多沒有和實驗對過：MDN 平常的放電在實驗範圍內<a class="cite" href="#ref-14">[14]</a>，DNa02 平常的放電剛好在實驗範圍下限<a class="cite" href="#ref-13">[13]</a>；DNp01 沒有比過，真果蠅的巨纖維通常只放一次電就引發起跳<a class="cite" href="#ref-3">[3]</a>。</li>
+<li><b>看不到腹神經索：</b>FlyWire 只有腦。真正哪個動作勝出，有一部分在腹神經索決定，例如 MDN 會在那裡壓住往前走的迴路<a class="cite" href="#ref-28">[28]</a>；這一段模型裡看不到，這一頁只顯示腦送出的指令。</li>
 <li><b>和文獻怎麼對照：</b>沒有實驗在同一批果蠅裡，分別活化兩組這些神經元、再一起活化，比較「一起給時比相加多或少」。以下是間接比對；要注意，只活化一組神經元的實驗，最多只能說明「各自的效果」，不能說明「比相加多或少」。
  <ul>
- <li>「轉」加「背」的轉向增益：<b>和文獻的計算模型推論一致。</b>Westeinde 等 2024 用實驗看到，果蠅偏離目標越遠，PFL2 放電越多，活化 PFL2 會提高轉速；他們再用計算模型推論「PFL2 會放大 PFL3 的轉向（比相加還多）」，這一步沒有實驗直接量過。這一頁就是照這篇的發現，才選 PFL2 代表「背」；模型算出同樣方向，等於重現了文獻已經提出的推論，所以不算文獻還沒想到的新預測。</li>
- <li>「退」加「閃」時倒退被抑制（MDN 比相加還少）：<b>有旁證。</b>這個證據來自給果蠅看真的逼近畫面，而不是活化神經元：正前方快速逼近的物體，有些果蠅看了起飛，沒起飛的多半改成倒退（Wu 等 2016；Sen 等 2017）。看畫面時，腦裡可能同時有好幾種視覺神經元被活化，但實驗沒有量是哪幾種，所以不能直接當成「LC16 加 LC4」。它支持的是比較一般的一點：起飛和倒退像二選一、起飛優先；巨纖維一放電，也能打斷正在做的動作、強制起飛（von Reyn 等 2014）。如果起飛的訊號會壓住倒退，就和模型的結果方向一致。</li>
- <li>「退」加「閃」時 DNp01（逃跑）比相加還多：<b>沒有證據。</b>模型裡只給「退」時 DNp01 不放電，但「退」會讓「閃」推起的 DNp01 更高（總覽表裡這一對的 DNp01 增益）。真果蠅裡，已知送訊號給巨纖維的視覺神經元是 LC4 和另一種叫 LPLC2 的視覺神經元，不包括 LC16；模型裡 LC16 是經過別的神經元間接放大這個訊號，這條路還沒有人測過。</li>
- <li>「退」或「閃」加「背」時倒退增益：<b>沒有證據。</b>PFL2 單獨活化就會讓果蠅倒退（Westeinde 等 2024），這只說明一起給時倒退會「加起來更多」，不能說明會「比相加還多」。</li>
- <li>「退」或「閃」加「轉」時轉向抑制：<b>沒有實驗。</b>還沒有人在果蠅朝目標走的時候給逼近威脅。</li>
- <li>另有一篇從接線圖推論「不同行為的指令神經元互相抑制」（Braun 等 2024）。照這個推論，兩種行為一起被推動時，至少有一邊應該比相加還少。模型裡兩種情形都有：「退」加「閃」時 MDN 比相加還少，符合這個推論；「閃」加「背」時 MDN 和 DNp01 都比相加還多，不符合。那個推論本身也還沒有行為實驗證實；能檢驗它的實驗，例如「活化 MDN 後，起飛機率會不會變低」，目前也沒有人做過。</li>
+ <li>「轉」加「背」的轉向增益：<b>和文獻的計算模型推論一致。</b>Westeinde 等 2024 <a class="cite" href="#ref-5">[5]</a> 用實驗看到，果蠅偏離目標越遠，PFL2 放電越多，活化 PFL2 會提高轉速；他們再用計算模型推論「PFL2 會放大 PFL3 的轉向（比相加還多）」，這一步沒有實驗直接量過。另一篇實驗證實 PFL3 會同時依頭朝的方向和目標方向調整放電（Mussells Pires 等 2024 <a class="cite" href="#ref-17">[17]</a>）。這一頁就是照這篇的發現，才選 PFL2 代表「背」；模型算出同樣方向，等於重現了文獻已經提出的推論，所以不算文獻還沒想到的新預測。</li>
+ <li>「退」加「閃」時倒退被抑制（MDN 比相加還少）：<b>有旁證。</b>這個證據來自給果蠅看真的逼近畫面，而不是活化神經元：正前方快速逼近的物體，有些果蠅看了起飛，沒起飛的多半改成倒退（Wu 等 2016 <a class="cite" href="#ref-1">[1]</a>；Sen 等 2017 <a class="cite" href="#ref-2">[2]</a>）。看畫面時，腦裡可能同時有好幾種視覺神經元被活化，但實驗沒有量是哪幾種，所以不能直接當成「LC16 加 LC4」。它支持的是比較一般的一點：起飛和倒退像二選一、起飛優先；巨纖維一放電，也能打斷正在做的動作、強制起飛（von Reyn 等 2014 <a class="cite" href="#ref-3">[3]</a>）。如果起飛的訊號會壓住倒退，就和模型的結果方向一致。另外查過的兩篇逼近實驗，一篇看行走速度怎麼影響僵住或逃跑（Zacarias 等 2018 <a class="cite" href="#ref-21">[21]</a>），一篇看起飛前的姿勢調整（Card、Dickinson 2008 <a class="cite" href="#ref-22">[22]</a>），都沒有談到倒退，和這一對關係不大。</li>
+ <li>「退」加「閃」時 DNp01（逃跑）比相加還多：<b>沒有證據。</b>模型裡只給「退」時 DNp01 不放電，但「退」會讓「閃」推起的 DNp01 更高（總覽表裡這一對的 DNp01 增益）。真果蠅裡，已知送訊號給巨纖維的視覺神經元是 LC4 和另一種叫 LPLC2 的視覺神經元，不包括 LC16<a class="cite" href="#ref-4">[4]</a><a class="cite" href="#ref-15">[15]</a>；模型裡 LC16 是經過別的神經元間接放大這個訊號，這條路還沒有人測過。</li>
+ <li>「退」或「閃」加「背」時倒退增益：<b>沒有證據。</b>PFL2 單獨活化就會讓果蠅倒退（Westeinde 等 2024 <a class="cite" href="#ref-5">[5]</a>），這只說明一起給時倒退會「加起來更多」，不能說明會「比相加還多」。也沒有找到「目標在背後」這種狀態怎麼影響威脅反應的實驗；目前只知道「在不在飛」這種狀態，會改變視覺訊號能不能傳到下行神經元（Ache 等 2019 <a class="cite" href="#ref-16">[16]</a>）。</li>
+ <li>「退」或「閃」加「轉」時轉向抑制：<b>沒有實驗。</b>還沒有人在果蠅朝目標走的時候給逼近威脅：朝目標走的實驗都沒有威脅條件（Giraldo 等 2018 <a class="cite" href="#ref-19">[19]</a>；Green 等 2019 <a class="cite" href="#ref-20">[20]</a>）。旁證只有一項：起飛方向由逼近物體的位置決定，和目標無關（Dombrovski 等 2023 <a class="cite" href="#ref-18">[18]</a>）。另有一篇預印本主張威脅會蓋過朝目標的轉向（Liao 等 2025 <a class="cite" href="#ref-27">[27]</a>），但它只用接線圖加模型，用的又是同一套接線圖，不算獨立證據。</li>
+ <li>另有一篇從接線圖推論「不同行為的指令神經元互相抑制」（Braun 等 2024 <a class="cite" href="#ref-6">[6]</a>）。照這個推論，兩種行為一起被推動時，至少有一邊應該比相加還少。模型裡兩種情形都有：「退」加「閃」時 MDN 比相加還少，符合這個推論；「閃」加「背」時 MDN 和 DNp01 都比相加還多，不符合。那個推論本身也還沒有行為實驗證實；能檢驗它的實驗，例如「活化 MDN 後，起飛機率會不會變低」，目前也沒有人做過：研究 MDN 的實驗都沒有量起飛<a class="cite" href="#ref-24">[24]</a><a class="cite" href="#ref-25">[25]</a><a class="cite" href="#ref-26">[26]</a><a class="cite" href="#ref-28">[28]</a>。另有實驗發現，活化下行神經元引出什麼行為，常取決於果蠅當時在做什麼（Cande 等 2018 <a class="cite" href="#ref-23">[23]</a>）。</li>
  </ul></li>
 <li><b>換強度會變的：</b>以下都是兩種刺激調成同一檔（弱、中、強）時的交互作用，單位是每秒放電次數；作為比較，原背景下 MDN 平常每秒約 16 次。
  <ul>
@@ -69,6 +69,58 @@
 <li><b>模型本身做過的改動：</b>原始模型給一陣輸入再撤掉，會有上萬顆神經元停不下來。為了消掉這個毛病，找出撤掉輸入後還撐著放電的細胞群，把群內細胞彼此之間的連結設為 0。共三群：嗅葉內部的神經元，加上另外兩小群（約 230 顆，主要在側副葉、上內側前腦等腦區）；設為 0 的突觸共占全部的 1.68%，其他連結都照接線圖。</li>
 </ul>
 <p>整理資料的程式見頁尾的 make.py；模擬程式和詳細數字在本研究的內部計畫書（多行為數位果蠅計畫，第 8.35–8.50 節），目前沒有放在網站上。</p>
+
+</details><details class="sec"><summary>文獻</summary>
+<p>這一頁說明裡提到的，以及模型與比對實際用到的文獻。內文的方括號編號（例如 [1]）對應下面的編號，點一下會跳到那一篇。每一篇下方灰字寫出它在這一頁的用途。</p>
+<p><b>說明裡直接引用的</b></p>
+<ol start="1">
+<li id="ref-1">Wu M 等 2016（Visual projection neurons in the Drosophila lobula link feature detection to distinct behavioral programs）。eLife 5:e21022。<a href="https://doi.org/10.7554/eLife.21022" target="_blank" rel="noopener">doi:10.7554/eLife.21022</a><br><span style="color:#777">「退」的依據：活化 LC16 → 倒退走；間接比對：正前方逼近時，沒起飛的果蠅多半改成倒退。</span></li>
+<li id="ref-2">Sen R 等 2017（Moonwalker descending neurons mediate visually evoked retreat in Drosophila）。Current Biology。<a href="https://doi.org/10.1016/j.cub.2017.02.008" target="_blank" rel="noopener">doi:10.1016/j.cub.2017.02.008</a><br><span style="color:#777">「退」的依據：LC16 經 MDN 引起倒退；間接比對：逼近刺激通常引起起飛，也可能改成倒退。</span></li>
+<li id="ref-3">von Reyn CR 等 2014（A spike-timing mechanism for action selection）。Nature Neuroscience。<a href="https://doi.org/10.1038/nn.3741" target="_blank" rel="noopener">doi:10.1038/nn.3741</a><br><span style="color:#777">「閃」的依據：巨纖維 DNp01 引發起飛；間接比對：巨纖維一放電就能打斷其他動作；真果蠅巨纖維通常只放一次電。</span></li>
+<li id="ref-4">Ache JM 等 2019（Neural basis for looming size and velocity encoding in the Drosophila giant fiber escape pathway）。Current Biology。<a href="https://doi.org/10.1016/j.cub.2019.01.079" target="_blank" rel="noopener">doi:10.1016/j.cub.2019.01.079</a><br><span style="color:#777">「閃」的依據：LC4 送訊號給巨纖維；間接比對：巨纖維的已知視覺輸入是 LC4 和 LPLC2。</span></li>
+<li id="ref-5">Westeinde EA 等 2024（Transforming a head direction signal into a goal-oriented steering command）。Nature。<a href="https://doi.org/10.1038/s41586-024-07039-2" target="_blank" rel="noopener">doi:10.1038/s41586-024-07039-2</a><br><span style="color:#777">「轉」「背」的依據：PFL3 與轉向方向、活化 PFL2 → 減速、轉速增加、倒退；「想去的方向」箭頭；間接比對：PFL2 放大 PFL3 轉向的計算模型推論。</span></li>
+<li id="ref-6">Braun J 等 2024（Descending networks transform command signals into population motor control）。Nature。<a href="https://doi.org/10.1038/s41586-024-07523-9" target="_blank" rel="noopener">doi:10.1038/s41586-024-07523-9</a><br><span style="color:#777">接線圖推論：不同行為的指令神經元互相抑制。</span></li>
+<li id="ref-7">Shiu PK 等 2024（A Drosophila computational brain model reveals sensorimotor processing）。Nature 634:210–219。<a href="https://doi.org/10.1038/s41586-024-07763-9" target="_blank" rel="noopener">doi:10.1038/s41586-024-07763-9</a><br><span style="color:#777">全腦模型的規則（每顆神經元收到的輸入夠多就放電）。</span></li>
+</ol>
+<p><b>模型、背景輸入與實驗範圍用到的</b></p>
+<ol start="8">
+<li id="ref-8">Dorkenwald S 等 2024（Neuronal wiring diagram of an adult brain）。Nature 634:124–138。<a href="https://doi.org/10.1038/s41586-024-07558-y" target="_blank" rel="noopener">doi:10.1038/s41586-024-07558-y</a><br><span style="color:#777">FlyWire 連結體（783 版）。</span></li>
+<li id="ref-9">Schlegel P 等 2024（Whole-brain annotation and multi-connectome cell typing of Drosophila）。Nature 634:139–152。<a href="https://doi.org/10.1038/s41586-024-07686-5" target="_blank" rel="noopener">doi:10.1038/s41586-024-07686-5</a><br><span style="color:#777">FlyWire 的細胞類型標註，用來找出 LC16、LC4、PFL3、PFL2、MDN、DNp01、DNa02。</span></li>
+<li id="ref-10">Hallem EA、Carlson JR 2006（Coding of odors by a receptor repertoire）。Cell 125:143–160。<a href="https://doi.org/10.1016/j.cell.2006.01.050" target="_blank" rel="noopener">doi:10.1016/j.cell.2006.01.050</a><br><span style="color:#777">背景輸入：多數嗅覺受器的平常放電率（經 DoOR 資料庫取得）。</span></li>
+<li id="ref-11">Kazama H、Wilson RI 2009（Origins of correlated activity in an olfactory circuit）。Nature Neuroscience 12:1136–1144。<a href="https://doi.org/10.1038/nn.2376" target="_blank" rel="noopener">doi:10.1038/nn.2376</a><br><span style="color:#777">背景輸入：DM4 嗅覺受器的平常放電率。</span></li>
+<li id="ref-12">Münch D、Galizia CG 2016（DoOR 2.0 – Comprehensive mapping of Drosophila melanogaster odorant responses）。Scientific Reports 6:21841。<a href="https://doi.org/10.1038/srep21841" target="_blank" rel="noopener">doi:10.1038/srep21841</a><br><span style="color:#777">背景輸入：其餘嗅覺受器的平常放電率由這個資料庫換算。</span></li>
+<li id="ref-13">Rayshubskiy A 等 2025（Neural circuit mechanisms for steering control in walking Drosophila）。eLife。<a href="https://doi.org/10.7554/eLife.102230" target="_blank" rel="noopener">doi:10.7554/eLife.102230</a><br><span style="color:#777">DNa02 平常放電的實驗範圍（每秒 2.5–10 次），用來比較模型與挑選原背景。</span></li>
+<li id="ref-14">Dahlhoff S 等 2025（預印本）（Control of walking direction by descending and dopaminergic neurons in Drosophila）。bioRxiv。<a href="https://doi.org/10.1101/2025.07.22.666129" target="_blank" rel="noopener">doi:10.1101/2025.07.22.666129</a><br><span style="color:#777">MDN 平常放電的實驗範圍（每秒約 4.25–17 次），用來比較模型與挑選原背景。</span></li>
+</ol>
+<p><b>和文獻怎麼對照時查過的</b>（「和文獻怎麼對照」那一段的判定依據）</p>
+<ol start="15">
+<li id="ref-15">von Reyn CR 等 2017（Feature integration drives probabilistic behavior in the Drosophila escape response）。Neuron。<a href="https://doi.org/10.1016/j.neuron.2017.05.036" target="_blank" rel="noopener">doi:10.1016/j.neuron.2017.05.036</a><br><span style="color:#777">巨纖維把 LC4（速度）和 LPLC2（大小）的訊號加總。</span></li>
+<li id="ref-16">Ache JM 等 2019（State-dependent decoupling of sensory and motor circuits underlies behavioral flexibility in Drosophila）。Nature Neuroscience。<a href="https://doi.org/10.1038/s41593-019-0413-4" target="_blank" rel="noopener">doi:10.1038/s41593-019-0413-4</a><br><span style="color:#777">行為狀態（飛行與否）會開關視覺到下行神經元的通路。</span></li>
+<li id="ref-17">Mussells Pires P 等 2024（Converting an allocentric goal into an egocentric steering signal）。Nature。<a href="https://doi.org/10.1038/s41586-023-07006-3" target="_blank" rel="noopener">doi:10.1038/s41586-023-07006-3</a><br><span style="color:#777">PFL3 依航向和目標調整放電；阻斷 PFL3 會損害朝目標定向。</span></li>
+<li id="ref-18">Dombrovski M 等 2023（Synaptic gradients transform object location to action）。Nature。<a href="https://doi.org/10.1038/s41586-022-05562-8" target="_blank" rel="noopener">doi:10.1038/s41586-022-05562-8</a><br><span style="color:#777">起飛方向由逼近刺激的位置決定（和目標無關）。</span></li>
+<li id="ref-19">Giraldo YM 等 2018（Sun navigation requires compass neurons in Drosophila）。Current Biology。<a href="https://doi.org/10.1016/j.cub.2018.07.002" target="_blank" rel="noopener">doi:10.1016/j.cub.2018.07.002</a><br><span style="color:#777">朝固定方向走需要方向感神經元；沒有測威脅。</span></li>
+<li id="ref-20">Green J 等 2019（A neural heading estimate is compared with an internal goal to guide oriented navigation）。Nature Neuroscience。<a href="https://doi.org/10.1038/s41593-019-0444-x" target="_blank" rel="noopener">doi:10.1038/s41593-019-0444-x</a><br><span style="color:#777">航向和目標的差決定轉向；沒有測威脅。</span></li>
+<li id="ref-21">Zacarias R 等 2018（Speed dependent descending control of freezing behavior in Drosophila melanogaster）。Nature Communications。<a href="https://doi.org/10.1038/s41467-018-05875-1" target="_blank" rel="noopener">doi:10.1038/s41467-018-05875-1</a><br><span style="color:#777">逼近刺激下，行走速度影響僵住或逃跑；沒有提到倒退。</span></li>
+<li id="ref-22">Card G、Dickinson MH 2008（Visually mediated motor planning in the escape response of Drosophila）。Current Biology。<a href="https://doi.org/10.1016/j.cub.2008.07.094" target="_blank" rel="noopener">doi:10.1016/j.cub.2008.07.094</a><br><span style="color:#777">起飛前的姿勢調整；和本頁關係不大。</span></li>
+<li id="ref-23">Cande J 等 2018（Optogenetic dissection of descending behavioral control in Drosophila）。eLife 7:e34275。<a href="https://doi.org/10.7554/eLife.34275" target="_blank" rel="noopener">doi:10.7554/eLife.34275</a><br><span style="color:#777">活化下行神經元引出的行為，常取決於當時的行為狀態。</span></li>
+<li id="ref-24">Bidaye SS 等 2014（Neuronal control of Drosophila walking direction）。Science。<a href="https://doi.org/10.1126/science.1249964" target="_blank" rel="noopener">doi:10.1126/science.1249964</a><br><span style="color:#777">MDN 是倒退走的必要且充分條件；沒有測起飛。</span></li>
+<li id="ref-25">Feng K 等 2020（Distributed control of motor circuits for backward walking in Drosophila）。Nature Communications。<a href="https://doi.org/10.1038/s41467-020-19936-x" target="_blank" rel="noopener">doi:10.1038/s41467-020-19936-x</a><br><span style="color:#777">MDN 在腹神經索的迴路；和起飛無關。</span></li>
+<li id="ref-26">Israel S 等 2022（Olfactory stimuli and moonwalker SEZ neurons can drive backward locomotion in Drosophila）。Current Biology。<a href="https://doi.org/10.1016/j.cub.2022.01.035" target="_blank" rel="noopener">doi:10.1016/j.cub.2022.01.035</a><br><span style="color:#777">氣味和另一群神經元可經 MDN 引起倒退；和起飛無關。</span></li>
+<li id="ref-27">Liao 等 2025（預印本）（Flexible steering and conflict resolution: pro-goal/anti-goal gating in Drosophila lateral accessory lobes）。bioRxiv。<a href="https://doi.org/10.1101/2025.10.19.683286" target="_blank" rel="noopener">doi:10.1101/2025.10.19.683286</a><br><span style="color:#777">主張威脅會蓋過朝目標轉向；只有接線圖加模型，用的是同一套接線圖，不算獨立證據。</span></li>
+</ol>
+<p><b>其他內文提到的</b></p>
+<ol start="28">
+<li id="ref-28">Carreira-Rosario A 等 2018（MDN brain descending neurons coordinately activate backward and inhibit forward locomotion）。eLife 7:e38554。<a href="https://doi.org/10.7554/eLife.38554" target="_blank" rel="noopener">doi:10.7554/eLife.38554</a><br><span style="color:#777">MDN 讓果蠅倒退走，同時在腹神經索壓住往前走的迴路。</span></li>
+</ol>
+<script>
+/* 點內文的 [n]：若那篇文獻在收合的段落裡，先打開再跳過去 */
+(function () {
+  function openTo(id) { var t = document.getElementById(id); if (!t) return; var d = t.closest("details"); if (d) d.open = true; t.scrollIntoView({block: "center"}); t.style.background = "rgba(255,200,0,.25)"; setTimeout(function () { t.style.background = ""; }, 1600); }
+  document.addEventListener("click", function (e) { var a = e.target.closest && e.target.closest("a.cite"); if (!a) return; e.preventDefault(); var id = a.getAttribute("href").slice(1); history.replaceState(null, "", "#" + id); openTo(id); });
+  if (location.hash.indexOf("#ref-") === 0) addEventListener("load", function () { openTo(location.hash.slice(1)); });
+})();
+</script>
+<style>a.cite{text-decoration:none;font-size:.85em;margin-left:1px}</style>
 </details></div>
 <p class="meta">條目編號 20261125-flywire-interact。產生這一頁的程式：<a href="make.py">make.py</a>。</p>
 <p class="meta"><a class="del" href="https://github.com/marginli/fly_concepts/issues/new?title=%E5%88%AA%E9%99%A4%E6%A2%9D%E7%9B%AE%2020261125-flywire-interact&body=%E9%80%81%E5%87%BA%E5%BE%8C%E6%9C%83%E8%87%AA%E5%8B%95%E5%88%AA%E9%99%A4%E9%80%99%E5%80%8B%E6%A2%9D%E7%9B%AE%E4%B8%A6%E6%9B%B4%E6%96%B0%E7%B6%B2%E7%AB%99%EF%BC%88%E7%B4%84%E4%B8%80%E5%85%A9%E5%88%86%E9%90%98%EF%BC%89%E3%80%82%E4%B8%8D%E6%83%B3%E5%88%AA%E5%B0%B1%E7%9B%B4%E6%8E%A5%E9%97%9C%E6%8E%89%E9%80%99%E4%B8%80%E9%A0%81%E3%80%82%E5%8F%AA%E6%9C%89%E7%AB%99%E4%B8%BB%E5%B8%B3%E8%99%9F%E9%80%81%E5%87%BA%E6%89%8D%E6%9C%89%E6%95%88%E3%80%82" target="_blank" rel="noopener">刪除這個條目</a>　會開一個 GitHub 頁面，按綠色的送出鈕（Create）就會刪除，約一兩分鐘後網站更新。</p></div>
