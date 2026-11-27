@@ -72,6 +72,20 @@ function drawList() {
 }
 drawList();
 
+function partnersHtml(P) {
+  if (!P) return "";
+  const NM = { up: "上游（送訊號給它，綠）", down: "下游（接收它的訊號，橙）" };
+  let h = "";
+  for (const d of ["up", "down"]) {
+    const p = P[d]; if (!p) continue;
+    const scope = p.filt ? `其中型別符合「${esc(p.filt)}」的 ${(p.n_f ?? 0).toLocaleString()} 顆、${(p.w_f ?? 0).toLocaleString()} 個連結；` : "";
+    const list = p.sel.map((x) => `${esc(x.type || "無型別")}${x.side ? "（" + esc(x.side) + "）" : ""} ${esc(x.id)}：${x.w.toLocaleString()}`).join("、");
+    h += `<p><b>${NM[d]}</b>：共 ${p.n.toLocaleString()} 顆、${p.w.toLocaleString()} 個連結；${scope}`
+      + (p.sel.length ? `畫出連結數最多的 ${p.sel.length} 顆（連結數至少 ${p.min ?? 1}）：${list}` : `沒有符合條件的可畫`)
+      + (p.no_skel ? `；另有 ${p.no_skel} 顆沒有骨架、略過` : "") + `。</p>`;
+  }
+  return h + `<p>連結數＝兩顆神經元之間的突觸數。</p>`;
+}
 if (cur) {
   const show = cur.show || ["fibre"];
   const ends = show.filter((e) => e !== "fibre");
@@ -81,12 +95,13 @@ if (cur) {
   const rows = cur.neurons.map((n) => `<tr><td>${esc(n.type || "無型別")}${n.side ? "（" + esc(n.side) + "）" : ""}</td><td>${esc(n.id)}</td>`
     + `<td>${top(n.top)}</td>` + ends.map((e) => `<td>${cnt(n, e)}</td><td>${top(n[e + "_top"])}</td>`).join("") + `</tr>`).join("");
   const head = `<tr><th>型別</th><th>編號</th><th>纖維最多的腦區</th>` + ends.map((e) => `<th>${EN[e]}數</th><th>${EN[e]}最多的腦區</th>`).join("") + `</tr>`;
-  const drawn = show.map((e) => ({ fibre: "纖維", pre: "輸出點（紅）", post: "輸入點（藍）" }[e])).join("、");
+  const drawn = show.map((e) => ({ fibre: "纖維", pre: "輸出點（紅）", post: "輸入點（藍）" }[e])).concat(cur.partners ? Object.keys(cur.partners).map((d) => d === "up" ? "上游神經元（綠）" : "下游神經元（橙）") : []).join("、");
   const basis = cur.region_basis === "syn" ? "這個畫面全部神經元畫出的突觸點，落在腦區內的" : "這個畫面全部神經元落在腦區內的纖維";
   document.getElementById("info").innerHTML = `<h2>${esc(cur.title)}</h2><p>資料：${esc(cur.dataset)}${cur.note ? "。" + esc(cur.note) : ""}</p>`
     + `<p>畫出：${drawn}。腦區百分比的分母都是「落在腦區內的部分」（纖維用長度，突觸用個數）。${cur.sampled != null && cur.sampled < 1 ? `突觸點太多，隨機畫出其中約 ${(cur.sampled * 100).toFixed(0)}%；表上數量是全部。` : ""}</p>`
     + `<div style="overflow-x:auto"><table>${head}${rows}</table></div>`
-    + `<p>畫出的腦區（括號內＝${basis}，有多少在這一區）：${cur.regions.length ? cur.regions.map((r, i) => esc(r) + (cur.region_frac ? `（${(cur.region_frac[i] * 100).toFixed(0)}%）` : "")).join("、") : "無"}</p>`;
+    + `<p>畫出的腦區（括號內＝${basis}，有多少在這一區）：${cur.regions.length ? cur.regions.map((r, i) => esc(r) + (cur.region_frac ? `（${(cur.region_frac[i] * 100).toFixed(0)}%）` : "")).join("、") : "無"}</p>`
+    + partnersHtml(cur.partners);
   await mount("views/" + cur.id + ".json?v=" + cur.date);
 } else {
   document.getElementById("info").innerHTML = "<p>還沒有畫面。</p>";

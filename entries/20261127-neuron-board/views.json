@@ -1,5 +1,295 @@
 [
  {
+  "id": "mcns-10515-orn",
+  "title": "MaleCNS 10515（lLN2F_b）與下游的 ORN",
+  "ds": "mcns",
+  "dataset": "MaleCNS v1.0",
+  "date": "2026-11-27",
+  "note": "",
+  "show": [
+   "fibre",
+   "pre"
+  ],
+  "sampled": 1.0,
+  "regions": [
+   "AL_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   1.0
+  ],
+  "neurons": [
+   {
+    "id": "10515",
+    "type": "lLN2F_b",
+    "side": "R",
+    "top": [
+     [
+      "AL_R",
+      1.0
+     ]
+    ],
+    "pre": 9805,
+    "pre_top": [
+     [
+      "AL_R",
+      0.999
+     ],
+     [
+      "LAL_R",
+      0.001
+     ]
+    ],
+    "pre_drawn": 9805
+   }
+  ],
+  "partners": {
+   "down": {
+    "n": 2619,
+    "w": 33644,
+    "sel": [
+     {
+      "id": "49886",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 86
+     },
+     {
+      "id": "138101",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 79
+     },
+     {
+      "id": "46300",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 75
+     },
+     {
+      "id": "52159",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 73
+     },
+     {
+      "id": "122717",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 71
+     },
+     {
+      "id": "31800",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 68
+     },
+     {
+      "id": "521703",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 68
+     },
+     {
+      "id": "68114",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 67
+     },
+     {
+      "id": "44983",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 66
+     },
+     {
+      "id": "176823",
+      "type": "ORN_DP1m",
+      "side": "",
+      "w": 63
+     }
+    ],
+    "no_skel": 0,
+    "min": 5,
+    "filt": "^ORN_",
+    "n_f": 2093,
+    "w_f": 17156
+   }
+  }
+ },
+ {
+  "id": "mcns-10515-partners",
+  "title": "MaleCNS 10515（lLN2F_b）與上下游",
+  "ds": "mcns",
+  "dataset": "MaleCNS v1.0",
+  "date": "2026-11-27",
+  "note": "",
+  "show": [
+   "fibre"
+  ],
+  "sampled": 1.0,
+  "regions": [
+   "AL_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   1.0
+  ],
+  "neurons": [
+   {
+    "id": "10515",
+    "type": "lLN2F_b",
+    "side": "R",
+    "top": [
+     [
+      "AL_R",
+      1.0
+     ]
+    ]
+   }
+  ],
+  "partners": {
+   "up": {
+    "n": 2547,
+    "w": 37622,
+    "sel": [
+     {
+      "id": "10254",
+      "type": "lLN2F_a",
+      "side": "R",
+      "w": 558
+     },
+     {
+      "id": "10456",
+      "type": "lLN2F_a",
+      "side": "R",
+      "w": 547
+     },
+     {
+      "id": "10942",
+      "type": "lLN2T_a",
+      "side": "R",
+      "w": 514
+     },
+     {
+      "id": "10929",
+      "type": "lLN2T_a",
+      "side": "R",
+      "w": 493
+     },
+     {
+      "id": "523591",
+      "type": "il3LN6",
+      "side": "L",
+      "w": 478
+     },
+     {
+      "id": "14212",
+      "type": "CSD",
+      "side": "L",
+      "w": 453
+     },
+     {
+      "id": "18016",
+      "type": "lLN2P_c",
+      "side": "R",
+      "w": 402
+     },
+     {
+      "id": "551294",
+      "type": "lLN2P_c",
+      "side": "R",
+      "w": 334
+     },
+     {
+      "id": "267437",
+      "type": "lLN2P_c",
+      "side": "R",
+      "w": 305
+     },
+     {
+      "id": "16668",
+      "type": "v2LN3A",
+      "side": "R",
+      "w": 296
+     }
+    ],
+    "no_skel": 0,
+    "min": 5,
+    "filt": ""
+   },
+   "down": {
+    "n": 2619,
+    "w": 33644,
+    "sel": [
+     {
+      "id": "10456",
+      "type": "lLN2F_a",
+      "side": "R",
+      "w": 1174
+     },
+     {
+      "id": "10254",
+      "type": "lLN2F_a",
+      "side": "R",
+      "w": 1156
+     },
+     {
+      "id": "10201",
+      "type": "lLN2T_c",
+      "side": "R",
+      "w": 836
+     },
+     {
+      "id": "10650",
+      "type": "lLN2T_c",
+      "side": "R",
+      "w": 774
+     },
+     {
+      "id": "67052",
+      "type": "lLN2T_b",
+      "side": "R",
+      "w": 633
+     },
+     {
+      "id": "16460",
+      "type": "lLN2T_b",
+      "side": "R",
+      "w": 442
+     },
+     {
+      "id": "18016",
+      "type": "lLN2P_c",
+      "side": "R",
+      "w": 342
+     },
+     {
+      "id": "11722",
+      "type": "v2LN30",
+      "side": "R",
+      "w": 311
+     },
+     {
+      "id": "10942",
+      "type": "lLN2T_a",
+      "side": "R",
+      "w": 291
+     },
+     {
+      "id": "21567",
+      "type": "lLN2P_c",
+      "side": "R",
+      "w": 286
+     }
+    ],
+    "no_skel": 0,
+    "min": 5,
+    "filt": ""
+   }
+  }
+ },
+ {
   "id": "mcns-10515",
   "title": "MaleCNS 10515（lLN2F_b）纖維與突觸",
   "ds": "mcns",

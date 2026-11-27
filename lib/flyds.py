@@ -146,6 +146,49 @@ def region_counts(ds, pts):
     return {i: int(c[i]) for i in range(1, len(c)) if c[i] > 0}
 
 
+# ---------- 連結對象（上游／下游） ----------
+# 連結數＝兩顆神經元之間的突觸數，各資料用官方的連結表：
+#   mcns connectome-weights traced-only（weight；只含已追蹤完成的神經元）
+#   fw   proofread_connections_783（syn_count，依腦區分列，這裡加總；只含校對過的神經元）
+#   banc banc_888_edgelist_simple_v3（count）
+EDGES = {
+    "mcns": ("/mnt/sda1/work1/male_cns/raw/flat-connectome/connectome-weights-male-cns-v1.0-minconf-0.5-traced-only.feather",
+             "body_pre", "body_post", "weight"),
+    "fw": ("/mnt/sda1/work1/flywire_783/proofread_connections_783.feather", "pre_pt_root_id", "post_pt_root_id", "syn_count"),
+    "banc": ("/mnt/sda1/work1/banc_888/banc_888_edgelist_simple_v3.feather", "pre", "post", "count"),
+}
+
+
+def partners(ds, nids, direction):
+    """nids（一或多顆）的連結對象。direction＝up（送訊號給它們的上游）或 down（接收它們訊號的下游）。
+    回傳 [(對象編號字串, 連結數)]，連結數由多到少；不含 nids 自己。"""
+    import pyarrow as pa
+    import pyarrow.compute as pc
+    import pyarrow.ipc as ipc
+    path, cpre, cpost, cw = EDGES[ds]
+    me, other = (cpost, cpre) if direction == "up" else (cpre, cpost)
+    r = ipc.open_file(pa.memory_map(path))
+    typ = r.schema.field(me).type
+    vs = pa.array([str(n) for n in nids]) if pa.types.is_string(typ) else pa.array([int(n) for n in nids], pa.int64())
+    acc = {}
+    for i in range(r.num_record_batches):
+        b = r.get_batch(i).select([me, other, cw])
+        b = b.filter(pc.is_in(b.column(me), value_set=vs))
+        for o, w in zip(b.column(other).to_pylist(), b.column(cw).to_pylist()):
+            acc[str(o)] = acc.get(str(o), 0) + int(w)
+    own = {str(n) for n in nids}
+    return sorted(((o, w) for o, w in acc.items() if o not in own), key=lambda x: -x[1])
+
+
+def neuron_info(ds, nid):
+    """(型別, 側)；註記裡沒有就回空字串。"""
+    a = annotations(ds)
+    if ("annidx", ds) not in _cache:
+        _cache[("annidx", ds)] = a.set_index("id")[["type", "side"]]
+    t = _cache[("annidx", ds)]
+    return tuple(t.loc[str(nid)]) if str(nid) in t.index else ("", "")
+
+
 # ---------- 骨架 ----------
 
 def swc_path(ds, nid):
