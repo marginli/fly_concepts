@@ -91,14 +91,14 @@ if (cur) {
   const ends = show.filter((e) => e !== "fibre");
   const EN = { pre: "輸出點（pre）", post: "輸入點（post）" };
   const top = (t) => (t && t.length ? t.map(([r, f]) => `${esc(r)} ${(f * 100).toFixed(0)}%`).join("、") : "無");
-  const cnt = (n, e) => (n[e] ?? 0).toLocaleString() + (n[e + "_drawn"] != null && n[e + "_drawn"] < n[e] ? `（畫出 ${n[e + "_drawn"].toLocaleString()}）` : "");
+  const cnt = (n, e) => (n[e] ?? 0).toLocaleString() + (n[e + "_all"] != null ? `（全部 ${n[e + "_all"].toLocaleString()}）` : "") + (n[e + "_drawn"] != null && n[e + "_drawn"] < n[e] ? `（畫出 ${n[e + "_drawn"].toLocaleString()}）` : "");
   const rows = cur.neurons.map((n) => `<tr><td>${esc(n.type || "無型別")}${n.side ? "（" + esc(n.side) + "）" : ""}</td><td>${esc(n.id)}</td>`
     + `<td>${top(n.top)}</td>` + ends.map((e) => `<td>${cnt(n, e)}</td><td>${top(n[e + "_top"])}</td>`).join("") + `</tr>`).join("");
   const head = `<tr><th>型別</th><th>編號</th><th>纖維最多的腦區</th>` + ends.map((e) => `<th>${EN[e]}數</th><th>${EN[e]}最多的腦區</th>`).join("") + `</tr>`;
   const drawn = show.map((e) => ({ fibre: "纖維", pre: "輸出點（紅）", post: "輸入點（藍）" }[e])).concat(cur.partners ? Object.keys(cur.partners).map((d) => d === "up" ? "上游神經元（綠）" : "下游神經元（橙）") : []).join("、");
   const basis = cur.region_basis === "syn" ? "這個畫面全部神經元畫出的突觸點，落在腦區內的" : "這個畫面全部神經元落在腦區內的纖維";
   document.getElementById("info").innerHTML = `<h2>${esc(cur.title)}</h2><p>資料：${esc(cur.dataset)}${cur.note ? "。" + esc(cur.note) : ""}</p>`
-    + `<p>畫出：${drawn}。腦區百分比的分母都是「落在腦區內的部分」（纖維用長度，突觸用個數）。${cur.sampled != null && cur.sampled < 1 ? `突觸點太多，隨機畫出其中約 ${(cur.sampled * 100).toFixed(0)}%；表上數量是全部。` : ""}</p>`
+    + `<p>畫出：${drawn}。腦區百分比的分母都是「落在腦區內的部分」（纖維用長度，突觸用個數）。${cur.syn_filter ? `突觸只畫和型別符合「${esc(cur.syn_filter)}」的神經元相接的：輸出點是接收方至少有一顆符合的，輸入點是送出方符合的；表上的數量和腦區百分比都只算這些，括號內是全部數量。` : ""}${cur.sampled != null && cur.sampled < 1 ? `突觸點太多，隨機畫出其中約 ${(cur.sampled * 100).toFixed(0)}%；表上數量是全部。` : ""}</p>`
     + `<div style="overflow-x:auto"><table>${head}${rows}</table></div>`
     + `<p>畫出的腦區（括號內＝${basis}，有多少在這一區）：${cur.regions.length ? cur.regions.map((r, i) => esc(r) + (cur.region_frac ? `（${(cur.region_frac[i] * 100).toFixed(0)}%）` : "")).join("、") : "無"}</p>`
     + partnersHtml(cur.partners);

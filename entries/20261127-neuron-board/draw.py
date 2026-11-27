@@ -15,6 +15,8 @@
   --partners    同時畫出和它有突觸相接的神經元（連結對象），逗號分隔：up（上游＝送訊號給它的，它們是突觸前 pre）、
                 down（下游＝接收它訊號的，它們是突觸後 post）；也可寫 pre＝up、post＝down、both＝兩者
   --partner-type 只畫型別名符合這個規則運算式的連結對象（例如 "^ORN_" 只畫嗅覺受器神經元）；總數仍列全部
+  --syn-partner-type 只畫和這種型別相接的突觸（規則運算式，例如 "^ORN_"）：輸出點只留「接收方至少一顆符合」的，
+                輸入點只留「送出方符合」的；表上另列全部數量。資料來源 flyds.synapse_pairs()（mcns 約 15 秒、banc 約 1 分鐘）
   --partner-top 每一邊畫連結數最多的前幾顆（預設 10）；--partner-min 連結數至少多少才畫（預設 5）
                 連結數＝兩顆神經元之間的突觸數，來源見 flyds.EDGES；有多顆主角時合併計算、不含主角彼此
   --regions     auto（預設：纖維長度占 ≥ 3% 的腦區，最多 12 個；沒畫纖維時改用畫出的突觸數）／none／逗號分隔的腦區名
@@ -70,6 +72,7 @@ def main():
     ap.add_argument("--partner-top", type=int, default=10)
     ap.add_argument("--partner-min", type=int, default=5)
     ap.add_argument("--partner-type", default="")
+    ap.add_argument("--syn-partner-type", default="")
     ap.add_argument("--show", default="fibre")
     ap.add_argument("--title"); ap.add_argument("--id"); ap.add_argument("--note", default="")
     ap.add_argument("--no-outline", action="store_true")
@@ -145,7 +148,15 @@ def main():
         for nid, _, _ in hits:
             for e in ends:
                 syn[(nid, e)] = D.synapses(ds, nid, e)
-    n_syn = sum(len(p) for p in syn.values())
+                if a.syn_partner_type:
+                    xyz, oth = D.synapse_pairs(ds, nid, e)
+                    keep = np.isin(oth, D.ids_of_type(ds, a.syn_partner_type))
+                    p = xyz[keep]
+                    if e == "pre" and len(p):
+                        p = np.unique(np.round(p, 2), axis=0)
+                    syn[(nid, e, "all")] = len(syn[(nid, e)])
+                    syn[(nid, e)] = p
+    n_syn = sum(len(p) for k, p in syn.items() if len(k) == 2)
     frac = min(1.0, MAX_SYN / n_syn) if n_syn else 1.0
     rng = np.random.default_rng(0)
 
@@ -172,6 +183,8 @@ def main():
                 for r, v in rc.items():
                     tot_syn[r] = tot_syn.get(r, 0) + v
                 row[e] = len(p)
+                if a.syn_partner_type:
+                    row[e + "_all"] = syn[(nid, e, "all")]
                 row[e + "_top"] = topn(rc)
                 if frac < 1 and len(p):
                     p = p[rng.random(len(p)) < frac]
@@ -224,7 +237,7 @@ def main():
         sc_groups.append({"name": "參考", "items": [mesh_item("整個神經系統輪廓", ov, of, color="#999999", opacity=0.05, ref=True)]})
 
     # 4. 存檔與清單
-    tag = ("" if show == {"fibre"} else "-" + "-".join(x for x in ("fibre", "pre", "post") if x in show)) + "".join("-" + d for d in dirs)
+    tag = ("" if show == {"fibre"} else "-" + "-".join(x for x in ("fibre", "pre", "post") if x in show)) + "".join("-" + d for d in dirs) + ("-synf" if a.syn_partner_type else "")
     vid = a.id or re.sub(r"[^A-Za-z0-9_-]+", "-", f"{ds}-{a.neurons}-{a.side or ''}{tag}").strip("-")[:60]
     title = a.title or f"{a.neurons}" + (f"（{a.side}）" if a.side else "")
     os.makedirs(os.path.join(HERE, "views"), exist_ok=True)
@@ -234,7 +247,7 @@ def main():
                       note=a.note, show=[x for x in ("fibre", "pre", "post") if x in show], sampled=round(frac, 3),
                       regions=regs, region_basis=basis,
                       region_frac=[round(tot.get(names.index(r) + 1, 0) / (sum(tot.values()) or 1), 3) for r in regs],
-                      neurons=rows, partners=part or None))
+                      neurons=rows, partners=part or None, syn_filter=a.syn_partner_type or None))
     save_index(ix)
     print(f"畫面 {vid}：{n_total} 顆神經元、{len(regs)} 個腦區 {regs}")
 

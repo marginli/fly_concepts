@@ -1,5 +1,53 @@
 [
  {
+  "id": "mcns-10515-pre-orn",
+  "title": "MaleCNS 10515（lLN2F_b）：只畫送給 ORN 的輸出點",
+  "ds": "mcns",
+  "dataset": "MaleCNS v1.0",
+  "date": "2026-11-27",
+  "note": "9,805 個輸出點中有 7,696 個（約八成）至少送給一顆 ORN。一個輸出點常同時送給好幾顆神經元，所以這些點也可能同時送給其他神經元。",
+  "show": [
+   "fibre",
+   "pre"
+  ],
+  "sampled": 1.0,
+  "regions": [
+   "AL_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   1.0
+  ],
+  "neurons": [
+   {
+    "id": "10515",
+    "type": "lLN2F_b",
+    "side": "R",
+    "top": [
+     [
+      "AL_R",
+      1.0
+     ]
+    ],
+    "pre": 7696,
+    "pre_all": 9805,
+    "pre_top": [
+     [
+      "AL_R",
+      0.999
+     ],
+     [
+      "LAL_R",
+      0.001
+     ]
+    ],
+    "pre_drawn": 7696
+   }
+  ],
+  "partners": null,
+  "syn_filter": "^ORN_"
+ },
+ {
   "id": "mcns-10515-orn",
   "title": "MaleCNS 10515（lLN2F_b）與下游的 ORN",
   "ds": "mcns",

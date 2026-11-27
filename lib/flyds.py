@@ -138,6 +138,74 @@ def synapses(ds, nid, end):
     return p
 
 
+def synapse_pairs(ds, nid, end):
+    """某顆神經元的突觸，一個連結一列：回傳 (xyz N×3, 對方編號 N)。
+    end＝pre：它送出、對方接收（xyz＝它的輸出點位置）；end＝post：對方送出、它接收（xyz＝它的輸入點位置）。
+    同一個輸出點送給幾顆就有幾列（位置相同），呼叫端要算點數時自己去重。
+    來源：mcns syn-partners traced-only（只含已追蹤完成的對方，約 15 秒）；fw syn_w5；banc 突觸 parquet（約 1 分鐘）。"""
+    k = ("pairs", ds, str(nid), end)
+    if k in _cache:
+        return _cache[k]
+    nid = int(nid)
+    me, ot = ("pre", "post") if end == "pre" else ("post", "pre")
+    if ds == "mcns":
+        import pyarrow as pa
+        import pyarrow.compute as pc
+        import pyarrow.ipc as ipc
+        fr = json.load(open(f"{CMU}/A1_maleCNS/mcns/d03_mcns/frame.json"))
+        r = ipc.open_file(pa.memory_map(
+            "/mnt/sda1/work1/male_cns/raw/flat-connectome/syn-partners-male-cns-v1.0-minconf-0.5-traced-only.feather"))
+        cols = [f"body_{me}", f"body_{ot}", f"x_{me}", f"y_{me}", f"z_{me}"]
+        P, O = [], []
+        for i in range(r.num_record_batches):
+            b = r.get_batch(i).select(cols)
+            b = b.filter(pc.equal(b.column(cols[0]), nid))
+            if b.num_rows:
+                P.append(np.stack([b.column(c).to_numpy() for c in cols[2:]], 1).astype(np.float64))
+                O.append(b.column(cols[1]).to_numpy().astype(np.int64))
+        P = np.concatenate(P) if P else np.zeros((0, 3))
+        xyz = ((P * fr["swc_voxel_nm"] / 1000.0)[:, fr["perm"]] + np.array(fr["shift_um"])).astype(np.float32)
+        out = (xyz, np.concatenate(O) if O else np.zeros(0, np.int64))
+    elif ds == "fw":
+        W5 = "/mnt/sda1/work1/flywire_783/syn_w5"
+        used = np.load(f"{W5}/proofread_ids_used.npy").astype(np.int64)
+        j = np.flatnonzero(used == nid)
+        if not len(j):
+            return np.zeros((0, 3), np.float32), np.zeros(0, np.int64)
+        I = np.load(f"{W5}/{me}_idx.npy", mmap_mode="r")
+        m = np.flatnonzero(np.asarray(I) == j[0])
+        t1 = json.load(open(f"{CMU}/A1/out/t1_affine.json"))["左右名字對調的對照"]
+        A, t = np.array(t1["A_每微米幾格"]), np.array(t1["t_格"])
+        P = np.asarray(np.load(f"{W5}/{me}_xyz.npy", mmap_mode="r")[m], np.float64)
+        out = (((P / 1000.0) @ A.T + t).astype(np.float32),
+               used[np.asarray(np.load(f"{W5}/{ot}_idx.npy", mmap_mode="r")[m])])
+    else:
+        import pyarrow.compute as pc
+        import pyarrow.parquet as pq
+        pf = pq.ParquetFile("/mnt/sda1/work1/banc_888/banc_888_synapses_v3_enriched.parquet")
+        e = "presyn" if end == "pre" else "postsyn"
+        cols = [f"{me}_root_id", f"{ot}_root_id", f"{e}_x", f"{e}_y", f"{e}_z"]
+        P, O = [], []
+        for g in range(pf.num_row_groups):
+            tb = pf.read_row_group(g, columns=cols)
+            tb = tb.filter(pc.equal(pc.cast(tb[cols[0]], "int64"), nid))
+            if tb.num_rows:
+                P.append(np.stack([tb[c].to_numpy() for c in cols[2:]], 1).astype(np.float32))
+                O.append(pc.cast(tb[cols[1]], "int64").to_numpy())
+        P = np.concatenate(P) if P else np.zeros((0, 3), np.float32)
+        out = ((P * np.array([16.0, 16.0, 45.0], np.float32) / 1000.0).astype(np.float32),
+               np.concatenate(O) if O else np.zeros(0, np.int64))
+    _cache[k] = out
+    return out
+
+
+def ids_of_type(ds, pattern):
+    """型別名符合規則運算式的全部神經元編號（int64 陣列）。"""
+    a = annotations(ds)
+    m = a["type"].astype(str).str.contains(pattern, regex=True)
+    return np.array([int(x) for x in a.id[m] if str(x).isdigit()], np.int64)
+
+
 def region_counts(ds, pts):
     """點 → {標籤值: 個數}（不含 0＝腦區外）。"""
     if len(pts) == 0:
