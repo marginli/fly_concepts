@@ -17,7 +17,7 @@
   --partner-type 只畫型別名符合這個規則運算式的連結對象（例如 "^ORN_" 只畫嗅覺受器神經元）；總數仍列全部
   --syn-partner-type 只畫和這種型別相接的突觸（規則運算式，例如 "^ORN_"）：輸出點只留「接收方至少一顆符合」的，
                 輸入點只留「送出方符合」的；表上另列全部數量。資料來源 flyds.synapse_pairs()（mcns 約 15 秒、banc 約 1 分鐘）
-  --partner-top 每一邊畫連結數最多的前幾顆（預設 10）；--partner-min 連結數至少多少才畫（預設 5）
+  --partner-top 每一邊畫連結數最多的前幾顆（預設 10；0＝全部）；--partner-min 連結數至少多少才畫（預設 5）
                 連結數＝兩顆神經元之間的突觸數，來源見 flyds.EDGES；有多顆主角時合併計算、不含主角彼此
   --regions     auto（預設：纖維長度占 ≥ 3% 的腦區，最多 12 個；沒畫纖維時改用畫出的突觸數）／none／逗號分隔的腦區名
   --title       畫面標題；--id 畫面代號（預設由資料集＋神經元組成）；--note 一句說明
@@ -40,6 +40,7 @@ MAX_PTS = 150_000          # 全部神經元合計的骨架點數上限（控制
 MAX_SYN = 120_000          # 全部神經元合計畫出的突觸點數上限；超過就隨機抽樣（表上列實際數量）
 PRE_COLOR, POST_COLOR = "#d62728", "#1f77b4"          # 輸出點紅、輸入點藍（所有畫面固定）
 UP_COLOR, DOWN_COLOR = "#2e8b3a", "#e08a00"         # 上游綠、下游橙（避開突觸的紅藍）
+GROUP_AT = 30                                      # 連結對象超過這麼多顆時，同型別合成一項
 MAIN_WITH_PARTNERS = "#222222"                     # 有畫連結對象時，主角用近黑色
 SYN_FIBRE_COLORS = ["#555555", "#1e7a3c", "#8e44ad", "#d35400", "#16a085", "#7f6000", "#c2185b", "#5d4037"]
 INDEX = os.path.join(HERE, "views.json")
@@ -120,7 +121,7 @@ def main():
         allp = D.partners(ds, main_ids, d)
         sel, skipped = [], 0
         for pid, w in allp:
-            if len(sel) >= a.partner_top or w < a.partner_min:
+            if (a.partner_top > 0 and len(sel) >= a.partner_top) or w < a.partner_min:
                 break
             t, sd = D.neuron_info(ds, pid)
             if a.partner_type and not re.search(a.partner_type, t or ""):
@@ -136,7 +137,8 @@ def main():
             part[d].update(n_f=len(m), w_f=sum(w for _, w in m))
         print(f"  {'上游' if d == 'up' else '下游'}：共 {len(allp):,} 顆、{part[d]['w']:,} 個連結；畫 {len(sel)} 顆"
               + (f"（{skipped} 顆沒有骨架、略過）" if skipped else ""))
-    n_total = sum(len(h) for _, h in groups) + sum(len(p["sel"]) for p in part.values())
+    n_main = sum(len(h) for _, h in groups)
+    n_total = n_main + sum(len(p["sel"]) for p in part.values())
 
     # 2. 骨架與各腦區纖維長度
     names = D.names(ds)
@@ -175,7 +177,7 @@ def main():
                 tot_len[r] = tot_len.get(r, 0) + v
             row["top"] = topn(rl)
             if "fibre" in show:
-                keep = max(1, int(np.ceil(len(a_sw) * n_total / MAX_PTS)))
+                keep = max(1, int(np.ceil(len(a_sw) * n_main / MAX_PTS)))
                 neu_items.append(lines_item(lab, D.FL.swc_polylines(a_sw, keep_every=keep), color=shade(base, k, len(hits))))
             for e in ends:
                 p = syn[(nid, e)]
@@ -216,15 +218,26 @@ def main():
         v, f = D.region_mesh(ds, r, faces=1500)
         reg_items.append(mesh_item(r, v, f, color=REG_COLORS[i % len(REG_COLORS)], opacity=0.3))
     sc_groups = [{"name": "神經元（纖維）", "items": neu_items}] if neu_items else []
+    psk = {(d, p["id"]): D.read_skeleton(ds, p["id"]) for d in dirs for p in part[d]["sel"]}
+    pkeep = max(1, int(np.ceil(sum(len(x) for x in psk.values()) / MAX_PTS)))   # 連結對象另有一份點數上限，均勻抽點
     for d in dirs:
         its = []
         sel = part[d]["sel"]
-        for k, p in enumerate(sel):
-            a_sw = D.read_skeleton(ds, p["id"])
-            keep = max(1, int(np.ceil(len(a_sw) * n_total / MAX_PTS)))
-            lab = f"{p['type'] or '無型別'}{('（' + p['side'] + '）') if p['side'] else ''} {p['id']}（{p['w']:,}）"
-            its.append(lines_item(lab, D.FL.swc_polylines(a_sw, keep_every=keep),
-                                  color=shade(UP_COLOR if d == "up" else DOWN_COLOR, k, len(sel)), width=1.0))
+        col = UP_COLOR if d == "up" else DOWN_COLOR
+        if len(sel) <= GROUP_AT:
+            for k, p in enumerate(sel):
+                lab = f"{p['type'] or '無型別'}{('（' + p['side'] + '）') if p['side'] else ''} {p['id']}（{p['w']:,}）"
+                its.append(lines_item(lab, D.FL.swc_polylines(psk[(d, p["id"])], keep_every=pkeep),
+                                      color=shade(col, k, len(sel)), width=1.0))
+        else:                                                  # 顆數多：同型別合成一項，面板才不會太長
+            byt = {}
+            for p in sel:
+                byt.setdefault(p["type"] or "無型別", []).append(p)
+            order = sorted(byt.items(), key=lambda kv: -sum(x["w"] for x in kv[1]))
+            for k, (t, ps) in enumerate(order):
+                pl = [l for p in ps for l in D.FL.swc_polylines(psk[(d, p["id"])], keep_every=pkeep)]
+                its.append(lines_item(f"{t}（{len(ps)} 顆，連結 {sum(x['w'] for x in ps):,}）", pl,
+                                      color=shade(col, k % 6, 6), width=1.0))
         if its:
             sc_groups.append({"name": "上游：送訊號給它（綠）" if d == "up" else "下游：接收它的訊號（橙）", "items": its})
     for e, nm in (("pre", "輸出點（pre，紅）"), ("post", "輸入點（post，藍）")):

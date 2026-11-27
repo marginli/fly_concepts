@@ -79,9 +79,9 @@ function partnersHtml(P) {
   for (const d of ["up", "down"]) {
     const p = P[d]; if (!p) continue;
     const scope = p.filt ? `其中型別符合「${esc(p.filt)}」的 ${(p.n_f ?? 0).toLocaleString()} 顆、${(p.w_f ?? 0).toLocaleString()} 個連結；` : "";
-    const list = p.sel.map((x) => `${esc(x.type || "無型別")}${x.side ? "（" + esc(x.side) + "）" : ""} ${esc(x.id)}：${x.w.toLocaleString()}`).join("、");
+    const list = p.sel.slice(0, 30).map((x) => `${esc(x.type || "無型別")}${x.side ? "（" + esc(x.side) + "）" : ""} ${esc(x.id)}：${x.w.toLocaleString()}`).join("、") + (p.sel.length > 30 ? `……（只列前 30 顆；面板上同型別合成一項）` : "");
     h += `<p><b>${NM[d]}</b>：共 ${p.n.toLocaleString()} 顆、${p.w.toLocaleString()} 個連結；${scope}`
-      + (p.sel.length ? `畫出連結數最多的 ${p.sel.length} 顆（連結數至少 ${p.min ?? 1}）：${list}` : `沒有符合條件的可畫`)
+      + (p.sel.length ? `畫出連結數最多的 ${p.sel.length.toLocaleString()} 顆（連結數至少 ${p.min ?? 1}）：${list}` : `沒有符合條件的可畫`)
       + (p.no_skel ? `；另有 ${p.no_skel} 顆沒有骨架、略過` : "") + `。</p>`;
   }
   return h + `<p>連結數＝兩顆神經元之間的突觸數。</p>`;
