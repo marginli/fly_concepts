@@ -1,5 +1,63 @@
 [
  {
+  "id": "mcns-10515",
+  "title": "MaleCNS 10515（lLN2F_b）纖維與突觸",
+  "ds": "mcns",
+  "dataset": "MaleCNS v1.0",
+  "date": "2026-11-27",
+  "note": "右側嗅葉的局部神經元（lLN2F_b，預測遞質 GABA）：纖維、輸出點、輸入點幾乎全部在右嗅葉，分支布滿整個嗅葉。它在嗅葉裡也把訊號送回嗅覺受器神經元的軸突末端。這裡的輸出點是送出訊號的位置（9,805 個）；一個輸出點常同時送給好幾顆神經元，所以按連結算的數目（約 3.4 萬）比較多。",
+  "show": [
+   "fibre",
+   "pre",
+   "post"
+  ],
+  "sampled": 1.0,
+  "regions": [
+   "AL_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   1.0
+  ],
+  "neurons": [
+   {
+    "id": "10515",
+    "type": "lLN2F_b",
+    "side": "R",
+    "top": [
+     [
+      "AL_R",
+      1.0
+     ]
+    ],
+    "pre": 9805,
+    "pre_top": [
+     [
+      "AL_R",
+      0.999
+     ],
+     [
+      "LAL_R",
+      0.001
+     ]
+    ],
+    "pre_drawn": 9805,
+    "post": 41323,
+    "post_top": [
+     [
+      "AL_R",
+      1.0
+     ],
+     [
+      "LAL_R",
+      0.0
+     ]
+    ],
+    "post_drawn": 41323
+   }
+  ]
+ },
+ {
   "id": "mcns-12239",
   "title": "MaleCNS 12239（DNbe002）纖維與突觸",
   "ds": "mcns",
