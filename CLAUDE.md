@@ -34,3 +34,13 @@
 - `"desc_wide": true`：下方說明欄和上方同寬（預設限 760px）。
 - `"full_width": true`：整頁不限寬（預設 1100px），欄寬隨視窗大小變，DEMO 在 iframe 內也不限寬。
 - `"desc_collapse": true`：說明欄除第一節外，每節包成可收合的 details（預設收合）。
+
+## 神經元畫板（entries/20261127-neuron-board，2026-11-27）
+使用者說「畫某某神經元」「在畫板加……」→ 不另開條目，在畫板加一個畫面：
+1. 確認資料集（mcns／fw／banc，沒說就問）。
+2. `cd entries/20261127-neuron-board && python3 draw.py --ds fw --neurons "MBON01,MBON02" --side R [--max-per-type 5] [--regions auto|none|A,B] [--title …] [--id …] [--note …]`。產生 `views/<id>.json` 並加到 `views.json` 最前面；`--remove <id>` 刪畫面。
+3. `python3 build.py`、本機截圖看一下、`./publish.sh "neuron-board: add <id>"`。
+- 共用讀取工具 `lib/flyds.py`：三份資料的腦區標籤、註記（型別→編號）、骨架、腦區外形（快取在 `~/.cache/fly_concepts`）。
+- 座標各自獨立：mcns 上 −y 前 −z；fw（FC12 框，標籤用 thre/t8 加寬版）上 +y 前 +z，左右與另兩份相反；banc（原生 µm）上 +z 前 −y（11-27 用萼／葉／嗅葉／GNG 重心確認；先前寫的 −y／−z 是錯的）。
+- MaleCNS 只有腦 80 區（沒有腹神經索標籤）；BANC 有腦 75＋腹神經索 26 區。
+- 骨架點數全部合計上限 15 萬（draw.py 的 MAX_PTS），APL 單顆畫面約 0.5–1.7 MB。

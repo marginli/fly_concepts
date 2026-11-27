@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>神經元畫板</title>
+<link rel="stylesheet" href="../../lib/style.css">
+<style>
+body{font-size:15px}
+.wrap.board{max-width:none;padding:8px 10px 16px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.bar button{font:inherit;font-size:.86rem;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+.bar button.on{border-color:var(--fg);font-weight:600}
+.lay{display:grid;grid-template-columns:240px minmax(0,1fr);gap:12px}
+.list{max-height:78vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.vi{display:block;text-align:left;width:100%;font:inherit;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+.vi:hover{border-color:var(--accent)}
+.vi.on{border-color:var(--fg);box-shadow:inset 3px 0 0 var(--accent)}
+.vi b{display:block;font-size:.95rem}
+.vi span{color:var(--muted);font-size:.8rem}
+.info h2{font-size:1.15rem;margin:0 0 2px}
+.info p{margin:0 0 6px;color:var(--muted);font-size:.9rem}
+.info table{border-collapse:collapse;font-size:.84rem;margin:2px 0 6px}
+.info td,.info th{border-bottom:1px solid var(--line);padding:2px 10px 2px 0;text-align:left;vertical-align:top}
+.info th{color:var(--muted);font-weight:500}
+.stage{margin:6px 0 0}
+#view{height:68vh}
+@media (max-width:820px){.lay{grid-template-columns:1fr}.list{max-height:240px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<div class="wrap board" id="wrap">
+  <div class="bar" id="filt"></div>
+  <div class="lay">
+    <div class="list" id="list"></div>
+    <div>
+      <div class="info" id="info"></div>
+      <div class="stage"><div id="view"></div><div id="panel"></div></div>
+      <p class="hint" style="font-size:.84rem;color:var(--muted);margin:4px 0 0">滑鼠左鍵拖曳＝旋轉，滾輪＝縮放，右鍵拖曳＝平移；手機用手指。右邊的勾選框可以開關神經元與腦區。</p>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { mount } from "../../lib/viewer.js";
+const DSN = { all: "全部", mcns: "MaleCNS", fw: "FlyWire", banc: "BANC" };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const qs = new URLSearchParams(location.search);
+const views = await (await fetch("views.json?t=" + Date.now())).json();
+let ds = qs.get("ds") || "all";
+const cur = views.find((v) => v.id === qs.get("view")) || views[0];
+
+function go(params) {
+  const u = new URLSearchParams(location.search);
+  for (const [k, v] of Object.entries(params)) v == null ? u.delete(k) : u.set(k, v);
+  location.search = u.toString();
+}
+const filt = document.getElementById("filt");
+for (const k of Object.keys(DSN)) {
+  const n = k === "all" ? views.length : views.filter((v) => v.ds === k).length;
+  const b = document.createElement("button");
+  b.textContent = `${DSN[k]}（${n}）`; b.className = k === ds ? "on" : "";
+  b.onclick = () => { ds = k; drawList(); filt.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); };
+  filt.appendChild(b);
+}
+function drawList() {
+  const L = document.getElementById("list"); L.innerHTML = "";
+  for (const v of views.filter((v) => ds === "all" || v.ds === ds)) {
+    const b = document.createElement("button"); b.className = "vi" + (v === cur ? " on" : "");
+    b.innerHTML = `<b>${esc(v.title)}</b><span>${esc(v.dataset)}　${esc(v.date)}　${v.neurons.length} 顆</span>`;
+    b.onclick = () => go({ view: v.id, ds });
+    L.appendChild(b);
+  }
+  report();
+}
+drawList();
+
+if (cur) {
+  const rows = cur.neurons.map((n) => `<tr><td>${esc(n.type || "無型別")}${n.side ? "（" + esc(n.side) + "）" : ""}</td><td>${esc(n.id)}</td>`
+    + `<td>${n.top.map(([r, f]) => `${esc(r)} ${(f * 100).toFixed(0)}%`).join("、")}</td></tr>`).join("");
+  document.getElementById("info").innerHTML = `<h2>${esc(cur.title)}</h2><p>資料：${esc(cur.dataset)}${cur.note ? "。" + esc(cur.note) : ""}</p>`
+    + `<table><tr><th>型別</th><th>編號</th><th>纖維最多的腦區（占該神經元落在腦區內的纖維）</th></tr>${rows}</table>`
+    + `<p>畫出的腦區（括號內＝這個畫面全部神經元落在腦區內的纖維，有多少在這一區）：${cur.regions.length ? cur.regions.map((r, i) => esc(r) + (cur.region_frac ? `（${(cur.region_frac[i] * 100).toFixed(0)}%）` : "")).join("、") : "無"}</p>`;
+  await mount("views/" + cur.id + ".json?v=" + cur.date);
+} else {
+  document.getElementById("info").innerHTML = "<p>還沒有畫面。</p>";
+}
+// 在 iframe 內：回報內容高度給條目頁（量容器的底，不用 scrollHeight；高度沒變就不送）
+var lastH = 0;
+function report() {
+  if (parent === window) return;
+  const h = Math.ceil(document.getElementById("wrap").getBoundingClientRect().bottom + 8);
+  if (h !== lastH) { lastH = h; parent.postMessage({ demoH: h }, "*"); }
+}
+new ResizeObserver(report).observe(document.getElementById("wrap"));
+report();
+</script>
+</body></html>

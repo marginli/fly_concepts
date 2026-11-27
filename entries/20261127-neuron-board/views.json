@@ -1,0 +1,137 @@
+[
+ {
+  "id": "mcns-apl-r",
+  "title": "APL（右）",
+  "ds": "mcns",
+  "dataset": "MaleCNS v1.0",
+  "date": "2026-11-27",
+  "note": "右側的 APL，取自 MaleCNS。",
+  "regions": [
+   "MB_gL_R",
+   "MB_CA_R",
+   "MB_aL_R",
+   "MB_bpL_R",
+   "MB_PED_R",
+   "MB_bL_R",
+   "MB_apL_R",
+   "CRE_R"
+  ],
+  "region_frac": [
+   0.3,
+   0.209,
+   0.108,
+   0.093,
+   0.085,
+   0.07,
+   0.055,
+   0.038
+  ],
+  "neurons": [
+   {
+    "id": "10540",
+    "type": "APL",
+    "side": "R",
+    "top": [
+     [
+      "MB_gL_R",
+      0.3
+     ],
+     [
+      "MB_CA_R",
+      0.209
+     ],
+     [
+      "MB_aL_R",
+      0.108
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fw-apl-r",
+  "title": "APL（右）",
+  "ds": "fw",
+  "dataset": "FlyWire v783",
+  "date": "2026-11-27",
+  "note": "右側的 APL，取自 FlyWire；這份資料在畫面上的左右與另兩份相反。",
+  "regions": [
+   "MB_ML_R",
+   "MB_CA_R",
+   "MB_VL_R",
+   "MB_PED_R",
+   "CRE_R"
+  ],
+  "region_frac": [
+   0.305,
+   0.268,
+   0.123,
+   0.122,
+   0.088
+  ],
+  "neurons": [
+   {
+    "id": "720575940613583001",
+    "type": "APL",
+    "side": "R",
+    "top": [
+     [
+      "MB_ML_R",
+      0.305
+     ],
+     [
+      "MB_CA_R",
+      0.268
+     ],
+     [
+      "MB_VL_R",
+      0.123
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "id": "banc-apl-r",
+  "title": "APL（右）",
+  "ds": "banc",
+  "dataset": "BANC v888",
+  "date": "2026-11-27",
+  "note": "右側的 APL，取自 BANC。",
+  "regions": [
+   "MB_CA_R",
+   "MB_ML_R",
+   "MB_PED_R",
+   "MB_VL_R",
+   "SCL_R"
+  ],
+  "region_frac": [
+   0.358,
+   0.265,
+   0.182,
+   0.126,
+   0.031
+  ],
+  "neurons": [
+   {
+    "id": "720575941482622627",
+    "type": "APL",
+    "side": "R",
+    "top": [
+     [
+      "MB_CA_R",
+      0.358
+     ],
+     [
+      "MB_ML_R",
+      0.265
+     ],
+     [
+      "MB_PED_R",
+      0.182
+     ]
+    ]
+   }
+  ]
+ }
+]

@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""神經元畫板：畫一顆或數顆神經元＋相關腦區外形，存成一個「畫面」（views/<id>.json），頁面左側清單會列出來。
+
+用法（在本資料夾）：
+  python3 draw.py --ds mcns --neurons APL --side R --title "APL（右）"
+  python3 draw.py --ds fw --neurons "KCg-m,MBON01" --side R --max-per-type 3
+  python3 draw.py --ds banc --neurons 720575941482622627 --regions "MB_CA_R,MB_PED_R"
+參數：
+  --ds          mcns（MaleCNS v1.0）／fw（FlyWire v783）／banc（BANC v888）；每次都要指定
+  --neurons     逗號分隔；每一項是神經元編號或型別名（型別名比對官方 type／instance）
+  --side        R／L；只對型別名有效（編號不篩）
+  --max-per-type 每個型別最多畫幾顆（預設 5）
+  --regions     auto（預設：神經元纖維長度占 ≥ 3% 的腦區，最多 12 個）／none／逗號分隔的腦區名
+  --title       畫面標題；--id 畫面代號（預設由資料集＋神經元組成）；--note 一句說明
+  --no-outline  不畫整個神經系統的淡色輪廓
+  --remove ID   從清單刪掉一個畫面
+腦區名稱：mcns 用官方 v5 腦 80 區；fw 用官方 78 區；banc 用腦 75 區＋腹神經索 26 區。
+"""
+import argparse, datetime, json, os, re, sys
+import numpy as np
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "lib"))
+import flyds as D                                  # noqa: E402
+from flylib import mesh_item, lines_item, write_scene   # noqa: E402
+
+NEU_COLORS = ["#c0392b", "#1f5fa8", "#1e7a3c", "#8e44ad", "#d35400", "#16a085", "#7f6000", "#c2185b"]
+REG_COLORS = ["#e07b39", "#3d7fc1", "#3c9d5d", "#8e7cc3", "#e0a939", "#7cc36a", "#d36b8f", "#5bb5c9",
+              "#a0a0a0", "#b5895a", "#9c6fd6", "#6f9c3d"]
+MAX_PTS = 150_000          # 全部神經元合計的骨架點數上限（控制檔案大小）
+INDEX = os.path.join(HERE, "views.json")
+
+
+def shade(hexc, k, n):
+    """同一型別的第 k 顆：同色、深淺略變。"""
+    c = np.array([int(hexc[i:i + 2], 16) for i in (1, 3, 5)], float)
+    f = 1.0 if n <= 1 else 0.75 + 0.5 * k / (n - 1)
+    c = np.clip(c * f if f <= 1 else c + (255 - c) * (f - 1), 0, 255)
+    return "#" + "".join(f"{int(v):02x}" for v in c)
+
+
+def load_index():
+    return json.load(open(INDEX, encoding="utf-8")) if os.path.exists(INDEX) else []
+
+
+def save_index(ix):
+    json.dump(ix, open(INDEX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ds", choices=list(D.DS))
+    ap.add_argument("--neurons")
+    ap.add_argument("--side", choices=["R", "L"])
+    ap.add_argument("--max-per-type", type=int, default=5)
+    ap.add_argument("--regions", default="auto")
+    ap.add_argument("--title"); ap.add_argument("--id"); ap.add_argument("--note", default="")
+    ap.add_argument("--no-outline", action="store_true")
+    ap.add_argument("--remove")
+    a = ap.parse_args()
+
+    if a.remove:
+        ix = [v for v in load_index() if v["id"] != a.remove]
+        save_index(ix)
+        p = os.path.join(HERE, "views", f"{a.remove}.json")
+        if os.path.exists(p):
+            os.remove(p)
+        print("已刪除", a.remove); return
+    if not (a.ds and a.neurons):
+        ap.error("要給 --ds 與 --neurons")
+
+    ds = a.ds
+    # 1. 找神經元：[(型別或編號, [(id, type, side)])]
+    groups = []
+    for q in [x.strip() for x in a.neurons.split(",") if x.strip()]:
+        hits = D.find(ds, q, side=None if q.isdigit() else a.side, limit=a.max_per_type)
+        if not hits:
+            sys.exit(f"{D.DS[ds]['label']} 找不到 {q}" + (f"（側別 {a.side}）" if a.side else ""))
+        hits = [h for h in hits if os.path.exists(D.swc_path(ds, h[0]))] or sys.exit(f"{q}：沒有骨架檔")
+        groups.append((q, hits))
+    n_total = sum(len(h) for _, h in groups)
+
+    # 2. 骨架與各腦區纖維長度
+    names = D.names(ds)
+    tot_len = {}
+    neu_items, rows = [], []
+    for gi, (q, hits) in enumerate(groups):
+        base = NEU_COLORS[gi % len(NEU_COLORS)]
+        for k, (nid, typ, sd) in enumerate(hits):
+            a_sw = D.read_skeleton(ds, nid)
+            keep = max(1, int(np.ceil(len(a_sw) * n_total / MAX_PTS)))
+            lines = D.FL.swc_polylines(a_sw, keep_every=keep)
+            rl = D.region_lengths(ds, a_sw)
+            for r, v in rl.items():
+                tot_len[r] = tot_len.get(r, 0) + v
+            s_in = sum(rl.values())
+            top = sorted(rl.items(), key=lambda x: -x[1])[:3]
+            lab = f"{typ or '無型別'}{('（' + sd + '）') if sd else ''} {nid}"
+            neu_items.append(lines_item(lab, lines, color=shade(base, k, len(hits))))
+            rows.append(dict(id=nid, type=typ, side=sd, top=[[names[r - 1], round(v / s_in, 3)] for r, v in top] if s_in else []))
+            print(f"  {lab}：{len(a_sw)} 點，主要腦區 {[(names[r - 1], round(v / s_in, 2)) for r, v in top] if s_in else '無'}")
+
+    # 3. 腦區
+    if a.regions == "none":
+        regs = []
+    elif a.regions == "auto":
+        s = sum(tot_len.values()) or 1
+        regs = [names[r - 1] for r, v in sorted(tot_len.items(), key=lambda x: -x[1]) if v / s >= 0.03][:12]
+        if not regs and tot_len:
+            regs = [names[max(tot_len, key=tot_len.get) - 1]]
+    else:
+        regs = [x.strip() for x in a.regions.split(",") if x.strip()]
+        bad = [r for r in regs if r not in names]
+        if bad:
+            sys.exit(f"不認得的腦區：{bad}；可用的有：{', '.join(names)}")
+    reg_items = []
+    for i, r in enumerate(regs):
+        v, f = D.region_mesh(ds, r, faces=1500)
+        reg_items.append(mesh_item(r, v, f, color=REG_COLORS[i % len(REG_COLORS)], opacity=0.3))
+    sc_groups = [{"name": "神經元", "items": neu_items}]
+    if reg_items:
+        sc_groups.append({"name": "腦區", "items": reg_items})
+    if not a.no_outline:
+        ov, of = D.outline_mesh(ds)
+        sc_groups.append({"name": "參考", "items": [mesh_item("整個神經系統輪廓", ov, of, color="#999999", opacity=0.05, ref=True)]})
+
+    # 4. 存檔與清單
+    vid = a.id or re.sub(r"[^A-Za-z0-9_-]+", "-", f"{ds}-{a.neurons}-{a.side or ''}").strip("-")[:60]
+    title = a.title or f"{a.neurons}" + (f"（{a.side}）" if a.side else "")
+    os.makedirs(os.path.join(HERE, "views"), exist_ok=True)
+    write_scene(os.path.join(HERE, "views", f"{vid}.json"), title, sc_groups, up=D.DS[ds]["up"], front=D.DS[ds]["front"])
+    ix = [v for v in load_index() if v["id"] != vid]
+    ix.insert(0, dict(id=vid, title=title, ds=ds, dataset=D.DS[ds]["label"], date=str(datetime.date.today()),
+                      note=a.note, regions=regs, region_frac=[round(tot_len.get(names.index(r) + 1, 0) / (sum(tot_len.values()) or 1), 3) for r in regs],
+                      neurons=rows))
+    save_index(ix)
+    print(f"畫面 {vid}：{n_total} 顆神經元、{len(regs)} 個腦區 {regs}")
+
+
+if __name__ == "__main__":
+    main()

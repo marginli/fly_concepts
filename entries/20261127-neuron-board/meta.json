@@ -1,0 +1,4 @@
+{"title": "神經元畫板", "date": "2026-11-27", "dataset": "MaleCNS v1.0／FlyWire v783／BANC v888（每個畫面各自標明）",
+ "tags": ["神經元", "3D", "平台", "APL", "蕈狀體"],
+ "summary": "指定資料集與神經元，就畫出它的 3D 骨架和它經過的腦區。所有畫過的畫面都留在左側清單，可依資料集篩選。",
+ "embed": {"src": "demo.html", "height": 1000}, "full_width": true}
