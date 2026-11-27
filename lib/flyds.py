@@ -115,6 +115,37 @@ def find(ds, query, side=None, limit=20):
     return [(x.id, x.type, x.side) for x in r.head(limit).itertuples()]
 
 
+# ---------- 突觸（索引由 build_syn_index.py 建成） ----------
+SYN_DIR = "/mnt/sda1/work1/fly_concepts_syn"
+
+
+def synapses(ds, nid, end):
+    """某顆神經元的突觸位置 N×3（該資料的框）。end＝pre（輸出點）或 post（輸入點）。
+    fw、banc 的 pre 來源是一個連結一列，這裡把同一位置的重複列去掉，只留送出點本身。"""
+    k = ("syn", ds, end)
+    if k not in _cache:
+        d = f"{SYN_DIR}/{ds}"
+        if not os.path.exists(f"{d}/{end}_ids.npy"):
+            raise FileNotFoundError(f"{ds} 的突觸索引還沒建：python3 lib/build_syn_index.py {ds}")
+        _cache[k] = tuple(np.load(f"{d}/{end}_{n}.npy", mmap_mode="r") for n in ("ids", "start", "xyz"))
+    ids, start, xyz = _cache[k]
+    i = int(np.searchsorted(ids, int(nid)))
+    if i >= len(ids) or ids[i] != int(nid):
+        return np.zeros((0, 3), np.float32)
+    p = np.asarray(xyz[start[i]:start[i + 1]], np.float32)
+    if end == "pre" and ds in ("fw", "banc") and len(p):
+        p = np.unique(np.round(p, 2), axis=0)
+    return p
+
+
+def region_counts(ds, pts):
+    """點 → {標籤值: 個數}（不含 0＝腦區外）。"""
+    if len(pts) == 0:
+        return {}
+    c = np.bincount(region_at(ds, pts), minlength=len(names(ds)) + 1)
+    return {i: int(c[i]) for i in range(1, len(c)) if c[i] > 0}
+
+
 # ---------- 骨架 ----------
 
 def swc_path(ds, nid):

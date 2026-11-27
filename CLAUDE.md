@@ -44,3 +44,5 @@
 - 座標各自獨立：mcns 上 −y 前 −z；fw（FC12 框，標籤用 thre/t8 加寬版）上 +y 前 +z，左右與另兩份相反；banc（原生 µm）上 +z 前 −y（11-27 用萼／葉／嗅葉／GNG 重心確認；先前寫的 −y／−z 是錯的）。
 - MaleCNS 只有腦 80 區（沒有腹神經索標籤）；BANC 有腦 75＋腹神經索 26 區。
 - 骨架點數全部合計上限 15 萬（draw.py 的 MAX_PTS），APL 單顆畫面約 0.5–1.7 MB。
+- 突觸：`--show fibre,pre,post`（syn＝pre,post；預設 fibre）。pre＝輸出點紅、post＝輸入點藍（固定色），有畫突觸時纖維改用不含紅藍的色盤。合計上限 12 萬點（MAX_SYN，超過隨機抽樣，表上列全部數量）。APL 纖維＋突觸約 3.5 MB。
+- 突觸索引 `lib/build_syn_index.py` 建在 /mnt/sda1/work1/fly_concepts_syn/<ds>/（依神經元排序；mcns 由 syn-points 換管線框、fw 由 syn_w5 用 t1 仿射、banc 由 parquet ×(16,16,45) nm）；讀取 `flyds.synapses(ds, id, end)`。fw、banc 的 pre 原始是一個連結一列，讀取時同位置去重。

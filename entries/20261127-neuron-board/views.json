@@ -1,5 +1,257 @@
 [
  {
+  "id": "mcns-apl-r-syn",
+  "title": "APL（右）：纖維與突觸",
+  "ds": "mcns",
+  "dataset": "MaleCNS v1.0",
+  "date": "2026-11-27",
+  "note": "右側的 APL，取自 MaleCNS；紅點＝輸出點、藍點＝輸入點。",
+  "show": [
+   "fibre",
+   "pre",
+   "post"
+  ],
+  "sampled": 0.853,
+  "regions": [
+   "MB_gL_R",
+   "MB_CA_R",
+   "MB_aL_R",
+   "MB_bpL_R",
+   "MB_PED_R",
+   "MB_bL_R",
+   "MB_apL_R",
+   "CRE_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   0.3,
+   0.209,
+   0.108,
+   0.093,
+   0.085,
+   0.07,
+   0.055,
+   0.038
+  ],
+  "neurons": [
+   {
+    "id": "10540",
+    "type": "APL",
+    "side": "R",
+    "top": [
+     [
+      "MB_gL_R",
+      0.3
+     ],
+     [
+      "MB_CA_R",
+      0.209
+     ],
+     [
+      "MB_aL_R",
+      0.108
+     ]
+    ],
+    "pre": 15966,
+    "pre_top": [
+     [
+      "MB_gL_R",
+      0.298
+     ],
+     [
+      "MB_CA_R",
+      0.228
+     ],
+     [
+      "MB_aL_R",
+      0.112
+     ]
+    ],
+    "pre_drawn": 13658,
+    "post": 124656,
+    "post_top": [
+     [
+      "MB_gL_R",
+      0.313
+     ],
+     [
+      "MB_CA_R",
+      0.163
+     ],
+     [
+      "MB_aL_R",
+      0.127
+     ]
+    ],
+    "post_drawn": 106548
+   }
+  ]
+ },
+ {
+  "id": "fw-apl-r-syn",
+  "title": "APL（右）：纖維與突觸",
+  "ds": "fw",
+  "dataset": "FlyWire v783",
+  "date": "2026-11-27",
+  "note": "右側的 APL，取自 FlyWire；紅點＝輸出點、藍點＝輸入點。這份資料在畫面上的左右與另兩份相反。",
+  "show": [
+   "fibre",
+   "pre",
+   "post"
+  ],
+  "sampled": 1.0,
+  "regions": [
+   "MB_ML_R",
+   "MB_CA_R",
+   "MB_VL_R",
+   "MB_PED_R",
+   "CRE_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   0.305,
+   0.268,
+   0.123,
+   0.122,
+   0.088
+  ],
+  "neurons": [
+   {
+    "id": "720575940613583001",
+    "type": "APL",
+    "side": "R",
+    "top": [
+     [
+      "MB_ML_R",
+      0.305
+     ],
+     [
+      "MB_CA_R",
+      0.268
+     ],
+     [
+      "MB_VL_R",
+      0.123
+     ]
+    ],
+    "pre": 50668,
+    "pre_top": [
+     [
+      "MB_CA_R",
+      0.3
+     ],
+     [
+      "MB_ML_R",
+      0.275
+     ],
+     [
+      "MB_PED_R",
+      0.154
+     ]
+    ],
+    "pre_drawn": 50668,
+    "post": 63780,
+    "post_top": [
+     [
+      "MB_ML_R",
+      0.285
+     ],
+     [
+      "MB_CA_R",
+      0.225
+     ],
+     [
+      "MB_PED_R",
+      0.176
+     ]
+    ],
+    "post_drawn": 63780
+   }
+  ]
+ },
+ {
+  "id": "banc-apl-r-syn",
+  "title": "APL（右）：纖維與突觸",
+  "ds": "banc",
+  "dataset": "BANC v888",
+  "date": "2026-11-27",
+  "note": "右側的 APL，取自 BANC；紅點＝輸出點、藍點＝輸入點。",
+  "show": [
+   "fibre",
+   "pre",
+   "post"
+  ],
+  "sampled": 1.0,
+  "regions": [
+   "MB_CA_R",
+   "MB_ML_R",
+   "MB_PED_R",
+   "MB_VL_R",
+   "SCL_R"
+  ],
+  "region_basis": "fibre",
+  "region_frac": [
+   0.358,
+   0.265,
+   0.182,
+   0.126,
+   0.031
+  ],
+  "neurons": [
+   {
+    "id": "720575941482622627",
+    "type": "APL",
+    "side": "R",
+    "top": [
+     [
+      "MB_CA_R",
+      0.358
+     ],
+     [
+      "MB_ML_R",
+      0.265
+     ],
+     [
+      "MB_PED_R",
+      0.182
+     ]
+    ],
+    "pre": 41900,
+    "pre_top": [
+     [
+      "MB_CA_R",
+      0.4
+     ],
+     [
+      "MB_ML_R",
+      0.23
+     ],
+     [
+      "MB_PED_R",
+      0.179
+     ]
+    ],
+    "pre_drawn": 41900,
+    "post": 23736,
+    "post_top": [
+     [
+      "MB_CA_R",
+      0.38
+     ],
+     [
+      "MB_ML_R",
+      0.253
+     ],
+     [
+      "MB_PED_R",
+      0.171
+     ]
+    ],
+    "post_drawn": 23736
+   }
+  ]
+ },
+ {
   "id": "mcns-apl-r",
   "title": "APL（右）",
   "ds": "mcns",
